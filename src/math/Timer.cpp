@@ -11,9 +11,9 @@ Timer::Timer() {
   TimeRestarted = 0;
   TimeOffset = 0;
   TimeLimit = 1000000000;
-  TimerNumber = TimerNumber + 1;
-  TimerName = "Timer_" + std::to_string(TimerNumber) + "]-(Timer" +
-              std::to_string(TimerNumber) + ")";
+  TimerID = TimerID + 1;
+  TimerName = "Timer_" + std::to_string(TimerID) + "]-(Timer" +
+              std::to_string(TimerID) + ")";
 }
 Timer::Timer(std::string name) {
   TimeStarted = 0;
@@ -23,8 +23,8 @@ Timer::Timer(std::string name) {
   TimeRestarted = 0;
   TimeOffset = 0;
   TimeLimit = 1000000000;
-  TimerNumber = TimerNumber + 1;
-  TimerName = "Timer [" + std::to_string(TimerNumber) + "]-(" + name + ")";
+  TimerID = TimerID + 1;
+  TimerName = "Timer [" + std::to_string(TimerID) + "]-(" + name + ")";
 }
 Timer::~Timer() {
   State = TimerState::None;
@@ -36,13 +36,7 @@ Timer::~Timer() {
   TimeOffset = 0;
   TimeLimit = 0;
   TimerName = "";
-  TimerNumber = TimerNumber - 1;
-}
-auto Timer::GetElapsed() -> U64 {
-  if (IsRunning()) {
-    return (NowNanoseconds() - TimeStarted) - TimeOffset;
-  }
-  return 0;
+  TimerID = TimerID - 1;
 }
 bool Timer::Is(TimerState state) {
   if (U8(state) >= 0 && U8(state) <= 5) {
@@ -52,7 +46,7 @@ bool Timer::Is(TimerState state) {
 }
 auto Timer::Pause() -> bool {
   if (Is(TimerState::Started) || Is(TimerState::Resumed)) {
-    TimePaused = GetNowOffset();
+    TimePaused = GetElapsed();
     State = TimerState::Paused;
     return true;
   }
@@ -60,8 +54,8 @@ auto Timer::Pause() -> bool {
 }
 auto Timer::Resume() -> bool {
   if (Is(TimerState::Paused)) {
-    TimeResumed = GetNowOffset();
-    TimeOffset += TimeResumed - TimePaused;
+    TimeResumed = GetElapsed();
+    TimeOffset.Set(TimeResumed.Get() - TimePaused.Get());
     State = TimerState::Resumed;
     return true;
   }
@@ -69,7 +63,7 @@ auto Timer::Resume() -> bool {
 }
 auto Timer::Stop() -> bool {
   if (!Is(TimerState::Stopped) && !Is(TimerState::None)) {
-    TimeStopped = GetNowOffset();
+    TimeStopped = Time::Nano();
     State = TimerState::Stopped;
     return true;
   }
@@ -78,7 +72,7 @@ auto Timer::Stop() -> bool {
 auto Timer::Start() -> bool {
   if (Is(TimerState::None) || Is(TimerState::Stopped) ||
       Is(TimerState::Restarted)) {
-    TimeStarted = GetNowOffset();
+    TimeStarted = Time::Nano();
     State = TimerState::Started;
     return true;
   }
@@ -91,7 +85,7 @@ auto Timer::Restart() -> bool {
     TimeStarted = 0;
     TimeStopped = 0;
     TimeOffset = 0;
-    TimeRestarted = NowNanoseconds();
+    TimeRestarted = Now();
     State = TimerState::Restarted;
     return true;
   }

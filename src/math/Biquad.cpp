@@ -66,7 +66,7 @@ void Biquad::SetBiquad(I32 type, F64 Fc, F64 Q, F64 peakGainDB) {
 void Biquad::CalcBiquad(void) {
   F64 norm;
   const F64 V = pow(10, fabs(peakGain) / 20.0);
-  const F64 K = tan(M_PI * Fc);
+  const F64 K = tan(PI * Fc);
   const F64 V2 = V * 2;
   const F64 KK = K * K;
   const F64 KKK = KK * K;
