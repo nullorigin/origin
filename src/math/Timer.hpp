@@ -1,12 +1,13 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
-#include "../Origin.hpp"
-#include <chrono>
+#include "Basic.hpp"
+#include <ctime>
 #include <string>
 
 namespace Origin {
+typedef U8 ID;
 static ID TimerID = 0;
-enum class Precision : U8 {
+enum class TimeUnit : U8 {
   Nano = 0,
   Micro = 1,
   Milli = 2,
@@ -35,62 +36,70 @@ struct Duration {
     nano = _nano;
     micro = nano / 1000.0;
     milli = micro / 1000.0;
-    second = milli / 1000, 0;
+    second = milli / 1000.0;
     minute = second / 60.0;
     hour = minute / 60.0;
     day = hour / 24.0;
     week = day / 7.0;
   }
   auto Get() -> I64 { return nano; }
-  auto Get(Precision _p) -> F64 {
+  auto Get(TimeUnit _tu) -> F64 {
     Set();
-    switch (_p) {
-    case Precision::Nano:
+    switch (_tu) {
+    case TimeUnit::Nano:
       return nano;
-    case Precision::Micro:
+    case TimeUnit::Micro:
       return micro;
-    case Precision::Milli:
+    case TimeUnit::Milli:
       return milli;
-    case Precision::Second:
+    case TimeUnit::Second:
       return second;
-    case Precision::Minute:
+    case TimeUnit::Minute:
       return minute;
-    case Precision::Hour:
+    case TimeUnit::Hour:
       return hour;
-    case Precision::Day:
+    case TimeUnit::Day:
       return day;
-    case Precision::Week:
+    case TimeUnit::Week:
       return week;
     }
   }
-  auto Set(Precision _p) -> I64 {
-    switch (_p) {
-    case Precision::Nano:
+  auto Set(TimeUnit _tu) -> I64 {
+    Set();
+    switch (_tu) {
+    case TimeUnit::Nano:
       nano = I64(nano);
+      Set(nano);
       break;
-    case Precision::Micro:
-      nano = I64(nano / (1000LL)) * I64(nano);
+    case TimeUnit::Micro:
+      micro = I64(nano / (1000LL));
+      Set(micro * 1000LL);
       break;
-    case Precision::Milli:
-      nano = I64(nano / (1000000LL)) * I64(nano);
+    case TimeUnit::Milli:
+      milli = I64(nano / (1000000LL));
+      Set(milli * 1000000LL);
       break;
-    case Precision::Second:
-      nano = I64(nano / (1000000000LL)) * I64(nano);
+    case TimeUnit::Second:
+      second = I64(nano / (1000000000LL));
+      Set(second * 1000000000LL);
       break;
-    case Precision::Minute:
-      nano = I64(nano / (1000000000LL * 60)) * I64(nano);
+    case TimeUnit::Minute:
+      minute = I64(nano / (1000000000LL * 60));
+      Set(minute * 1000000000LL * 60);
       break;
-    case Precision::Hour:
-      nano = I64(nano / (1000000000LL * 60 * 60)) * I64(nano);
+    case TimeUnit::Hour:
+      hour = I64(nano / (1000000000LL * 60 * 60));
+      Set(hour * 1000000000LL * 60 * 60);
       break;
-    case Precision::Day:
-      nano = I64(nano / (1000000000LL * 60 * 60 * 24)) * I64(nano);
+    case TimeUnit::Day:
+      day = I64(nano / (1000000000LL * 60 * 60 * 24));
+      Set(day * 1000000000LL * 60 * 60 * 24);
       break;
-    case Precision::Week:
-      nano = I64(nano / (1000000000LL * 60 * 60 * 24 * 7)) * I64(nano);
+    case TimeUnit::Week:
+      week = I64(nano / (1000000000LL * 60 * 60 * 24 * 7));
+      Set(week * 1000000000LL * 60 * 60 * 24 * 7);
       break;
     }
-    Set(nano);
     return nano;
   }
 };
@@ -116,14 +125,14 @@ struct Timer {
   Timer();
   Timer(std::string name);
   ~Timer();
-  Timer(std::string name, std::function<void()> callback);
   auto operator=(const Timer & /*unused*/) -> Timer & { return *this; }
   auto operator=(Timer && /*unused*/) noexcept -> Timer & { return *this; }
   auto SetName(const std::string &name) -> void { TimerName = name; }
   auto SetLimit(const Duration &limit) -> void { TimeLimit = limit; }
   auto Now() -> F64 {
-    return (std::chrono::steady_clock::now().time_since_epoch().count()) -
-           TimeOffset.Get();
+    timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (ts.tv_sec + ts.tv_nsec / 1000000000.0) - TimeOffset.Get();
   }
   auto GetID() -> ID { return TimerID; }
   auto GetName() -> std::string { return TimerName; }
@@ -163,7 +172,9 @@ private:
 
 public:
   static auto Nano() -> F64 {
-    return (std::chrono::steady_clock::now().time_since_epoch().count());
+    timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (ts.tv_sec + ts.tv_nsec / 1000000000.0);
   }
   static auto Micro() -> F64 { return (Nano() / 1000.0); }
   static auto Milli() -> F64 { return (Nano() / 1000000.0); }
@@ -172,7 +183,7 @@ public:
   static auto Hour() -> F64 { return (Nano() / 3600000000000.0); };
   static auto Day() -> F64 { return (Nano() / 86400000000000.0); }
   static auto Week() -> F64 { return (Nano() / 604800000000000.0); }
-  static auto Elapsed(ID id, Precision _p = Precision::Nano) -> Duration {
+  static auto Elapsed(ID id, TimeUnit _p = TimeUnit::Nano) -> Duration {
     TimePoint[id].Set(_p);
     return Nano() - TimePoint[id].Get();
   }

@@ -1,0 +1,8 @@
+{
+    "codeium.enableSearch": true,
+    "codium.codeCompletion.enable": true,
+    "remoteHub.gitProtocol": "ssh",
+    "diffEditor.codeLens": true,
+    "editor.suggest.matchOnWordStartOnly": false,
+    "workbench.list.smoothScrolling": true
+}
