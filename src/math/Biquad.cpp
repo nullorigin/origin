@@ -17,8 +17,9 @@
 //
 
 #include "Biquad.hpp"
+
 #include <math.h>
-namespace Origin {
+namespace origin {
 Biquad::Biquad() {
   type = Lowpass;
   a0 = 1.0;
@@ -29,49 +30,49 @@ Biquad::Biquad() {
   z1 = z2 = 0.0;
 }
 
-Biquad::Biquad(I32 type, F64 Fc, F64 Q, F64 peakGainDB) {
+Biquad::Biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB) {
   SetBiquad(type, Fc, Q, peakGainDB);
   z1 = z2 = 0.0;
 }
 
-Biquad::~Biquad() {}
+Biquad::~Biquad() = default;
 
-void Biquad::SetType(I32 type) {
+void Biquad::SetType(u8 type) {
   this->type = type;
   CalcBiquad();
 }
 
-void Biquad::SetQ(F64 Q) {
+void Biquad::SetQ(f64 Q) {
   this->Q = Q;
   CalcBiquad();
 }
 
-void Biquad::SetFc(F64 Fc) {
+void Biquad::SetFc(f64 Fc) {
   this->Fc = Fc;
   CalcBiquad();
 }
 
-void Biquad::SetPeakGain(F64 peakGainDB) {
+void Biquad::SetPeakGain(f64 peakGainDB) {
   this->peakGain = peakGainDB;
   CalcBiquad();
 }
 
-void Biquad::SetBiquad(I32 type, F64 Fc, F64 Q, F64 peakGainDB) {
+void Biquad::SetBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB) {
   this->type = type;
   this->Q = Q;
   this->Fc = Fc;
   SetPeakGain(peakGainDB);
 }
 
-void Biquad::CalcBiquad(void) {
-  F64 norm;
-  const F64 V = pow(10, fabs(peakGain) / 20.0);
-  const F64 K = tan(PI * Fc);
-  const F64 V2 = V * 2;
-  const F64 KK = K * K;
-  const F64 KKK = KK * K;
-  const F64 sqrt2 = 1.4142135623730950488016887242097;
-  const F64 sqrtV2 = sqrt(V2);
+void Biquad::CalcBiquad() {
+  f64 norm = NAN;
+  const f64 V = Pow(Abs(peakGain) / 20.0, 10);
+  const f64 K = Tan(PI * Fc);
+  const f64 V2 = V * 2;
+  const f64 KK = K * K;
+  const f64 KKK = KK * K;
+  const f64 sqrt2 = 1.4142135623730950488016887242097;
+  const f64 sqrtV2 = Sqrt(V2);
   switch (this->type) {
   case Lowpass:
     norm = 1 / (1 + K / Q + KK);
@@ -161,6 +162,5 @@ void Biquad::CalcBiquad(void) {
     }
     break;
   }
-  return;
 }
-} // namespace Origin
+} // namespace origin

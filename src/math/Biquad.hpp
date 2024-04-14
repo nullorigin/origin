@@ -18,9 +18,9 @@
 
 #ifndef Biquad_h
 #define Biquad_h
-#include "../Origin.hpp"
-namespace Origin {
-enum : const I32 {
+#include "Basic.hpp"
+namespace origin {
+enum : const u8 {
   Lowpass = 0,
   Highpass = 1,
   Bandpass = 2,
@@ -33,29 +33,29 @@ enum : const I32 {
 class Biquad {
 public:
   Biquad();
-  Biquad(I32 type, F64 Fc, F64 Q, F64 peakGainDB);
+  Biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
   ~Biquad();
-  void SetType(I32 type);
-  void SetQ(F64 Q);
-  void SetFc(F64 Fc);
-  void SetPeakGain(F64 peakGainDB);
-  void SetBiquad(I32 type, F64 Fc, F64 Q, F64 peakGainDB);
-  F32 Process(F32 in);
+  void SetType(u8 type);
+  void SetQ(f64 Q);
+  void SetFc(f64 Fc);
+  void SetPeakGain(f64 peakGainDB);
+  void SetBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
+  f64 Process(f64 in);
 
 protected:
-  void CalcBiquad(void);
+  void CalcBiquad();
 
-  I32 type;
-  F64 a0, a1, a2, b1, b2;
-  F64 Fc, Q, peakGain;
-  F64 z1, z2;
+  i32 type;
+  f64 a0, a1, a2, b1, b2;
+  f64 Fc, Q, peakGain;
+  f64 z1, z2;
 };
 
-inline F32 Biquad::Process(F32 in) {
-  F64 out = in * a0 + z1;
+inline auto Biquad::Process(f64 in) -> f64 {
+  f64 out = in * a0 + z1;
   z1 = in * a1 + z2 - b1 * out;
   z2 = in * a2 - b2 * out;
   return out;
 }
-} // namespace Origin
+} // namespace origin
 #endif // Biquad_h

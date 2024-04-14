@@ -1,61 +1,104 @@
 #pragma once
-#include <cstddef>
+#include "Basic.hpp"
+#include <complex.h>
 #include <cstdlib>
+#include <emmintrin.h>
 #include <xmmintrin.h>
-namespace Origin {
-typedef char I8;
-typedef short I16;
-typedef int I32;
-typedef long long I64;
-typedef unsigned char U8;
-typedef unsigned short U16;
-typedef unsigned int U32;
-typedef unsigned long long U64;
-typedef signed char S8;
-typedef signed short S16;
-typedef signed int S32;
-typedef signed long long S64;
-typedef float F32;
-typedef double F64;
-typedef long double F128;
-typedef I8 V16I128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef U8 V16U128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef S8 V16S128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef I16 V8I128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef U16 V8U128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef S16 V8S128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef F32 V4F128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef I32 V4I128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef U32 V4U128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef S32 V4S128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef F64 V2F128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef I64 V2I128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef U64 V2U128 __attribute__((__vector_size__(16), __aligned__(16)));
-typedef S64 V2S128 __attribute__((__vector_size__(16), __aligned__(16)));
 
-typedef I8 V32I256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef U8 V32U256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef S8 V32S256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef I16 V16I256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef U16 V16U256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef S16 V16S256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef F32 V8F256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef I32 V8I256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef U32 V8U256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef S32 V8S256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef F64 V4F256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef I64 V4I256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef U64 V4U256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef S64 V4S256 __attribute__((__vector_size__(32), __aligned__(32)));
-typedef F128 V2F256 __attribute__((__vector_size__(32), __aligned__(32)));
+namespace origin {
+typedef char i8;
+typedef short i16;
+typedef int i32;
+typedef long long i64;
+typedef __int128_t i128;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef unsigned long long u64;
+typedef __uint128_t u128;
+typedef signed char s8;
+typedef signed short s16;
+typedef signed int s32;
+typedef signed long long s64;
+typedef __int128_t s128;
+typedef float f32;
+typedef double f64;
+typedef long double f128;
+typedef unsigned char *up8p;
+typedef unsigned short *u16p;
+typedef unsigned int *u32p;
+typedef unsigned long long *u64p;
+typedef __uint128_t *u128p;
+typedef char *i8p;
+typedef short *i16p;
+typedef int *i32p;
+typedef long long *i64p;
+typedef __int128_t *i128p;
+typedef float *f32p;
+typedef double *f64p;
+typedef long double *f128p;
 
+typedef char m128i8 __attribute__((__vector_size__(16), __aligned__(16)));
+typedef unsigned char m128u8
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef signed char m128s8
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef short m128i16 __attribute__((__vector_size__(16), __aligned__(16)));
+typedef unsigned short m128u16
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef signed short m128s16
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef float m128f32 __attribute__((__vector_size__(16), __aligned__(16)));
+typedef int m128i32 __attribute__((__vector_size__(16), __aligned__(16)));
+typedef unsigned int m128u32
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef signed int m128s32
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef double m128f64 __attribute__((__vector_size__(16), __aligned__(16)));
+typedef long long m128i64 __attribute__((__vector_size__(16), __aligned__(16)));
+typedef unsigned long long m128u64
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef signed long long m128s64
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef char m256i8 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef unsigned char m256u8
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef char m256i8 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef unsigned char m256u8
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef signed char m256s8
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef short m256i16 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef unsigned short m256u16
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef signed short m256s16
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef float m256f32 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef int m256i32 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef unsigned int m256u32
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef signed int m256s32
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef double m256f64 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef long long m256i64 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef unsigned long long m256u64
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef signed long long m256s64
+    __attribute__((__vector_size__(32), __aligned__(32)));
+typedef double m256f64 __attribute__((__vector_size__(32), __aligned__(32)));
+typedef long double m256f128
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef __int128_t m256i128
+    __attribute__((__vector_size__(16), __aligned__(16)));
+typedef __uint128_t m256u128
+    __attribute__((__vector_size__(16), __aligned__(16)));
 #if WORDSIZE == 64
 typedef unsigned long SIZE_T;
 #else
-typedef U64 SIZE_T;
+typedef unsigned long long SIZE_T;
 #endif
-static const U32 C8 = 0xff, C16 = 0xffff, C32 = 0xffffff, C64 = 0xffffffff;
-constexpr F64 PI = 3.14159265358979323846535897932384;
+static const u32 C8 = 0xff, C16 = 0xffff, C32 = 0xffffff, C64 = 0xffffffff;
+constexpr f64 PI = 3.14159265358979323846535897932384;
 #define I8_C(c) c
 #define U8_C(c) c
 #define S8_C(c) c
@@ -77,7 +120,7 @@ constexpr F64 PI = 3.14159265358979323846535897932384;
 #define F32_C(c) c##f
 #define F64_C(c) c
 #define F128_C(c) c##d
-#define U64_C2(h, l) ((static_cast<U64>(h) << 32) | static_cast<U64>(l))
+#define U64_C2(h, l) ((static_cast<u64>(h) << 32) | static_cast<u64>(l))
 #define IMAX8 I8_C(127)
 #define IMAX16 I16_C(32767)
 #define IMAX32 I32_C(2147483647)
@@ -114,188 +157,209 @@ constexpr F64 PI = 3.14159265358979323846535897932384;
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
-
-struct Dir {
-  typedef enum : U32 {
-    X = 1,
-    Y = 2,
-    XY = 3,
-    Z = 4,
-    XZ = 5,
-    YZ = 6,
-    XYZ = 7,
-    W = 8,
-    XW = 9,
-    YW = 10,
-    XYW = 11,
-    ZW = 12,
-    XZW = 13,
-    YZW = 14,
-    XYZW = 15
-  } Axis;
-  typedef enum : U32 {
-    Right = 1 << 0,
-    Left = 1 << 1,
-    Front = 1 << 2,
-    Back = 1 << 3,
-    Top = 1 << 4,
-    Bottom = 1 << 5
-  } Face;
-
-  typedef struct {
-    F64 x, y, z, w;
-  } Quat;
-
-  typedef struct {
-    F64 x, y, z;
-  } Vec3;
-  typedef struct Vec4x4 {
-  public:
-    F64 q[4][4];
-    Vec4x4(F64 x1 = 0, F64 y1 = 0, F64 z1 = 0, F64 w1 = 0, F64 x2 = 0,
-           F64 y2 = 0, F64 z2 = 0, F64 w2 = 0, F64 x3 = 0, F64 y3 = 0,
-           F64 z3 = 0, F64 w3 = 0, F64 x4 = 0, F64 y4 = 0, F64 z4 = 0,
-           F64 w4 = 0) {
-      q[0][0] = x1;
-      q[1][0] = y1;
-      q[2][0] = z1;
-      q[3][0] = w1;
-      q[0][1] = x2;
-      q[1][1] = y2;
-      q[2][1] = z2;
-      q[3][1] = w2;
-      q[0][2] = x3;
-      q[1][2] = y3;
-      q[2][2] = z3;
-      q[3][2] = w3;
-      q[0][3] = x4;
-      q[1][3] = y4;
-      q[2][3] = z4;
-      q[3][3] = w4;
-    }
-    Vec4x4 Mul(Vec4x4 _rhs) {
-      Vec4x4 ret = *this;
-      for (U32 i = 0; i < 4; i++) {
-        for (U32 j = 0; j < 4; j++) {
-          ret.q[i][j] = 0;
-          for (U32 k = 0; k < 4; k++) {
-            ret.q[i][j] += q[i][k] * _rhs.q[k][j];
-          }
-        }
-      }
-      return ret;
-    }
-
-    Vec3 MulV(Vec3 _rhs) {
-      Vec3 ret;
-      ret.x = q[0][0] * _rhs.x + q[0][1] * _rhs.y + q[0][2] * _rhs.z + q[0][3];
-      ret.y = q[1][0] * _rhs.x + q[1][1] * _rhs.y + q[1][2] * _rhs.z + q[1][3];
-      ret.z = q[2][0] * _rhs.x + q[2][1] * _rhs.y + q[2][2] * _rhs.z + q[2][3];
-      return ret;
-    }
-
-    Vec3 MulVQ(Vec4x4 _rhs) {
-      Vec3 ret;
-      ret.x = q[0][0] * _rhs.q[0][0] + q[0][1] * _rhs.q[1][0] +
-              q[0][2] * _rhs.q[2][0] + q[0][3] * _rhs.q[3][0];
-      ret.y = q[1][0] * _rhs.q[0][0] + q[1][1] * _rhs.q[1][0] +
-              q[1][2] * _rhs.q[2][0] + q[1][3] * _rhs.q[3][0];
-      ret.z = q[2][0] * _rhs.q[0][0] + q[2][1] * _rhs.q[1][0] +
-              q[2][2] * _rhs.q[2][0] + q[2][3] * _rhs.q[3][0];
-      return ret;
-    }
-  } Quaternion;
-
-  Quaternion Rotate(Quaternion _q, Vec3 _a, Face _f, F64 _d) {
-    Quaternion q;
-    switch (_f) {
-    case Face::Right:
-      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Left:
-      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Front:
-      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Back:
-      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Top:
-      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Bottom:
-      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    default:
-      break;
-    }
-    q = _q.Mul(q);
-    return Transform(q, _a, _d);
-  }
-  Quaternion Transform(Quaternion _q, Vec3 _v) {
-    Quaternion q =
-        Quaternion{0, _v.x, _v.y, _v.z, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-    return q.Mul(_q);
-  }
-  Quaternion Transform(Quaternion _q, Vec3 _v, F64 _d) {
-    Quaternion q =
-        Quaternion{0, _v.x, _v.y, _v.z, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-    F64 angle = _d * PI / 180.0; // Convert degrees to radians
-    q.Mul(Quaternion{__builtin_sin(angle / 2), _v.x * __builtin_sin(angle / 2),
-                     _v.y * __builtin_sin(angle / 2),
-                     _v.z * __builtin_sin(angle / 2),
-                     __builtin_cos(angle / 2)});
-    return q.Mul(_q);
-  }
-  Quaternion Translate(Quaternion _q, Vec3 _v) {
-    Quaternion q =
-        Quaternion{0, _v.x, _v.y, _v.z, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-    return q.Mul(_q);
-  }
-  Quaternion Translate(Quaternion _q, Vec3 _v, Face _face) {
-    Quaternion q;
-    switch (_face) {
-    case Face::Right:
-      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Left:
-      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Front:
-      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Back:
-      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Top:
-      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    case Face::Bottom:
-      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    default:
-      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-      break;
-    }
-    q = Translate(q, _v);
-    return q.Mul(_q);
-  }
-};
+#ifndef NO_BUILTIN
+#define abs __builtin_abs
+#define acos __builtin_acos
+#define acosf __builtin_acosf
+#define acosh __builtin_acosh
+#define acoshf __builtin_acoshf
+#define acoshl __builtin_acoshl
+#define acosl __builtin_acosl
+#define asin __builtin_asin
+#define asinf __builtin_asinf
+#define asinh __builtin_asinh
+#define asinhf __builtin_asinhf
+#define asinhl __builtin_asinhl
+#define asinl __builtin_asinl
+#define atan __builtin_atan
+#define atan2 __builtin_atan2
+#define atan2f __builtin_atan2f
+#define atan2l __builtin_atan2l
+#define atanf __builtin_atanf
+#define atanh __builtin_atanh
+#define atanhf __builtin_atanhf
+#define atanhl __builtin_atanhl
+#define atanl __builtin_atanl
+#define cbrt __builtin_cbrt
+#define cbrtf __builtin_cbrtf
+#define cbrtl __builtin_cbrtl
+#define ceil __builtin_ceil
+#define ceilf __builtin_ceilf
+#define ceill __builtin_ceill
+#define copysign __builtin_copysign
+#define copysignf __builtin_copysignf
+#define copysignl __builtin_copysignl
+#define cos __builtin_cos
+#define cosf __builtin_cosf
+#define cosh __builtin_cosh
+#define coshf __builtin_coshf
+#define coshl __builtin_coshl
+#define cosl __builtin_cosl
+#define double_t __builtin_double_t
+#define erf __builtin_erf
+#define erfc __builtin_erfc
+#define erfcf __builtin_erfcf
+#define erfcl __builtin_erfcl
+#define erff __builtin_erff
+#define erfl __builtin_erfl
+#define exp __builtin_exp
+#define exp2 __builtin_exp2
+#define exp2f __builtin_exp2f
+#define exp2l __builtin_exp2l
+#define expf __builtin_expf
+#define expl __builtin_expl
+#define expm1 __builtin_expm1
+#define expm1f __builtin_expm1f
+#define expm1l __builtin_expmll
+#define fabs __builtin_fabs
+#define fabsf __builtin_fabsf
+#define fabsl __builtin_fabsl
+#define fdim __builtin_fdim
+#define fdimf __builtin_fdimf
+#define fdiml __builtin_fdiml
+#define float_t __builtin_float_t
+#define floor __builtin_floor
+#define floorf __builtin_floorf
+#define floorl __builtin_floorl
+#define fma __builtin_fma
+#define fmaf __builtin_fmaf
+#define fmal __builtin_fmal
+#define fmax __builtin_fmax
+#define fmaxf __builtin_fmaxf
+#define fmaxl __builtin_fmaxl
+#define fmin __builtin_fmin
+#define fminf __builtin_fminf
+#define fminl __builtin_fminl
+#define fmod __builtin_fmod
+#define fmodf __builtin_fmodf
+#define fmodl __builtin_fmodl
+#define fpclassify __builtin_fpclassify
+#define frexp __builtin_frexp
+#define frexpf __builtin_frexp
+#define frexpl __builtin_frexpl
+#define hypot __builtin_hypot
+#define hypotf __builtin_hypotf
+#define hypotl __builtin_hypotl
+#define ilogb __builtin_ilogb
+#define ilogbf __builtin_ilogbf
+#define ilogbl __builtin_ilogbl
+#define isfinite __builtin_isfinite
+#define isgreater __builtin_isgreater
+#define isgreaterequal __builtin_isgreaterequal
+#define isinf __builtin_isinf
+#define isless __builtin_isless
+#define islessequal __builtin_islessequal
+#define islessgreater __builtin_lessgreater
+#define isnan __builtin_isnan
+#define isnormal __builtin_normal
+#define isunordered __builtin_isunordered
+#define ldexp __builtin_ldexp
+#define ldexpf __builtin_ldexpf
+#define ldexpl __builtin_ldexpl
+#define lgamma __builtin_lgamma
+#define lgammaf __builtin_lgammaf
+#define lgammal __builtin_lgammal
+#define llrint __builtin_llrint
+#define llrintf __builtin_llrintf
+#define llrintl __builtin_llrintl
+#define llround __builtin_llround
+#define llroundf __builtin_llround
+#define llroundl __builtin_llroundl
+#define log __builtin_log
+#define log10 __builtin_log10
+#define log10f __builtin_log10f
+#define log10l __builtin_log10l
+#define log1p __builtin_log1p
+#define log1pf __builtin_log1pf
+#define log1pl __builtin_log1pl
+#define log2 __builtin_log2
+#define log2f __builtin_log2f
+#define log2l __builtin_log2l
+#define logb __builtin_logb
+#define logbf __builtin_logbf
+#define logbl __builtin_logbl
+#define logf __builtin_logf
+#define logl __builtin_logl
+#define lrint __builtin_lrint
+#define lrintf __builtin_lrintf
+#define lrintl __builtin_lrintl
+#define lround __builtin_lround
+#define lroundf __builtin_lroundf
+#define lroundl __builtin_lroundl
+#define modf __builtin_modf
+#define modff __builtin_modff
+#define modfl __builtin_modfl
+#define nan __builtin_nan
+#define nanf __builtin_nanf
+#define nanl __builtin_nanl
+#define nearbyint __builtin_nearbyint
+#define nearbyintf __builtin_nearbyintf
+#define nearbyintl __builtin_nearbyintl
+#define nextafter __builtin_nextafter
+#define nextafterf __builtin_nextafterf
+#define nextafterl __builtin_nextafterl
+#define nexttoward __builtin_nexttoward
+#define nexttowardf __builtin_nexttowardf
+#define nexttowardl __builtin_nexttowardl
+#define pow __builtin_pow
+#define powf __builtin_powf
+#define powi __builtin_powi
+#define powl __builtin_powl
+#define remainder __builtin_remainder
+#define remainderf __builtin_remainderf
+#define remainderl __builtin_remainderl
+#define remquo __builtin_remquo
+#define remquof __builtin_remquof
+#define remquol __builtin_remquol
+#define rint __builtin_rint
+#define rintf __builtin_rintf
+#define rintl __builtin_fintl
+#define round __builtin_round
+#define roundf __builtin_roundf
+#define roundl __builtin_roundl
+#define scalbln __builtin_scalbin
+#define scalblnf __builtin_scalbinf
+#define scalblnl __builtin_scalblnl
+#define scalbn __builtin_scalbn
+#define scalbnf __builtin_scalbnf
+#define scalbnl __builtin_scalbnl
+#define signbit __builtin_signbit
+#define sin __builtin_sin
+#define sinf __builtin_sinf
+#define sinh __builtin_sinh
+#define sinhf __builtin_sinhf
+#define sinhl __builtin_sinhl
+#define sinl __builtin_sinl
+#define sqrt __builtin_sqrt
+#define sqrtf __builtin_sqrtf
+#define sqrtl __builtin_sqrtl
+#define tan __builtin_tan
+#define tanf __builtin_tanf
+#define tanh __builtin_tanh
+#define tanhf __builtin_tanhf
+#define tanhl __builtin_tanhl
+#define tanl __builtin_tanl
+#define tgamma __builtin_tgamma
+#define tgammaf __builtin_tgammaf
+#define tgammal __builtin_tgammal
+#define trunc __builtin_trunc
+#define truncf __builtin_truncf
+#define truncl __builtin_truncl
+#endif // NO_BUILTIN
 template <typename T> inline constexpr bool IsNum(const T _a) {
-  return !(bool(__builtin_isnan(_a))) && !(bool(__builtin_isinf(_a)));
+  return !(bool(isnan(_a))) && !(bool(isinf(_a)));
 }
 template <typename T> inline constexpr bool IsNan(const T _a) {
-  return bool(__builtin_isnan(_a));
+  return bool(isnan(_a));
 }
 template <typename T> inline constexpr bool IsInf(const T _a) {
-  return bool(__builtin_isinf(_a));
+  return bool(isinf(_a));
 }
-template <typename T, U64 N>
+template <typename T, u64 N>
 inline constexpr T *Cross(const T _a[N], const T _b[N], const T _c[N]) {
   T vec[3][N], dot;
   T ret[N];
-  U32 i = 0;
+  u32 i = 0;
   for (i = 0; i < N; i += 3) {
     vec[i][0] = _a[i];
     vec[i + 1][0] = _a[i + 1];
@@ -321,10 +385,13 @@ inline constexpr T *Cross(const T _a[N], const T _b[N], const T _c[N]) {
   return ret;
 }
 template <typename T> inline constexpr T Floor(const T _a) {
-  return T(__builtin_floor(F64(_a)));
+  return T(floor(f64(_a)));
 }
 template <typename T> inline constexpr T Ceil(const T _a) {
-  return T(__builtin_ceil(F64(_a)));
+  return T(ceil(f64(_a)));
+}
+template <typename T> inline constexpr T Hypot(T _a, T _b) {
+  return T(hypot(f64(_a), f64(_b)));
 }
 template <typename T> inline constexpr T Square(const T _a) {
   return T(_a * _a);
@@ -333,7 +400,7 @@ template <typename T> inline constexpr T Madd(const T _a, T _b, const T _c) {
   return T(_a * _b + _c);
 }
 template <typename T> inline constexpr T Sqrt(const T _a) noexcept {
-  return T(__builtin_sqrt((F64)_a));
+  return T(sqrt((f64)_a));
 }
 template <typename T> inline constexpr T Min(const T _a, const T _b) {
   return T(_a < _b ? _a : _b);
@@ -369,14 +436,17 @@ template <typename T> inline constexpr T RSqrt(const T _a) {
   }
   return T(1.0 / Sqrt(_a));
 }
+template <typename T> inline constexpr T Pow(const T _a, const i32 _b) {
+  return T(__builtin_powi(f64(_a), i32(_b)));
+}
 template <typename T> inline constexpr T Pow(const T _a, const T _b) noexcept {
-  return T(__builtin_pow(F64(_a), F64(_b)));
+  return T(__builtin_pow(f64(_a), f64(_b)));
 }
 template <typename T> inline constexpr T Round(const T _a) {
-  return T(__builtin_round((F64(_a))));
+  return T(__builtin_round((f64(_a))));
 }
 template <typename T> inline constexpr T Trunc(const T _a) noexcept {
-  return T(__builtin_trunc(F64(_a)));
+  return T(__builtin_trunc(f64(_a)));
 }
 template <typename T> inline constexpr T Dot(const T _a, const T _b) {
   return T(_a * _b);
@@ -384,8 +454,8 @@ template <typename T> inline constexpr T Dot(const T _a, const T _b) {
 template <typename T> inline constexpr T Length(T _a, T _b) {
   return T(Sqrt((_a * _a) + (_b * _b)));
 }
-template <typename T, U64 N> inline constexpr T *Normalize(const T _a[N]) {
-  U32 i = 0;
+template <typename T, u64 N> inline constexpr T *Normalize(const T _a[N]) {
+  u32 i = 0;
   T *ret[N];
   for (i = 0; i < N; i++) {
     *ret[i] = _a[i] / Length(_a[i], _a[i + 1]);
@@ -406,46 +476,46 @@ template <typename T>
 inline constexpr T Clamp(const T _a, const T _b, const T _c) {
   return T(Max(Min(_a, _b), _c));
 }
-template <typename T> inline constexpr T Rand(T _min, T _max, U32 _seed = 0) {
+template <typename T> inline constexpr T Rand(T _min, T _max, u32 _seed = 0) {
   return T(srand(_seed) % (_max - _min) + _min);
 }
 template <typename T> inline constexpr T Sin(T _a) noexcept {
-  return T(__builtin_sin(F64(_a)));
+  return T(__builtin_sin(f64(_a)));
 }
 template <typename T> inline constexpr T Cos(T _a) noexcept {
-  return T(__builtin_cos(F64(_a)));
+  return T(__builtin_cos(f64(_a)));
 }
 template <typename T> inline constexpr T Tan(T _a) noexcept {
-  return T(__builtin_tan(F64(_a)));
+  return T(__builtin_tan(f64(_a)));
 }
 template <typename T> inline constexpr T Asin(T _a) noexcept {
-  return T(__builtin_asin(F64(_a)));
+  return T(__builtin_asin(f64(_a)));
 }
 template <typename T> inline constexpr T Acos(T _a) noexcept {
-  return T(__builtin_acos(F64(_a)));
+  return T(__builtin_acos(f64(_a)));
 }
 template <typename T> inline constexpr T Atan(T _a) noexcept {
-  return T(__builtin_atan(F64(_a)));
+  return T(__builtin_atan(f64(_a)));
 }
 template <typename T> inline constexpr T Atan2(T _a, T _b) noexcept {
-  return T(__builtin_atan2(F64(_a), F64(_b)));
+  return T(__builtin_atan2(f64(_a), f64(_b)));
 }
 template <typename T> inline T Log(T _a) noexcept {
 
-  return T(__builtin_log(F64(_a)));
+  return T(__builtin_log(f64(_a)));
 }
 template <typename T> inline T log2(T _x) noexcept {
-  return T(__builtin_log2(F64(_x)));
+  return T(__builtin_log2(f64(_x)));
 }
 template <typename T> inline T Log10(T _a) noexcept {
-  return T(__builtin_log10(F64(_a)));
+  return T(__builtin_log10(f64(_a)));
 }
 
 struct Complex {
-  F64 real = 0;
-  F64 imag = 0;
+  f64 real = 0;
+  f64 imag = 0;
   Complex() = default;
-  Complex(F64 _real, F64 _imag) {
+  Complex(f64 _real, f64 _imag) {
     real = _real;
     imag = _imag;
   }
@@ -455,22 +525,26 @@ struct Complex {
     Complex out = {A.real + B.real, A.imag + B.imag};
     return out;
   }
+  static Complex Sub(Complex A, Complex B) {
+    Complex out = {A.real - B.real, A.imag - B.imag};
+    return out;
+  }
   static Complex Mul(Complex A, Complex B) {
     Complex out = {A.real * B.real - A.imag * B.imag,
                    A.real * B.imag + A.imag * B.real};
     return out;
   }
-  F64 *Mul(F64 *A, F64 *B) {
+  static f64 *Mul(f64 *A, f64 *B) {
     //-------------Basied SIMD testing--------------//
     //  Using SIMD to compute the complex multiplication
 
     // if A=a+b*j,B=c+d*j; then A * B = (ac -bd) + (bc+ad)*j
     // load a b
-    V2F128 n1 = _mm_load_pd(A);
+    m128f64 n1 = _mm_load_pd(A);
     // load b a
-    V2F128 n2 = _mm_loadr_pd(A);
+    m128f64 n2 = _mm_loadr_pd(A);
     // load c c
-    V2F128 n3 = _mm_load1_pd(B);
+    m128f64 n3 = _mm_load1_pd(B);
     // mul, ac bc
     n1 = _mm_mul_pd(n1, n3); //  a b * c c = ac|bc
     // load d d
@@ -486,12 +560,12 @@ struct Complex {
     // dst[63:0] : = (imm8[0] == 0) ? a[63:0] : a[127:64]
     // dst[127:64] : = (imm8[1] == 0) ? b[63:0] : b[127:64]
     //  store and output
-    F64 *C = new F64[2];
+    f64 *C = new f64[2];
     _mm_store_pd(C, n1);
     return C;
   }
 };
-void FFT2(Complex *X, int N) {
+static void FFT2(Complex *X, int N) {
   // Notes	: the length of fft must be a power of 2,and it is  a in-place
   // algorithm ref		:
   // https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm
@@ -500,44 +574,44 @@ void FFT2(Complex *X, int N) {
     // Do nothing here, because already X[0] = x[0]
   } else {
     Complex *Y = new Complex[N / 2]; // get temp heap storage
-    for (U32 i = 0; i < N / 2; i++)  // copy all odd elements to heap storage
+    for (u32 i = 0; i < N / 2; i++)  // copy all odd elements to heap storage
       Y[i] = X[i * 2 + 1];
-    for (U32 i = 0; i < N / 2;
+    for (u32 i = 0; i < N / 2;
          i++) // copy all even elements to lower-half of a[]
       X[i] = X[i * 2];
-    for (U32 i = 0; i < N / 2;
+    for (u32 i = 0; i < N / 2;
          i++) // copy all odd (from heap) to upper-half of a[]
       X[i + N / 2] = Y[i];
     delete[] Y;             // delete heap storage
     FFT2(X, N / 2);         // recurse even items
     FFT2(X + N / 2, N / 2); // recurse odd  items
     //                             // combine results of two half recursions
-    for (U32 k = 0; k < N / 2; k++) {
-      V2F128 o = _mm_load_pd((double *)&X[k + N / 2]); // odd
-      F64 cc = Cos(-2. * PI * k / N);
-      F64 ss = Sin(-2. * PI * k / N);
-      V2F128 wr = _mm_load1_pd(
+    for (u32 k = 0; k < N / 2; k++) {
+      m128f64 o = _mm_load_pd((double *)&X[k + N / 2]); // odd
+      f64 cc = Cos(-2. * PI * k / N);
+      f64 ss = Sin(-2. * PI * k / N);
+      m128f64 wr = _mm_load1_pd(
           &cc); //__m128d wr =  _mm_set_pd( cc,cc );		// cc
-      V2F128 wi =
+      m128f64 wi =
           _mm_set_pd(ss, -ss); // -d | d	, note that it is reverse order
       // compute the w*o
-      wr = _mm_mul_pd(o, wr);                               // ac|bc
-      V2F128 n1 = _mm_shuffle_pd(o, o, _MM_SHUFFLE2(0, 1)); // invert
-      wi = _mm_mul_pd(n1, wi);                              // -bd|ad
+      wr = _mm_mul_pd(o, wr);                                // ac|bc
+      m128f64 n1 = _mm_shuffle_pd(o, o, _MM_SHUFFLE2(0, 1)); // invert
+      wi = _mm_mul_pd(n1, wi);                               // -bd|ad
       n1 = _mm_add_pd(wr, wi);
-      o = _mm_load_pd((F64 *)&X[k]); // load even part
+      o = _mm_load_pd((f64 *)&X[k]); // load even part
       wr = _mm_add_pd(o, n1);        // compute even part, X_e + w * X_o;
       wi = _mm_sub_pd(o, n1);        // compute odd part,  X_e - w * X_o;
-      _mm_store_pd((F64 *)&X[k], wr);
-      _mm_store_pd((F64 *)&X[k + N / 2], wi);
+      _mm_store_pd((f64 *)&X[k], wr);
+      _mm_store_pd((f64 *)&X[k + N / 2], wi);
     }
   }
 }
 struct Mem {
 public:
-  U64 size = 0, used = 0, free = 0, total = 0;
+  u64 size = 0, used = 0, free = 0, total = 0;
   Mem() = default;
-  enum class Unit : U8 {
+  enum class Unit : u8 {
     BYTE = 0,
     KBYTE = 1,
     MBYTE = 2,
@@ -553,23 +627,25 @@ public:
     total = 0;
     unit = _unit;
   };
-  Mem(U64 _size, U64 _used, U64 _free, U64 _total, Unit _unit = Unit::BYTE) {
+  Mem(u64 _size, u64 _used, u64 _free, u64 _total, Unit _unit = Unit::BYTE) {
     size = _size;
     used = _used;
     free = _free;
     total = _total;
     unit = _unit;
   }
-  constexpr U64 Convert(Unit _unit) {
-    F64 ratio = (1 >> (U64(_unit) * 10)) / (1 >> (U64(unit) * 10));
-    return U64(size * ratio);
+  constexpr u64 Convert(Unit _unit) {
+    f64 ratio = f64(1 << (u64(unit) * 10));
+    ratio = ratio / (1 << (u64(_unit) * 10));
+    return u64(size * ratio);
   }
   Mem Convert(Mem _mem) {
-    F64 ratio = (1 >> (U64(_mem.unit) * 10)) / (1 >> (U64(unit) * 10));
-    return Mem(U64(size * ratio), U64(used * ratio), U64(free * ratio),
-               U64(total * ratio), _mem.unit);
+    f64 ratio = f64(1 << (u64(_mem.unit) * 10));
+    ratio = ratio / (1 << (u64(unit) * 10));
+    return Mem(u64(size * ratio), u64(used * ratio), u64(free * ratio),
+               u64(total * ratio), _mem.unit);
   }
-  U64 operator[](Unit _unit) { return Convert(_unit); }
+  u64 operator[](Unit _unit) { return Convert(_unit); }
   Mem &operator=(const Mem &_rhs) {
     size = _rhs.size;
     used = _rhs.used;
@@ -579,4 +655,4 @@ public:
     return *this;
   }
 };
-} // namespace Origin
+} // namespace origin

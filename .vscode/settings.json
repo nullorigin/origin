@@ -4,5 +4,10 @@
     "remoteHub.gitProtocol": "ssh",
     "diffEditor.codeLens": true,
     "editor.suggest.matchOnWordStartOnly": false,
-    "workbench.list.smoothScrolling": true
+    "workbench.list.smoothScrolling": true,
+    "cmake.configureOnOpen": true,
+    "cmake.copyCompileCommands": "/home/matt/origin/compile-commands.json",
+    "cmake.enabledOutputParsers": [
+        "cmake"
+    ]
 }

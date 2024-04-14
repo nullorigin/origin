@@ -1,911 +1,826 @@
 #pragma once
 #include "Basic.hpp"
-namespace Origin {
+#include <cstring>
+namespace origin {
+using Axis = enum class Axis : u8 {
+  X = 1,
+  Y = 2,
+  XY = 3,
+  Z = 4,
+  XZ = 5,
+  YZ = 6,
+  XYZ = 7,
+  W = 8,
+  XW = 9,
+  YW = 10,
+  XYW = 11,
+  ZW = 12,
+  XZW = 13,
+  YZW = 14,
+  XYZW = 15
+};
+using Face = enum : u32 {
+  Right = 1 << 0,
+  Left = 1 << 1,
+  Forward = 1 << 2,
+  Backward = 1 << 3,
+  Up = 1 << 4,
+  Down = 1 << 5
+};
 
-template <typename T, U64 N> class Vec {
-private:
-  T *data[N];
-
+template <typename T, u64 N> class Vec {
 public:
-  constexpr U64 const Size(Mem::Unit _mu = Mem::Unit::BYTE) {
-    return U64((N * sizeof(T)) << (U64(_mu) * 10));
+  T Data[N];
+  constexpr auto Size(Mem::Unit _mu = Mem::Unit::BYTE) -> u64 {
+    return u64((N * sizeof(T)) << (u64(_mu) * 10));
   }
-  constexpr U64 const Length() { return U64(N); }
+  constexpr auto Length() -> u64 { return u64(N); }
   Vec<T, N>() {
-    *data = new T[N];
-    for (U32 i = 0; i < N; i++) {
-      data[i] = new T(0);
+    *Data = *new T[N];
+    for (u32 i = 0; i < N; i++) {
+      Data[i] = *new T();
     }
   }
-  Vec<T, N>(T *_rhs) { *data = _rhs; }
-  Vec<T, N>(const Vec<T, N> *_rhs) {
-    data = new T[N]();
-    for (U32 i = 0; i < N; i++) {
-      data[i] = _rhs[i];
+  auto operator=(const Vec & /*unused*/) -> Vec & { return *this; };
+  auto operator=(Vec && /*unused*/) noexcept -> Vec & { return *this; };
+  Vec(const Vec & /*unused*/) { memset(Data, 0, sizeof(T) * N); };
+  Vec(Vec && /*unused*/) noexcept : Data{} { memset(Data, 0, sizeof(T)); };
+  constexpr auto Find(T min, T max, u64 &index) -> T {
+    for (u32 i = 0; i < N; i++) {
+      if (Data[i] >= min && Data[i] <= max) {
+        index = i;
+        return Data[i];
+      }
     }
+    return T(0);
   }
-  Vec<T, N>(T *_rhs[N]) {
-    data = new T[N];
-    for (U32 i = 0; i < N; i++) {
-      data[i] = _rhs[i];
+  constexpr auto Find(T min, T max) -> Vec<T, N> {
+    Vec<T, N> ret;
+    for (u32 i = 0; i < N; i++) {
+      if (Data[i] >= min && Data[i] <= max) {
+        ret[i] = Data[i];
+      }
     }
+    return ret;
   }
-  ~Vec<T, N>() {
-    for (U32 i = 0; i < N; i++) {
-      delete data[i];
+  constexpr auto Find(T value, void (*callback)(T)) -> Vec<T, N> {
+    Vec<T, N> ret;
+    for (u32 i = 0; i < N; i++) {
+      if (Data[i] == value) {
+        ret[i] = Data[i];
+        callback(Data[i]);
+      }
     }
-    delete *data;
+    return ret;
   }
-  Vec<T, N> Set(T _rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] = _rhs;
+  constexpr auto Replace(T min, T max, T value) -> Vec<T, N> {
+    T ret = T(0);
+    for (u32 i = 0; i < N; i++) {
+      if (Data[i] >= min && Data[i] <= max) {
+        ret[i] = value;
+      } else {
+        ret[i] = Data[i];
+      }
+    }
+    return ret;
+  }
+  constexpr auto Index(Vec<T, N> value) -> Vec<u64, N> {
+    Vec<u64, N> ret = Vec<u64, N>();
+    for (u32 i = 0; i < N; i++) {
+      if (Data[i] == value[i]) {
+        ret[i] = i;
+      }
+    }
+    return ret;
+  }
+  constexpr auto Index(Vec<T, N> /*value*/, T min, T max) -> Vec<u64, N> {
+    Vec<u64, N> ret = Vec<u64, N>();
+    for (u64 i = 0; i < N; i++) {
+      if (Data[i] >= min && Data[i] <= max) {
+        ret[i] = i;
+      }
+    }
+    return ret;
+  }
+  auto Index(T value, T threshold) -> Vec<u64, N> {
+    Vec<u64, N> ret = Vec<u64, N>();
+    for (u32 i = 0; i < N; i++) {
+      if (Data[i] >= value - threshold && Data[i] <= value + threshold) {
+        ret[i] = i;
+      }
+    }
+    return ret;
+  }
+  explicit Vec<T, N>(T *_rhs) {
+    memset(Data, 0, sizeof(T) * N);
+    *Data = *_rhs;
+  }
+  explicit Vec<T, N>(const Vec<T, N> *_rhs) : Data(new T[N]()) { *Data = _rhs; }
+  explicit Vec<T, N>(const T *_rhs) : Data(new T[N]) { *Data = _rhs; }
+  explicit Vec<T, N>(T *_rhs[N]) : Data(new T[N]) { *Data = _rhs; }
+  ~Vec<T, N>() { delete[] &Data; }
+  auto Set(T _rhs) -> Vec<T, N> {
+    for (u32 i = 0; i < N; i++) {
+      Data[i] = _rhs;
     }
     return *this;
   }
-  Vec<T, N> Set(T *_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] = _rhs[i];
+  auto Set(T *_rhs) -> Vec<T, N> {
+    *Data = _rhs;
+    return *this;
+  }
+  auto Set(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    for (u32 i = 0; i < N; i++) {
+      Data[i] = _rhs[i];
     }
     return *this;
   }
-  Vec<T, N> Set(const Vec<T, N> &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] = _rhs[i];
-    }
+  auto Set(T *_rhs[N]) -> Vec<T, N> {
+    Data = _rhs;
     return *this;
   }
-  Vec<T, N> Set(T *_rhs[N]) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] = _rhs[i];
-    }
-    return *this;
-  }
-  Vec<T, N> Get() { return data; }
-  Vec<T, N> Get(U32 _index) { return data[_index]; }
-  Vec<T, N> Add(const Vec<T, N> &_rhs) {
+  auto Get() -> Vec<T, N> { return Data; }
+  auto Get(u32 _index) -> Vec<T, N> { return Data[_index]; }
+  auto Add(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] += _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Sub(const Vec<T, N> &_rhs) {
+  auto Sub(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] -= _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Mul(const Vec<T, N> &_rhs) {
+  auto Mul(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] *= _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Div(const Vec<T, N> &_rhs) {
+  auto Div(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] /= _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Mod(const Vec<T, N> &_rhs) {
+  auto Mod(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] %= _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> And(const Vec<T, N> &_rhs) {
+  auto And(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] &= _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Or(const Vec<T, N> &_rhs) {
+  auto Or(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] |= _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Xor(const Vec<T, N> &_rhs) {
+  auto Xor(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] ^= _rhs[i];
+    for (u32 i = 0; i < N; i++) {
+      ret[i] | &_rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Neg() {
+  auto Neg() -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] = (-ret[i]);
     }
     return ret;
   }
-  Vec<T, N> Pow(const Vec<T, N> &_rhs) {
+  auto Pow(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
+    for (u32 i = 0; i < N; i++) {
       ret[i] ^= _rhs[i];
     }
     return ret;
   }
-  Vec<T, N> Swap(Vec<T, N> &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      T tmp = data[i];
-      data[i] = _rhs[i];
+  auto Swap(Vec<T, N> &_rhs) -> Vec<T, N> {
+    for (u32 i = 0; i < N; i++) {
+      T tmp = Data[i];
+      Data[i] = _rhs[i];
       _rhs[i] = tmp;
     }
     return *this;
   }
-  Vec<T, N> Cross(const Vec<T, N> &_rhs, const Vec<T, N> &_rhs2) {
+  auto Cross(const Vec<T, N> &_rhs, const Vec<T, N> &_rhs2) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Cross(data[i], _rhs[i], _rhs2[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Cross(Data[i], _rhs[i], _rhs2[i]);
     }
     return ret;
   }
-  Vec<T, N> Abs() {
+  auto Abs() -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Abs(ret[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Abs(ret[i]);
     }
     return ret;
   }
-  Vec<T, N> Sqrt() {
+  auto Sqrt() -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Sqrt(ret[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Sqrt(ret[i]);
     }
     return ret;
   }
-  Vec<T, N> Lerp(const Vec<T, N> &_rhs, const Vec<T, N> &_exp) {
+  auto Lerp(const Vec<T, N> &_rhs, const Vec<T, N> &_exp) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Lerp(data[i], _rhs[i], _exp[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Lerp(Data[i], _rhs[i], _exp[i]);
     }
     return ret;
   }
   Vec<bool, N> Eq(const Vec<T, N> &_rhs) {
     Vec<bool, N> ret;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = (data[i] == _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = (Data[i] == _rhs[i]);
     }
     return ret;
   }
-  Vec<bool, N> Neq(const Vec<T, N> &_rhs) {
+  auto Neq(const Vec<T, N> &_rhs) -> Vec<bool, N> {
     Vec<bool, N> ret;
-    for (U32 i = 0; i < N; i++) {
-      ret = data[i] != _rhs[i];
+    for (u32 i = 0; i < N; i++) {
+      ret = Data[i] != _rhs[i];
     }
     return ret;
   }
-  Vec<bool, N> Gt(const Vec<T, N> &_rhs) {
+  auto Gt(const Vec<T, N> &_rhs) -> Vec<bool, N> {
     Vec<bool, N> ret;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = (data[i] > _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = (Data[i] > _rhs[i]);
     }
     return ret;
   }
-  Vec<bool, N> Gte(const Vec<T, N> &_rhs) {
+  auto Gte(const Vec<T, N> &_rhs) -> Vec<bool, N> {
     Vec<bool, N> ret;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = (data[i] >= _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = (Data[i] >= _rhs[i]);
     }
     return ret;
   }
-  Vec<bool, N> Lt(const Vec<T, N> &_rhs) {
+  auto Lt(const Vec<T, N> &_rhs) -> Vec<bool, N> {
     Vec<bool, N> ret;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = (data[i] < _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = (Data[i] < _rhs[i]);
     }
     return ret;
   }
-  Vec<bool, N> Lte(const Vec<T, N> &_rhs) {
+  auto Lte(const Vec<T, N> &_rhs) -> Vec<bool, N> {
     Vec<bool, N> ret;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = (data[i] <= _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = (Data[i] <= _rhs[i]);
     }
     return ret;
   }
 
-  Vec<T, N> Max(const Vec<T, N> &_rhs) {
+  auto Max(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Max(data[i], _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Max(Data[i], _rhs[i]);
     }
     return ret;
   }
-  Vec<T, N> Min(const Vec<T, N> &_rhs) {
+  auto Min(const Vec<T, N> &_rhs) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Min(data[i], _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Min(Data[i], _rhs[i]);
     }
     return ret;
   }
-  Vec<T, N> Clamp(const Vec<T, N> &_min, const Vec<T, N> &_max) {
+  auto Clamp(const Vec<T, N> &_min, const Vec<T, N> &_max) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Clamp(data[i], _min[i], _max[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Clamp(Data[i], _min[i], _max[i]);
     }
     return ret;
   }
-  Vec<T, N> Rand(T _min, T _max) {
+  auto Rand(T _min, T _max) -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = Origin::Rand(_min, _max);
+    for (u64 i = 0; i < N; i++) {
+      ret[i] = origin::Rand(_min, _max);
     }
     return ret;
   }
-  inline T &operator[](U32 index) { return *data[index]; }
-  Vec<T, N> &operator=(T *_data) {
+  inline auto operator[](u64 index) const -> T & { return *Data[index]; }
+  auto operator=(T *_data) -> Vec<T, N> & {
     if (_data == nullptr) {
-      for (U32 i = 0; i < N; i++) {
+      for (u32 i = 0; i < N; i++) {
         _data[i] = 0;
       }
       return *this;
     }
-    U32 a_size = (N * 8) / (sizeof(data[0])) / 8;
-    U32 b_size = ((sizeof(data[0]) * 8) / N) / 8;
-    U32 c_size = a_size > b_size ? a_size : b_size;
-    for (U32 i = 0; i < c_size; i++) {
+    u32 a_size = (N * 8) / (sizeof(Data[0])) / 8;
+    u32 b_size = ((sizeof(Data[0]) * 8) / N) / 8;
+    u32 c_size = a_size > b_size ? a_size : b_size;
+    for (u32 i = 0; i < c_size; i++) {
       if (i < c_size) {
-        data[i] = _data[i];
+        Data[i] = _data[i];
       } else {
-        data[i] = 0;
+        Data[i] = 0;
       }
     }
   }
-  Vec<T, N> Pow(const Vec<T, N> &_rhs) const {
+  auto ShiftL(const Vec<T, N> &_rhs) const -> Vec<T, N> {
+    Vec<T, N> ret = *this;
+    for (u32 i = 0; i < N; i++) {
+      ret[i] <<= _rhs[i];
+    }
+    return ret;
+  }
+  auto ShiftR(const Vec<T, N> &_rhs) const -> Vec<T, N> {
+    Vec<T, N> ret = *this;
+    for (u32 i = 0; i < N; i++) {
+      ret[i] >>= _rhs[i];
+    }
+    return ret;
+  }
+  auto Pow(const Vec<T, N> &_rhs) const -> Vec<T, N> {
     Vec ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Pow(ret[i], _rhs[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Pow(ret[i], _rhs[i]);
     }
     return ret;
   }
-  Vec<T, N> Lerp(const Vec<T, N> &_rhs, U32 _exp) const {
+  auto Lerp(const Vec<T, N> &_rhs, u32 _exp) const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Lerp(ret[i], _rhs[i], _exp);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Lerp(ret[i], _rhs[i], _exp);
     }
     return ret;
   }
-  Vec<T, N> Lerp(const Vec<T, N> &_rhs, const Vec<T, N> &_exp) const {
+  auto Lerp(const Vec<T, N> &_rhs, const Vec<T, N> &_exp) const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Lerp(ret[i], _rhs[i], _exp[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Lerp(ret[i], _rhs[i], _exp[i]);
     }
     return ret;
   }
-  Vec<T, N> Clamp(const Vec<T, N> &_min, const Vec<T, N> &_max) const {
+  auto Clamp(const Vec<T, N> &_min, const Vec<T, N> &_max) const -> Vec<T, N> {
     Vec ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Clamp(ret[i], _min[i], _max[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Clamp(ret[i], _min[i], _max[i]);
     }
     return ret;
   }
-  Vec<T, N> Clamp(const T _min, const T _max) const {
+  auto Clamp(const T _min, const T _max) const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = T(Origin::Clamp(ret[i], _min, _max));
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = T(origin::Clamp(ret[i], _min, _max));
     }
     return ret;
   }
-  Vec<T, N> Abs() const {
+  auto Abs() const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i].data = Origin::Abs(ret[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Abs(ret[i]);
     }
     return ret;
   }
-  Vec<T, N> Sign() const {
+  auto Sign() const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Sign(ret[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Sign(ret[i]);
     }
     return ret;
   }
-  Vec<T, N> Sqrt() const {
+  auto Sqrt() const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Sqrt(ret[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Sqrt(ret[i]);
     }
     return ret;
   }
-  Vec<T, N> Sq() const {
+  auto Sq() const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Square(ret[i]);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Square(ret[i]);
     }
     return ret;
   }
-  Vec<T, N> RSqrt() const {
+  auto RSqrt() const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = (T)__builtin_sqrt(F64(ret[i]));
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = (T)__builtin_sqrt(f64(ret[i]));
     }
     return ret;
   }
-  Vec<T, N> Rand(T _min, T _max) const {
+  auto Rand(T _min, T _max) const -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret.data[i] = Origin::Rand(_min, _max);
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = origin::Rand(_min, _max);
     }
     return ret;
   }
-  bool IsNan(bool set_zero = false) const {
-    for (U32 i = 0; i < N; i++) {
-      if (__builtin_isnan(*data[i])) {
+  auto IsNan(bool set_zero = false) const -> bool {
+    for (u32 i = 0; i < N; i++) {
+      if (__builtin_isnan(*Data[i])) {
         if (set_zero) {
-          *data[i] = 0;
+          *Data[i] = 0;
         }
         return true;
       }
     }
     return false;
   }
-  bool IsNum() const { return !IsNan(); }
-  Vec<T, N> operator=(const Vec<T, N> &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] = _rhs[i];
+  auto IsNum() const -> bool { return !IsNan(); }
+  auto operator=(const Vec<T, N> *_rhs) -> Vec<T, N> {
+    for (u32 i = 0; i < N; i++) {
+      &Data[i] = _rhs[i];
     }
-    return *this;
+    return &this;
   }
-  T operator[](I32 i) {
+  auto operator[](u32 i) const -> T {
     if (i < N) {
-      return *data[i];
-    } else {
-      return 0;
+      return Data[i];
     }
+    return 0;
   }
-  operator Vec<T, N> *() { return *this; }
-  Vec<T, N> operator+(const T &_rhs) { return Add(_rhs); }
-  Vec<T, N> operator-(const T &_rhs) { return Sub(_rhs); }
-  Vec<T, N> operator*(const T &_rhs) { return Mul(_rhs); }
-  Vec<T, N> operator/(const T &_rhs) { return Div(_rhs); }
-  Vec<T, N> operator%(const T &_rhs) { return Mod(_rhs); }
-  Vec<T, N> operator&(const T &_rhs) {
+  explicit operator Vec<T, N> *() { return *this; }
+  auto operator+(const T &_rhs) -> Vec<T, N> { return Add(_rhs); }
+  auto operator-(const T &_rhs) -> Vec<T, N> { return Sub(_rhs); }
+  auto operator*(const T &_rhs) -> Vec<T, N> { return Mul(_rhs); }
+  auto operator/(const T &_rhs) -> Vec<T, N> { return Div(_rhs); }
+  auto operator%(const T &_rhs) -> Vec<T, N> { return Mod(_rhs); }
+  auto operator&(const T &_rhs) -> Vec<T, N> { return And(_rhs); }
+  auto operator|(const T &_rhs) -> Vec<T, N> { return Or(_rhs); }
+  auto operator^(const T &_rhs) -> Vec<T, N> { return Pow(_rhs); }
+  auto operator<<(const T &_rhs) -> Vec<T, N> { return ShiftL(_rhs); }
+  auto operator>>(const T &_rhs) -> Vec<T, N> { return ShiftR(_rhs); }
+  auto operator==(const T &_rhs) -> Vec<bool, N> { return Eq(_rhs); }
+  auto operator!=(const T &_rhs) -> Vec<bool, N> { return Neq(_rhs); }
+  auto operator<(const T &_rhs) -> Vec<bool, N> { return Lt(_rhs); }
+  auto operator<=(const T &_rhs) -> Vec<bool, N> { return Lte(_rhs); }
+  auto operator>(const T &_rhs) -> Vec<bool, N> { return Gt(_rhs); }
+  auto operator>=(const T &_rhs) -> Vec<bool, N> { return Gte(_rhs); }
+  auto operator-() -> Vec<T, N> { return Neg(); }
+  auto operator~() -> Vec<T, N> {
     Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] &= _rhs;
+    for (u32 i = 0; i < N; i++) {
+      ret[i] = ~ret[i];
     }
     return ret;
   }
-  Vec<T, N> operator|(const T &_rhs) {
-    Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] |= _rhs;
-    }
-    return ret;
-  }
-  Vec<T, N> operator^(const T &_rhs) { return Pow(_rhs); }
-  Vec<T, N> operator<<(const T &_rhs) {
-    Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] <<= _rhs;
-    }
-    return ret;
-  }
-  Vec<T, N> operator>>(const T &_rhs) {
-    Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] >>= _rhs;
-    }
-    return ret;
-  }
-  Vec<T, N> operator+=(const T &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] += _rhs;
-    }
-    return *this;
-  }
-  Vec<T, N> operator-=(const T &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] -= _rhs;
-    }
-    return *this;
-  }
-  Vec<T, N> operator*=(const T &_rhs) {
-    *this = Mul(_rhs);
-    return *this;
-  }
-  Vec<T, N> operator/=(const T &_rhs) {
-    *this = Div(_rhs);
-    return *this;
-  }
-  Vec<T, N> operator%=(const T &_rhs) {
-    *this = Mod(_rhs);
-    return *this;
-  }
-  Vec<T, N> operator&=(const T &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] &= _rhs;
-    }
-    return *this;
-  }
-  Vec<T, N> operator|=(const T &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] |= _rhs;
-    }
-    return *this;
-  }
-  Vec<T, N> operator^=(const T &_rhs) {
-    *this = Pow(_rhs);
-    return *this;
-  }
-  Vec<T, N> operator<<=(const T &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      this->data[i] <<= _rhs;
-    }
-    return *this;
-  }
-  Vec<T, N> operator>>=(const T &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      this->data[i] >>= _rhs;
-    }
-    return *this;
-  }
-  Vec<T, N> operator-() {
-    Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] = -ret[i];
-    }
-    return ret;
-  }
-  Vec<T, N> operator++() {
-    for (U32 i = 0; i < N; i++) {
-      data[i]++;
-    }
-    return *this;
-  }
-  Vec<T, N> operator--() {
-    for (U32 i = 0; i < N; i++) {
-      data[i]--;
-    }
-    return *this;
-  }
-  operator T *() { return data; }
-  operator Vec<T, N>() { return data; } // Vec<T,N>
-
-  Vec<T, N> operator+(const Vec<T, N> &_rhs) { return Add(_rhs); }
-  Vec<T, N> operator-(const Vec<T, N> &_rhs) { return Sub(_rhs); }
-  Vec<T, N> operator*(const Vec<T, N> &_rhs) { return Mul(_rhs); }
-  Vec<T, N> operator/(const Vec<T, N> &_rhs) { return Div(_rhs); }
-  Vec<T, N> operator%(const Vec<T, N> &_rhs) { return Mod(_rhs); }
-  Vec<T, N> operator&(const Vec<T, N> &_rhs) { return And(_rhs); }
-  Vec<T, N> operator|(const Vec<T, N> &_rhs) { return Or(_rhs); }
-  Vec<T, N> operator^(const Vec<T, N> &_rhs) {
-    Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] ^= _rhs[i];
-    }
-    return *ret;
-  }
-  Vec<T, N> operator<<(const Vec<T, N> &_rhs) {
-    Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] <<= _rhs[i];
-    }
-    return *ret;
-  }
-  Vec<T, N> operator>>(const Vec<T, N> &_rhs) {
-    Vec<T, N> ret = *this;
-    for (U32 i = 0; i < N; i++) {
-      ret[i] >>= _rhs[i];
-    }
-    return *ret;
-  }
-  Vec<T, N> operator+=(const Vec<T, N> &_rhs) {
+  auto operator+=(const T &_rhs) -> Vec<T, N> {
     *this = Add(_rhs);
     return *this;
   }
-  Vec<T, N> operator-=(const Vec<T, N> &_rhs) {
+  auto operator-=(const T &_rhs) -> Vec<T, N> {
     *this = Sub(_rhs);
     return *this;
   }
-  Vec<T, N> operator*=(const Vec<T, N> &_rhs) {
+  auto operator*=(const T &_rhs) -> Vec<T, N> {
     *this = Mul(_rhs);
     return *this;
   }
-  Vec<T, N> operator/=(const Vec<T, N> &_rhs) {
+  auto operator/=(const T &_rhs) -> Vec<T, N> {
     *this = Div(_rhs);
     return *this;
   }
-  Vec<T, N> operator%=(const Vec<T, N> &_rhs) {
+  auto operator%=(const T &_rhs) -> Vec<T, N> {
     *this = Mod(_rhs);
     return *this;
   }
-  Vec<T, N> operator&=(const Vec<T, N> &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] &= _rhs[i];
-    }
+  auto operator&=(const T &_rhs) -> Vec<T, N> {
+    *this = And(_rhs);
     return *this;
   }
-  Vec<T, N> operator|=(const Vec<T, N> &_rhs) {
+  auto operator|=(const T &_rhs) -> Vec<T, N> {
     *this = Or(_rhs);
     return *this;
   }
-  Vec<T, N> operator^=(const Vec<T, N> &_rhs) {
+  auto operator^=(const T &_rhs) -> Vec<T, N> {
+    *this = Pow(_rhs);
+    return *this;
+  }
+  auto operator<<=(const T &_rhs) -> Vec<T, N> {
+    *this = ShiftL(_rhs);
+    return *this;
+  }
+  auto operator>>=(const T &_rhs) -> Vec<T, N> {
+    *this = ShiftR(_rhs);
+    return *this;
+  }
+  auto operator++() -> Vec<T, N> {
+    *this = Add(1);
+    return *this;
+  }
+  auto operator--() -> Vec<T, N> {
+    *this = Sub(1);
+    return *this;
+  }
+  explicit operator T *() { return *Data; }
+  explicit operator Vec<T, N>() { return *Data; } // Vec<T,N>
+
+  auto operator+(const Vec<T, N> &_rhs) -> Vec<T, N> { return Add(_rhs); }
+  auto operator-(const Vec<T, N> &_rhs) -> Vec<T, N> { return Sub(_rhs); }
+  auto operator*(const Vec<T, N> &_rhs) -> Vec<T, N> { return Mul(_rhs); }
+  auto operator/(const Vec<T, N> &_rhs) -> Vec<T, N> { return Div(_rhs); }
+  auto operator%(const Vec<T, N> &_rhs) -> Vec<T, N> { return Mod(_rhs); }
+  auto operator&(const Vec<T, N> &_rhs) -> Vec<T, N> { return And(_rhs); }
+  auto operator|(const Vec<T, N> &_rhs) -> Vec<T, N> { return Or(_rhs); }
+  auto operator^(const Vec<T, N> &_rhs) -> Vec<T, N> { return Pow(_rhs); }
+  auto operator<<(const Vec<T, N> &_rhs) -> Vec<T, N> { return ShiftL(_rhs); }
+  auto operator>>(const Vec<T, N> &_rhs) -> Vec<T, N> { return ShiftR(_rhs); }
+  auto operator+=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = Add(_rhs);
+    return *this;
+  }
+  auto operator-=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = Sub(_rhs);
+    return *this;
+  }
+  auto operator*=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = Mul(_rhs);
+    return *this;
+  }
+  auto operator/=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = Div(_rhs);
+    return *this;
+  }
+  auto operator%=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = Mod(_rhs);
+    return *this;
+  }
+  auto operator&=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = And(_rhs);
+    return *this;
+  }
+  auto operator|=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = Or(_rhs);
+    return *this;
+  }
+  auto operator^=(const Vec<T, N> &_rhs) -> Vec<T, N> {
     *this = Pow(_rhs);
     return *this;
   };
-  Vec<T, N> operator<<=(const Vec<T, N> &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] <<= _rhs.data[i];
-    }
+  auto operator<<=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = ShiftL(_rhs);
     return *this;
   };
-  Vec<T, N> operator>>=(const Vec<T, N> &_rhs) {
-    for (U32 i = 0; i < N; i++) {
-      data[i] >>= _rhs[i];
-    }
+  auto operator>>=(const Vec<T, N> &_rhs) -> Vec<T, N> {
+    *this = ShiftR(_rhs);
     return *this;
   };
+  auto operator[](u32 _i) -> T & { return Data[_i]; }
 };
-class Vec2 : public Vec<F64, 2> {
+class Vec2 : public Vec<f64, 2> {
 public:
-  F64 x, y;
-  Vec2(F64 _x, F64 _y) { *this = {_x, _y}; }
-  Vec2() { *this = {0, 0}; }
-  Vec2 operator=(const Vec2 &_rhs) {
-    x = _rhs.x;
-    y = _rhs.y;
-    *this = {_rhs.x, _rhs.y};
-    return *this;
+  union {
+    f64 *Data = new f64[2];
+    struct {
+      f64 x;
+      f64 y;
+    };
+  };
+  explicit Vec2(Vec<f64, 2> &_rhs) { Data = _rhs.Data; };
+  explicit Vec2(Vec<f64, 2> const &_rhs) { *Data = *_rhs.Data; }
+  explicit Vec2(f64 _x = 0, f64 _y = 0) {
+    x = _x;
+    y = _y;
   }
-  Vec2 operator+(const Vec2 &_rhs) {
-    Vec2 ret = *this;
-    ret += _rhs;
-    return ret;
-  }
-  Vec2 operator-(const Vec2 &_rhs) {
-    Vec2 ret = *this;
-    ret -= _rhs;
-    return ret;
-  }
-  Vec2 operator*(const Vec2 &_rhs) {
-    Vec2 ret = *this;
-    ret *= _rhs;
-    return ret;
-  }
-  Vec2 operator/(const Vec2 &_rhs) {
-    Vec2 ret = *this;
-    ret /= _rhs;
-    return ret;
-  }
-  Vec2 operator%(const Vec2 &_rhs) {
-    *this %= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator&(const Vec2 &_rhs) {
-    *this &= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator|(const Vec2 &_rhs) {
-    *this |= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator^(const Vec2 &_rhs) {
-    *this ^= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator<<(const Vec2 &_rhs) {
-    *this <<= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator>>(const Vec2 &_rhs) {
-    *this >>= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator+=(const Vec2 &_rhs) {
-    x += _rhs.x;
-    y += _rhs.y;
-    *this = {x, y};
-    return *this;
-  }
-  Vec2 operator-=(const Vec2 &_rhs) {
-    x -= _rhs.x;
-    y -= _rhs.y;
-    *this = {x, y};
-    return *this;
-  }
-  Vec2 operator*=(const Vec2 &_rhs) {
-    x *= _rhs.x;
-    y *= _rhs.y;
-    *this = {x, y};
-    return *this;
-  }
-  Vec2 operator/=(const Vec2 &_rhs) {
-    x /= _rhs.x;
-    y /= _rhs.y;
-    *this = {x, y};
-    return *this;
-  }
-  Vec2 operator%=(const Vec2 &_rhs) {
-    *this %= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator&=(const Vec2 &_rhs) {
-    *this &= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator|=(const Vec2 &_rhs) {
-    *this |= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator^=(const Vec2 &_rhs) {
-    *this ^= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator<<=(const Vec2 &_rhs) {
-    *this <<= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  Vec2 operator>>=(const Vec2 &_rhs) {
-    *this >>= _rhs;
-    Vec2 tmp = *this;
-    x = tmp.x;
-    y = tmp.y;
-    return *this;
-  }
-  operator F64 *() { return Vec2{x, y}; }
-  operator const F64 *() { return Vec2{x, y}; }
-  operator Vec2 *() { return new Vec2{x, y}; }
-  operator const Vec2 *() { return new Vec2{x, y}; }
-  Vec2 operator-() const { return Vec2(-x, -y); }
 };
-class Vec3 : Vec<F64, 3> {
+class Vec3 : public Vec<f64, 3> {
 public:
-  F64 x, y, z;
-  Vec3(F64 _x, F64 _y, F64 _z) {
+  union {
+    f64 *Data = new f64[3];
+    struct {
+      f64 x;
+      f64 y;
+      f64 z;
+    };
+  };
+  explicit Vec3(Vec<f64, 3> &_rhs) { Data = _rhs.Data; }
+  explicit Vec3(Vec<f64, 3> const &_rhs) { *Data = *_rhs.Data; }
+  explicit Vec3(f64 _x = 0, f64 _y = 0, f64 _z = 0) {
     x = _x;
     y = _y;
     z = _z;
-    *this = {_x, _y, _z};
   }
-  Vec3() {
-    x = 0;
-    y = 0;
-    z = 0;
-    *this = {0, 0, 0};
-  }
-  Vec3 operator=(const Vec3 &_rhs) {
-    x = _rhs.x;
-    y = _rhs.y;
-    z = _rhs.z;
-    *this = {_rhs.x, _rhs.y, _rhs.z};
-    return *this;
-  }
-
-  F64 &operator[](U32 i);
-  Vec3 operator+(const Vec3 &_rhs) { return *this + _rhs; }
-  Vec3 operator-(const Vec3 &_rhs) {
-    return Vec3(x - _rhs.x, y - _rhs.y, z - _rhs.z);
-  };
-  Vec3 operator*(const Vec3 &_rhs) const {
-    return Vec3(x * _rhs.x, y * _rhs.y, z * _rhs.z);
-  }
-  const Vec3 operator/(const Vec3 &_rhs) {
-    return Vec3(x / _rhs.x, y / _rhs.y, z / _rhs.z);
-  }
-  Vec3 operator%(const Vec3 &_rhs) { return *this % _rhs; }
-  Vec3 operator&(const Vec3 &_rhs) { return *this & _rhs; };
-  Vec3 operator|(const Vec3 &_rhs) { return *this | _rhs; };
-  Vec3 operator^(const Vec3 &_rhs) { return *this ^ _rhs; };
-  Vec3 operator<<(const Vec3 &_rhs) { return *this << _rhs; };
-  Vec3 operator>>(const Vec3 &_rhs) { return *this >> _rhs; };
-  Vec3 operator-() const { return Vec3(-x, -y, -z); }
-  Vec3 operator+=(const Vec3 &_rhs) {
-    x += _rhs.x;
-    y += _rhs.y;
-    z += _rhs.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator-=(const Vec3 &_rhs) {
-    x -= _rhs.x;
-    y -= _rhs.y;
-    z -= _rhs.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator*=(const Vec3 &_rhs) {
-    x *= _rhs.x;
-    y *= _rhs.y;
-    z *= _rhs.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator/=(const Vec3 &_rhs) {
-    x /= _rhs.x;
-    y /= _rhs.y;
-    z /= _rhs.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator%=(const Vec3 &_rhs) {
-    const Vec3 ret = *this % _rhs;
-    x = ret.x;
-    y = ret.y;
-    z = ret.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator&=(const Vec3 &_rhs) {
-    const Vec3 ret = *this & _rhs;
-    x = ret.x;
-    y = ret.y;
-    z = ret.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator|=(const Vec3 &_rhs) {
-    const Vec3 ret = *this | _rhs;
-    x = ret.x;
-    y = ret.y;
-    z = ret.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator^=(const Vec3 &_rhs) {
-    const Vec3 ret = *this ^ _rhs;
-    x = ret.x;
-    y = ret.y;
-    z = ret.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator<<=(const Vec3 &_rhs) {
-    const Vec3 ret = *this << _rhs;
-    x = ret.x;
-    y = ret.y;
-    z = ret.z;
-    *this = {x, y, z};
-    return *this;
-  }
-  Vec3 operator>>=(const Vec3 &_rhs) {
-    const Vec3 ret = *this >> _rhs;
-    x = ret.x;
-    y = ret.y;
-    z = ret.z;
-    *this = {x, y, z};
-    return *this;
-  }
-
-  bool operator==(const Vec3 &_rhs) {
-    return x == _rhs.x && y == _rhs.y && z == _rhs.z;
-  }
-  bool operator!=(const Vec3 &_rhs) {
-    return x != _rhs.x || y != _rhs.y || z != _rhs.z;
-  }
-  bool operator<(const Vec3 &_rhs) {
-    return x < _rhs.x && y < _rhs.y && z < _rhs.z;
-  }
-  bool operator>(const Vec3 &_rhs) {
-    return x > _rhs.x && y > _rhs.y && z > _rhs.z;
-  }
-  bool operator<=(const Vec3 &_rhs) {
-    return x <= _rhs.x && y <= _rhs.y && z <= _rhs.z;
-  }
-  bool operator>=(const Vec3 &_rhs) {
-    return x >= _rhs.x && y >= _rhs.y && z >= _rhs.z;
-  }
-  operator F64 *() const { return Vec3(x, y, z); }
-  operator Vec3 *() const { return new Vec3(x, y, z); }
-  operator const Vec3 *() const { return new Vec3(x, y, z); }
 };
-class Vec4 : Vec<F64, 4> {
+class Vec4 : public Vec<f64, 4> {
 public:
-  F64 x = 0, y = 0, z = 0, w = 0;
-  Vec4(F64 _x, F64 _y, F64 _z, F64 _w) { *this = {_x, _y, _z, _w}; }
-  Vec4() { *this = {0, 0, 0, 0}; }
-  void Set(F64 _x, F64 _y, F64 _z, F64 _w, bool reset = false) {
-    if (__builtin_isnan(_x) || __builtin_isnan(_y) || __builtin_isnan(_z) ||
-        __builtin_isnan(_w) || reset) {
-      if (reset) {
-        x = 0, y = 0, z = 0, w = 0;
-        *this = {0, 0, 0, 0};
-        return;
-      }
-      throw("Failed to set Vec4: Not a number");
-      return;
-    }
+  union {
+    f64 *Data = new f64[4];
+    struct {
+      f64 x;
+      f64 y;
+      f64 z;
+      f64 w;
+    };
+  };
+  explicit Vec4(Vec<f64, 4> &_rhs) { Data = _rhs.Data; }
+  explicit Vec4(Vec<f64, 4> const &_rhs) { *Data = *_rhs.Data; }
+  explicit Vec4(f64 _x = 0, f64 _y = 0, f64 _z = 0, f64 _w = 0) {
     x = _x;
     y = _y;
     z = _z;
     w = _w;
-    *this = {x, y, z, w};
-    return;
   }
-
-  Vec4 Get() {
-    *this = {x, y, z, w};
-    return *this;
-  }
-
-  Vec4 operator=(const Vec4 &_rhs) {
-    x = _rhs.x;
-    y = _rhs.y;
-    z = _rhs.z;
-    w = _rhs.w;
-    return *this;
-  }
-  operator F64 *() const { return Vec4(x, y, z, w); }
-  operator Vec4 *() const { return new Vec4(x, y, z, w); }
-  operator const Vec4 *() const { return new Vec4(x, y, z, w); }
-  F64 &operator[](U32 i) {
-    switch (i) {
-    case 0:
-      return x;
-    case 1:
-      return y;
-    case 2:
-      return z;
-    case 3:
-      return w;
-    default:
-      throw("Failed to get Vec4 value: Index out of range");
-    }
-  }
-
-  Vec4 operator+(const Vec4 &_rhs);
-  Vec4 operator-(const Vec4 &_rhs);
-  Vec4 operator*(const Vec4 &_rhs);
-  Vec4 operator/(const Vec4 &_rhs);
-  Vec4 operator%(const Vec4 &_rhs);
-  Vec4 operator&(const Vec4 &_rhs);
-  Vec4 operator|(const Vec4 &_rhs);
-  Vec4 operator^(const Vec4 &_rhs);
-  Vec4 operator<<(const Vec4 &_rhs);
-  Vec4 operator>>(const Vec4 &_rhs);
-  Vec4 operator-() const { return Vec4(-x, -y, -z, -w); }
-
-  Vec4 operator+=(const Vec4 &_rhs);
-  Vec4 operator-=(const Vec4 &_rhs);
-  Vec4 operator*=(const Vec4 &_rhs);
-  Vec4 operator/=(const Vec4 &_rhs);
-  Vec4 operator%=(const Vec4 &_rhs);
-  Vec4 operator&=(const Vec4 &_rhs);
-  Vec4 operator|=(const Vec4 &_rhs);
-  Vec4 operator^=(const Vec4 &_rhs);
-  Vec4 operator<<=(const Vec4 &_rhs);
-  Vec4 operator>>=(const Vec4 &_rhs);
 };
-typedef Vec<Vec<F64, 3>, 3> Matrix3x3;
-typedef Vec<Vec<F64, 4>, 4> Matrix4x4;
-} // namespace Origin
+class Vec16 : public Vec<f64, 16> {
+public:
+  union {
+    f64 *Data = new f64[16];
+    struct {
+      f64 x[4];
+      f64 y[4];
+      f64 z[4];
+      f64 w[4];
+    };
+  };
+  Vec16() = default;
+  explicit Vec16(Vec<f64, 16> &_rhs) : Vec<f64, 16>(x) { Data = _rhs.Data; }
+  explicit Vec16(Vec<f64, 16> const &_rhs) { *Data = *_rhs.Data; }
+  explicit Vec16(f64 _x[4], f64 _y[4], f64 _z[4], f64 _w[4]) {
+    *x = *_x;
+    *y = *_y;
+    *z = *_z;
+    *w = *_w;
+  }
+};
+class Quaternion : public Vec16 {
+public:
+  explicit Quaternion(Vec<f64, 4> &_rhs)
+      : Vec16(&_rhs[0], &_rhs[1], &_rhs[2], &_rhs[3]) {
+    Data[0] = _rhs.Data[0];
+    Data[1] = _rhs.Data[1];
+    Data[2] = _rhs.Data[2];
+    Data[3] = _rhs.Data[3];
+  }
+  explicit Quaternion(Vec<f64, 4> const &_rhs) { *Data = *_rhs.Data; };
+  f64 q[4][4]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  explicit Quaternion(f64 x1 = 0, f64 y1 = 0, f64 z1 = 0, f64 w1 = 0,
+                      f64 x2 = 0, f64 y2 = 0, f64 z2 = 0, f64 w2 = 0,
+                      f64 x3 = 0, f64 y3 = 0, f64 z3 = 0, f64 w3 = 0,
+                      f64 x4 = 0, f64 y4 = 0, f64 z4 = 0, f64 w4 = 0) {
+    q[0][0] = x1;
+    q[1][0] = y1;
+    q[2][0] = z1;
+    q[3][0] = w1;
+    q[0][1] = x2;
+    q[1][1] = y2;
+    q[2][1] = z2;
+    q[3][1] = w2;
+    q[0][2] = x3;
+    q[1][2] = y3;
+    q[2][2] = z3;
+    q[3][2] = w3;
+    q[0][3] = x4;
+    q[1][3] = y4;
+    q[2][3] = z4;
+    q[3][3] = w4;
+  }
+  Quaternion(const Quaternion &) = default;
+  Quaternion(Quaternion && /*unused*/) noexcept {
+    *this = Quaternion(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  };
+  auto operator=(Quaternion &&) noexcept -> Quaternion & { return *this; }
+  explicit Quaternion(const Vec4 _q[4]) {
+    *this = Quaternion(_q[0].x, _q[0].y, _q[0].z, _q[0].w, _q[1].x, _q[1].y,
+                       _q[1].z, _q[1].w, _q[2].x, _q[2].y, _q[2].z, _q[2].w,
+                       _q[3].x, _q[3].y, _q[3].z, _q[3].w);
+  };
+  auto Mul(Quaternion &_rhs) -> Quaternion {
+    Quaternion ret = *this;
+    for (u32 i = 0; i < 4; i++) {
+      for (u32 j = 0; j < 4; j++) {
+        ret.q[i][j] = 0;
+        for (u32 k = 0; k < 4; k++) {
+          ret.q[i][j] += q[i][k] * _rhs.q[k][j];
+        }
+      }
+    }
+    return Quaternion{ret};
+  }
+
+  auto MulV(const Vec3 &_rhs) -> Vec3 {
+    Vec3 ret;
+    ret.x = q[0][0] * _rhs.x + q[0][1] * _rhs.y + q[0][2] * _rhs.z + q[0][3];
+    ret.y = q[1][0] * _rhs.x + q[1][1] * _rhs.y + q[1][2] * _rhs.z + q[1][3];
+    ret.z = q[2][0] * _rhs.x + q[2][1] * _rhs.y + q[2][2] * _rhs.z + q[2][3];
+    return ret;
+  }
+
+  auto MulVQ(const Quaternion &_rhs) -> Vec3 {
+    Vec3 ret;
+    ret.x = q[0][0] * _rhs.q[0][0] + q[0][1] * _rhs.q[1][0] +
+            q[0][2] * _rhs.q[2][0] + q[0][3] * _rhs.q[3][0];
+    ret.y = q[1][0] * _rhs.q[0][0] + q[1][1] * _rhs.q[1][0] +
+            q[1][2] * _rhs.q[2][0] + q[1][3] * _rhs.q[3][0];
+    ret.z = q[2][0] * _rhs.q[0][0] + q[2][1] * _rhs.q[1][0] +
+            q[2][2] * _rhs.q[2][0] + q[2][3] * _rhs.q[3][0];
+    return ret;
+  }
+
+  static auto Rotate(Quaternion _q, const Vec3 &_a, Face _f, f64 _d)
+      -> Quaternion {
+    Quaternion q;
+    switch (_f) {
+    case Face::Right:
+      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Left:
+      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Forward:
+      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Backward:
+      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Up:
+      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Down:
+      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    default:
+      break;
+    }
+    q = _q.Mul(q);
+    return Transform(q, _a, _d);
+  }
+  static auto Transform(Quaternion _q, const Vec3 &_v) -> Quaternion {
+    Quaternion q =
+        Quaternion{0, _v.x, _v.y, _v.z, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+    return q.Mul(_q);
+  }
+  static auto Transform(Quaternion &_q, const Vec3 &_v, f64 _d) -> Quaternion {
+    Quaternion q0 =
+        Quaternion(0, _v.x, _v.y, _v.z, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0);
+    f64 angle = _d * PI / 180.0; // Convert degrees to radians
+    Quaternion q1 = Quaternion(
+        Quaternion(__builtin_sin(angle / 2), _v.x * __builtin_sin(angle / 2),
+                   _v.y * __builtin_sin(angle / 2),
+                   _v.z * __builtin_sin(angle / 2), __builtin_cos(angle / 2)));
+    return Quaternion(q0.Mul(q1).Mul(_q));
+  }
+  static auto Translate(Quaternion _q, const Vec3 &_v) -> Quaternion {
+    Quaternion q =
+        Quaternion{0, _v.x, _v.y, _v.z, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+    return q.Mul(_q);
+  }
+  static auto Translate(Quaternion _q, const Vec3 &_v, Face _face)
+      -> Quaternion {
+    Quaternion q;
+    switch (_face) {
+    case Face::Right:
+      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Left:
+      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Forward:
+      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Backward:
+      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Up:
+      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    case Face::Down:
+      q = Quaternion{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    default:
+      q = Quaternion{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+      break;
+    }
+    q = Translate(q, _v);
+    return q.Mul(_q);
+  }
+  auto operator=(const Quaternion &_rhs) -> Quaternion {
+    for (u32 i = 0; i < 4; i++) {
+      for (u32 j = 0; j < 4; j++) {
+        q[i][j] = _rhs.q[i][j];
+      }
+    }
+    return *this;
+  }
+  auto operator*(Quaternion &_rhs) -> Quaternion { return Mul(_rhs); }
+
+  explicit operator f64 *() {
+    f64 ret[16] = {q[0][0], q[0][1], q[0][2], q[0][3], q[1][0], q[1][1],
+                   q[1][2], q[1][3], q[2][0], q[2][1], q[2][2], q[2][3],
+                   q[3][0], q[3][1], q[3][2], q[3][3]};
+    return (f64 *)ret;
+  }
+};
+} // namespace origin

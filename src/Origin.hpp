@@ -1,66 +1,165 @@
 #pragma once
-#include "math/Basic.hpp"
+#include "Basic.hpp"
 #include "math/Geometry.hpp"
 
-namespace Origin {
-
-struct String {
+namespace origin {
+class KeyValue {
+public:
+  u8 key;
+  u8 val;
+};
+class String {
 private:
-  U8 *data;
-  U32 length;
+  u8 *Data;
+  u64 length{0};
 
 public:
-  String(U32 _length = 0) {
-    data = new U8[_length + 1];
-    if (data == nullptr) {
-      for (U32 i = 0; i < _length; i++) {
-        data[i] = 0;
-      }
-    }
-    length = _length;
-    data[_length] = '\0';
+  String() : Data(new u8[1]) {}
+
+  String(const String &) = default;
+  String(String &&) = default;
+  auto operator=(String &&) -> String & = delete;
+  ~String() {
+    delete[] Data;
+    length = -1;
   }
 
-  String(U8 *_data, U32 _length);
-  ~String() { delete[] data; }
-
-  U8 *CStr(U32 length = sizeof(*data)) const {
-    U8 *ret = new U8[length];
-    for (U32 i = 0; i < length; i++) {
-      if (data[i] == '\0') {
-        break;
+  static auto ReplaceU8(u8 *keyval[2], const u8 *str) -> String {
+    u64 keyval_len = sizeof(*keyval) / 2;
+    u64 str_len = sizeof(*str);
+    u8 *tmp = new u8[str_len];
+    for (u32 i = 0; i < str_len; i++) {
+      tmp[i] = str[i];
+      for (u64 j = 0; j < keyval_len; j++) {
+        if (str[i] == keyval[j][0]) {
+          tmp[i] = keyval[j][1];
+        }
       }
-      ret[i] = data[i];
+    }
+    return {tmp, static_cast<u32>(str_len)};
+  }
+  using callback = bool (*)(u8);
+
+  static auto ReplaceU8(const u8 *keyval[2], const u8 *str, callback func)
+      -> String {
+    u64 keyval_len = sizeof(*keyval) / 2;
+    u64 str_len = sizeof(*str);
+    u8 *tmp = new u8;
+    for (u32 i = 0; i < str_len; i++) {
+      for (u32 j = 0; j < keyval_len; j++) {
+        if ((str[i] == keyval[j][0]) && (func(str[i]))) {
+          tmp[i] = (keyval[j][1]);
+        } else {
+          tmp[i] = str[i];
+        }
+      }
+    }
+    return (String)*tmp;
+  }
+
+  static auto FormatU8(const u8 *str, u32 flags) -> u8 * {
+    u8 *ret = new u8[sizeof(*str)];
+    for (u32 i = 0; i < sizeof(*str); i++) {
+      if ((str[i] >= (u8)('\0') && str[i] <= (u8)('\n')) || (flags == 1) ||
+          (str[i] >= (u8)('0') && str[i] <= (u8)('9'))) {
+        ret[i] = ' ';
+      } else {
+        ret[i] = str[i];
+      }
     }
     return ret;
   }
+  explicit String(u32 _length = 0) : Data(new u8[_length + 1]) {
 
-  U32 StrLen(U8 *str) {
+    if (Data == nullptr) {
+      for (u32 i = 0; i < _length; i++) {
+        Data[i] = 0;
+      }
+    }
+    length = _length;
+    Data[_length] = '\0';
+  }
+
+  String(u8 *_data, u32 _length);
+  auto CStr(u32 length = sizeof(*Data)) const -> u8 * {
+    u8 *ret = new u8[length];
+    for (u32 i = 0; i < length; i++) {
+      if (Data[i] == '\0') {
+        break;
+      }
+      ret[i] = Data[i];
+    }
+    return ret;
+  }
+  static auto StrLen(const u8 *str) -> u32 {
     if (str == nullptr) {
       return 0;
     }
-    U32 len = sizeof(str);
+    u32 len = sizeof(str);
     return len;
   }
-
-  void StrCpy(U8 *dest, U8 *src) {
+  static auto Format(u8 *str, u32 flags) -> String {
+    u8 *tmp = {str};
+    tmp[sizeof(*str)] = '\0';
+    switch (flags) {
+    case 0:
+      return {str, sizeof(*str)};
+    case 1:
+      for (u32 i = 0; i < sizeof(*str); i++) {
+        if (str[i] >= '\0' && str[i] <= '\n') {
+          tmp[i] = ' ';
+        }
+      }
+      return {tmp, sizeof(*str)};
+    case 2:
+      for (u32 i = 0; i < sizeof(*str); i++) {
+        if (str[i] < '0' || str[i] > '9') {
+          tmp[i] = str[i];
+        } else {
+          tmp[i] = ' ';
+        }
+      }
+    case 3:
+      for (u32 i = 0; i < sizeof(*str); i++) {
+        if (str[i] < 'a' || str[i] > 'z') {
+          tmp[i] = str[i];
+        } else {
+          tmp[i] = ' ';
+        }
+      }
+    case 4:
+      for (u32 i = 0; i < sizeof(*str); i++) {
+        if (str[i] < 'A' || str[i] > 'Z') {
+          tmp[i] = str[i];
+        } else {
+          tmp[i] = ' ';
+        }
+      }
+    default:
+      for (u32 i = 0; i < sizeof(*str); i++) {
+        tmp[i] = str[i];
+      }
+    }
+    return {str, sizeof(*str)};
+  }
+  void StrCpy(u8 *dest, const u8 *src) const {
     if (dest == nullptr || src == nullptr) {
       return;
     }
-    for (U32 i = 0; i < length; i++) {
+    for (u32 i = 0; i < length; i++) {
       dest[i] = src[i];
     }
   }
 
-  U8 *StrCat(U8 *str1, U8 *str2) {
+  static auto StrCat(const u8 *str1, const u8 *str2) -> u8 * {
     if (str1 == nullptr || str2 == nullptr) {
-      return NULL;
+      return nullptr;
     }
-    U32 str1_len = sizeof(*str1);
-    U32 str2_len = sizeof(*str2);
-    U32 str_len = str1_len + str2_len;
-    U8 *ret = new U8[str_len];
-    for (U32 i = 1; i < str_len; i++) {
+    u32 str1_len = sizeof(*str1);
+    u32 str2_len = sizeof(*str2);
+    u32 str_len = str1_len + str2_len;
+    u8 *ret = new u8[str_len];
+    for (u32 i = 1; i < str_len; i++) {
       if (ret[i - 1] != '\0') {
         if (i < str1_len) {
           ret[i] = str1[i];
@@ -75,98 +174,108 @@ public:
     return ret;
   }
 
-  inline U8 operator[](U32 index) { return data[index]; }
-  inline operator U8 *() { return data; }             // U8*
-  inline operator const U8 *() const { return data; } // const U8*
-  String operator=(const U8 *str) {
+  inline u8 operator[](u32 index) { return Data[index]; }
+  inline explicit operator u8 *() { return Data; }             // u8*
+  inline explicit operator const u8 *() const { return Data; } // const u8*
+  auto operator=(const u8 *str) -> String {
     if (str != nullptr) {
-      if (str != data)
-        return *StrCat((U8 *)data, (U8 *)str);
+      if (str != Data) {
+        return {StrCat(Data, str), sizeof(*str)};
+      }
     } else {
-      for (U32 i = 0; i < length; i++) {
-        data[i] = 0;
+      for (u32 i = 0; i < length; i++) {
+        Data[i] = 0;
       }
     }
-    return *this;
+    return {Data, static_cast<u32>(length)};
   }
-  String operator=(const String str);
-  String operator+(const U8 *str);
-  String operator+(const String str);
-  String operator+=(const U8 *str);
-  String operator+=(const String str);
+  auto operator=(String str) -> String;
+  auto operator+(const u8 *str) -> String;
+  auto operator+(String str) -> String;
+  auto operator+=(const u8 *str) -> String;
+  auto operator+=(String str) -> String;
 };
 
-typedef U64 ID;
+using ID = u64;
 
-class Color : public Vec<U8, 4> {
+class Color : public Vec<u8, 4> {
 public:
-  const U8 r = 0;
-  const U8 g = 1;
-  const U8 b = 2;
-  const U8 a = 3;
-  Color(const U8 _r, const U8 _g, const U8 _b, const U8 _a) {
-    *this = {_r, _g, _b, _a};
+  f64 Data[4] = {0, 0, 0, 0};
+  union {
+    struct {
+      f64 r{};
+      f64 g{};
+      f64 b{};
+      f64 a{};
+    };
+  };
+  Color(const f64 _r, const f64 _g, const f64 _b, const f64 _a) {
+    Data[0] = _r;
+    Data[1] = _g;
+    Data[2] = _b;
+    Data[3] = _a;
   }
-  Color() { *this = {0, 0, 0, 0}; }
-  Color operator=(const Color &_rhs) {
-    *this = {_rhs.r, _rhs.g, _rhs.b, _rhs.a};
+  Color() { Data[0] = 0, Data[1] = 0, Data[2] = 0, Data[3] = 0; }
+  Color(const Color &) = default;
+  Color(Color && /*unused*/) noexcept {
+    Data[0] = 0, Data[1] = 0, Data[2] = 0, Data[3] = 0;
+  };
+  ~Color() = default;
+  auto operator=(Color &&) noexcept -> Color & {
+    Data[0] = 0, Data[1] = 0, Data[2] = 0, Data[3] = 0;
     return *this;
   }
-  F64 &operator[](U32 index) { return (F64 &)(*this)[index]; }
+  auto operator=(const Color &_rhs) -> Color {
+    Data[0] = _rhs.r, Data[1] = _rhs.g, Data[2] = _rhs.b, Data[3] = _rhs.a;
+    return *this;
+  }
+  auto operator[](u32 index) -> f64 & { return Data[index]; }
 };
-class Vertex {
-  F64 *data[10];
-  U32 index;
-  U32 *owners;
-
+class Vertex : public Vec<f64, 10> {
 public:
+  u32 index;
+  u32 owners{};
   Vertex(Vec3 coords, Vec3 normal, Color color) {
-    *data = new F64[10]{coords[0], coords[1], coords[2], normal[0], normal[1],
-                        normal[2], color[0],  color[1],  color[2],  color[3]};
+    *Data = *new f64[10]{coords[0], coords[1], coords[2], normal[0], normal[1],
+                         normal[2], color[0],  color[1],  color[2],  color[3]};
     index = 0;
-    owners = nullptr;
   }
-  Vertex(Vec3 coords = {0.0, 0.0, 0.0}, Vec3 normal = {0.0, 0.0, 0.0},
-         Color color = {0, 0, 0, 0}, U32 _index = 0, U32 *owners = nullptr) {
-    *data = new F64[10]{coords[0], coords[1], coords[2], normal[0], normal[1],
-                        normal[2], color[0],  color[1],  color[2],  color[3]};
-    index = _index;
-    owners = nullptr;
+  explicit Vertex(const Vec3 &coords = Vec3(0.0, 0.0, 0.0),
+                  const Vec3 &normal = Vec3(0.0, 0.0, 0.0),
+                  const Color &color = Color(0, 0, 0, 0), u32 _index = 0,
+                  const u32 *owners = nullptr)
+      : index(_index), owners(*owners) {
+    *Data = *new f64[10]{coords.Data[0], coords.Data[1], coords.Data[2],
+                         normal.Data[0], normal.Data[1], normal.Data[2],
+                         color.Data[0],  color.Data[1],  color.Data[2],
+                         color.Data[3]};
   }
 };
-class Triangle {
-  Vertex *data = Vec<Vertex, 3>();
-  U32 index;
+class Triangle : public Vec<Vertex, 3> {
+  u32 index{};
 
 public:
   Triangle(const Vertex &_a, const Vertex &_b, const Vertex &_c) {
-    data[0] = _a;
-    data[1] = _b;
-    data[2] = _c;
-  }
-  Triangle() {
-    *data = (Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(0, 0, 0));
-    for (U32 i = 0; i < 3; i++) {
-      data[i] = Vec3(0, 0, 0);
+    for (u32 i = 0; i < 3; i++) {
+      Data[0][i % 3] = _a[i];
+      Data[1][i % 3] = _b[i];
+      Data[2][i % 3] = _c[i];
     }
   }
-  ~Triangle() { delete[] data; }
-  Vertex *Get() { return data; }
-  const Vertex *Get() const { return data; }
-  Vertex &operator[](U32 _i) { return data[_i]; }
-  Vertex operator[](U32 _i) const { return data[_i]; }
+  ~Triangle() = default;
+  auto Get() -> Vertex * { return Data; }
 };
-class Mesh {
-  Triangle *data;
+template <u32 N> class Mesh : public Vec<Triangle, N> {
+  Triangle Data[N];
 
 public:
-  Mesh(Triangle *_data) { data = _data; }
-  ~Mesh() { delete[] data; }
-  Triangle *Get() { return data; }
-  const Triangle *Get() const { return data; }
+  ~Mesh() { delete[] *Data; }
+  Triangle *Get() { return *Data; }
+  const Triangle *Get() const { return *Data; }
   void Index() const {
-    for (U32 i = 0; i < 3; i++) {
+    for (u32 i = 0; i < 3; i++) {
+      Data[i] = Triangle(Vertex(), Vertex(), Vertex());
     }
   }
 };
-} // namespace Origin
+} // namespace origin

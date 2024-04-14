@@ -1,45 +1,43 @@
-#pragma once
 
 #include "Timer.hpp"
-
-namespace Origin {
+namespace origin {
 Timer::Timer() {
-  TimeStarted = 0;
-  TimePaused = 0;
-  TimeResumed = 0;
-  TimeStopped = 0;
-  TimeRestarted = 0;
-  TimeOffset = 0;
-  TimeLimit = 1000000000;
+  TimeStarted = Duration(0);
+  TimePaused = Duration(0);
+  TimeResumed = Duration(0);
+  TimeStopped = Duration(0);
+  TimeRestarted = Duration(0);
+  TimeOffset = Duration(0);
+  TimeLimit = Duration(1000000000);
   TimerID = TimerID + 1;
   TimerName = "Timer_" + std::to_string(TimerID) + "]-(Timer" +
               std::to_string(TimerID) + ")";
 }
 Timer::Timer(std::string name) {
-  TimeStarted = 0;
-  TimePaused = 0;
-  TimeResumed = 0;
-  TimeStopped = 0;
-  TimeRestarted = 0;
-  TimeOffset = 0;
-  TimeLimit = 1000000000;
+  TimeStarted = Duration(0);
+  TimePaused = Duration(0);
+  TimeResumed = Duration(0);
+  TimeStopped = Duration(0);
+  TimeRestarted = Duration(0);
+  TimeOffset = Duration(0);
+  TimeLimit = Duration(1000000000);
   TimerID = TimerID + 1;
   TimerName = "Timer [" + std::to_string(TimerID) + "]-(" + name + ")";
 }
 Timer::~Timer() {
   State = TimerState::None;
-  TimeResumed = 0;
-  TimePaused = 0;
-  TimeStarted = 0;
-  TimeStopped = 0;
-  TimeRestarted = 0;
-  TimeOffset = 0;
-  TimeLimit = 0;
+  TimeResumed = Duration(0);
+  TimePaused = Duration(0);
+  TimeStarted = Duration(0);
+  TimeStopped = Duration(0);
+  TimeRestarted = Duration(0);
+  TimeOffset = Duration(0);
+  TimeLimit = Duration(1000000000);
   TimerName = "";
   TimerID = TimerID - 1;
 }
 bool Timer::Is(TimerState state) {
-  if (U8(state) >= 0 && U8(state) <= 5) {
+  if (u8(state) >= 0 && u8(state) <= 5) {
     return State == state;
   }
   return false;
@@ -63,7 +61,7 @@ auto Timer::Resume() -> bool {
 }
 auto Timer::Stop() -> bool {
   if (!Is(TimerState::Stopped) && !Is(TimerState::None)) {
-    TimeStopped = Time::Nano();
+    TimeStopped = Duration(Time::Nano());
     State = TimerState::Stopped;
     return true;
   }
@@ -72,7 +70,7 @@ auto Timer::Stop() -> bool {
 auto Timer::Start() -> bool {
   if (Is(TimerState::None) || Is(TimerState::Stopped) ||
       Is(TimerState::Restarted)) {
-    TimeStarted = Time::Nano();
+    TimeStarted = Duration(Time::Nano());
     State = TimerState::Started;
     return true;
   }
@@ -80,12 +78,12 @@ auto Timer::Start() -> bool {
 }
 auto Timer::Restart() -> bool {
   if (!Is(TimerState::None)) {
-    TimeResumed = 0;
-    TimePaused = 0;
-    TimeStarted = 0;
-    TimeStopped = 0;
-    TimeOffset = 0;
-    TimeRestarted = Now();
+    TimeResumed = Duration(0);
+    TimePaused = Duration(0);
+    TimeStarted = Duration(0);
+    TimeStopped = Duration(0);
+    TimeOffset = Duration(0);
+    TimeRestarted = Duration(Now());
     State = TimerState::Restarted;
     return true;
   }
@@ -95,4 +93,4 @@ auto Timer::IsRunning() -> bool {
   return Is(TimerState::Started) || Is(TimerState::Resumed) ||
          Is(TimerState::Paused);
 }
-}; // namespace Origin
+}; // namespace origin

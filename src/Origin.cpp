@@ -1,13 +1,10 @@
-#pragma once
 #include "Origin.hpp"
-namespace Origin {
+namespace origin {
 
-inline String operator""_(const char *str, size_t len) {
-  return *(new String((U8 *)str, len));
+inline auto operator+(const String &str1, const String &str2) -> String {
+  String ret = str1;
+  ret += str2;
+  return {ret};
 }
 
-inline String operator+(const String &str1, const String &str2) {
-  return str1 + str2;
-}
-
-} // namespace Origin
+} // namespace origin
