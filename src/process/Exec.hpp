@@ -86,7 +86,7 @@ switch. Uses the constants above as specifiers for the equivalent index. */
         // The main loop of the application. Splits the output into a separate thread
         // and continues updating the input status until the application is exited or
         // a time limit is reached.
-        auto Loop(Duration runtime) -> int;
+        auto Loop(f128 runtime) -> int;
         // Sets the run state of the application to 'Initializing' and Upon success,
         // sets the run state to 'Initialized'.
         auto DoInit() -> bool;
