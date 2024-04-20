@@ -1,6 +1,8 @@
 #include "Console.hpp"
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <sstream>
+#include <cstddef>
 namespace origin
 {
     Console::Console()
@@ -79,7 +81,7 @@ namespace origin
         {
         };
         tcgetattr(STDIN_FILENO, &oldt);
-        if (echo == true)
+        if (echo)
         {
             tcflag_t flags = oldt.c_lflag;
             flags &= ~ICANON & ~ECHO;
@@ -194,26 +196,26 @@ namespace origin
         // so that the next read call retrieves the keypress
         if (available > 0)
         {
-            termios old{};
-            termios new_{};
+            termios old_t{};
+            termios new_t{};
 
-            if (tcgetattr(0, &old) == -1)
+            if (tcgetattr(0, &old_t) == -1)
             {
                 perror("tcgetattr error");
                 return 0;
             }
 
-            new_ = old;
-            new_.c_lflag |= ICANON_ECHO;
+            new_t = old_t;
+            new_t.c_lflag |= ICANON_ECHO;
 
-            if (tcsetattr(0, TCSANOW, &new_) == -1)
+            if (tcsetattr(0, TCSANOW, &new_t) == -1)
             {
                 perror("tcsetattr error");
                 return 0;
             }
         }
 
-        return available > 0;
+        return static_cast<int>(available > 0);
     }
 
     /**
@@ -327,12 +329,12 @@ namespace origin
     {
         printf("\033[%d;%d;%d;%dH", b, t, r, l);
         fflush(stdout);
-        return fread(destination, 1, l * t * r, stdin);
+        return fread(destination, 1, static_cast<size_t>(l * t) * r, stdin);
     }
     auto Console::WriteText(int l, int t, int r, int b, void* source) -> size_t
     {
         printf("\033[%d;%d;%d;%dH", b, t, r, l);
         fflush(stdout);
-        return fwrite(source, 1, l * t * r, stdout);
+        return fwrite(source, 1, static_cast<size_t>(l * t) * r, stdout);
     }
-}
+} // namespace origin

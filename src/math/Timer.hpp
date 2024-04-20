@@ -1,16 +1,11 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 #include "Basic.hpp"
-#include "Message.hpp"
-#include <algorithm>
+#include "String.hpp"
 #include <chrono>
-#include <cstring>
-#include <ctime>
 #include <iostream>
-#include <ratio>
 #include <sstream>
 #include <string>
-#include <utility>
 
 namespace origin
 {
@@ -74,11 +69,11 @@ namespace origin
             this->Tu = tu;
             this->nano = _nano;
         }
-        auto Get(TimeUnit tu = TimeUnit::Nano) -> Duration
+        auto Get(TimeUnit tu = TimeUnit::Nano) const -> Duration
         {
             return Duration(this->nano, tu);
         }
-        auto GetString(TimeUnit tu = TimeUnit::Nano) -> std::string
+        auto GetString(TimeUnit tu = TimeUnit::Nano) const -> std::string
         {
             std::stringstream ss = std::stringstream();
             ss.precision(20);
@@ -196,7 +191,7 @@ namespace origin
         static auto Nano() -> f128
         {
             std::chrono::duration now = std::chrono::high_resolution_clock::now().time_since_epoch();
-            return (f128)now.count();
+            return static_cast<f128>(now.count());
         }
         static auto Micro() -> f128 { return (Nano() / 1000.0); }
         static auto Milli() -> f128 { return (Nano() / 1000000.0); }

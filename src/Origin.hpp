@@ -4,181 +4,9 @@
 #include <algorithm>
 #include <cstring>
 #include <immintrin.h>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace origin
 {
-    class KeyValue
-    {
-    public:
-        i8 key;
-        i8 val;
-    };
-    class String : public std::string
-    {
-    private:
-        union
-        {
-            i8* data[2];
-            struct
-            {
-                i8* val;
-                i8* key;
-            };
-        };
-
-    public:
-        String(i8* keyval[2])
-        {
-            key = keyval[0];
-            val = keyval[1];
-        }
-
-        String(i8* str)
-        {
-            val = str;
-            key = nullptr;
-        }
-        auto CStr(u64 length = 0) const -> i8*
-        {
-            i8* ret = const_cast<i8*>(data[0]);
-            if (length && length != size())
-            {
-                ret = new i8[length + 1];
-                memcpy(ret, val, std::min(length, (u64)size()));
-            }
-            ret[length ? length : size()] = '\0';
-            return ret;
-        }
-
-    public:
-        String() :
-            std::string() {}
-        String(const String& str) :
-            std::string(str)
-        {
-        }
-        String(String&&) = default;
-        auto operator=(String&&) -> String& = default;
-        auto operator=(const String& str) -> String&
-        {
-            if (str.size() != size())
-            {
-                delete[] *data;
-                *data = new i8[str.size()];
-            }
-            memcpy(data, str.data, str.size());
-            return *this;
-        }
-        ~String()
-        {
-            delete[] *data;
-        }
-
-        static auto replace_all(const i8* from_str, const i8* to_str, const i8* str) -> String
-        {
-            i8* replaced = new i8[strlen(str) + 1];
-            strcpy(replaced, str);
-            for (i8* p = replaced; (p = strchr(p, from_str[0])) != nullptr;)
-                *p++ = to_str[0];
-
-            return { replaced, strlen(replaced) };
-        }
-
-        using callback = bool (*)(i8);
-
-        static auto replace(const i8* from[2], const i8* str, callback func)
-            -> String
-        {
-            i8* target = const_cast<i8*>(str);
-            const i8* const end = target + strlen(str);
-            while (target != end && (target = static_cast<i8*>(memchr(target, from[0][0], end - target))))
-            {
-                if (func(*target) && *target == from[0][0])
-                {
-                    *target = from[0][1];
-                }
-                ++target;
-            }
-            return { const_cast<i8*>(str), static_cast<u32>(strlen(str)) };
-        }
-
-        static i8* CleanString(i8* str, u32 flags)
-        {
-            i8* dst = str;
-            for (i8* src = str; *src != '\0'; ++src)
-            {
-                if ((*src >= '\0' && *src <= '\n') ||
-                    (flags == 1 && (*src >= '0' && *src <= '9')))
-                {
-                    *dst++ = ' ';
-                }
-                else
-                {
-                    *dst++ = *src;
-                }
-            }
-            *dst = '\0';
-            return str;
-        }
-        explicit String(u64 length) :
-            data{ new i8[length + 1] }
-        {
-            std::memset(data, 0, length + 1);
-        }
-
-        String(i8* _data, u64 _length);
-        static auto StrLen(const i8* str) -> u64
-        {
-            return *str ? strlen(str) : 0;
-        }
-        static auto Format(i8* str, u32 flags) -> String
-        {
-            u64 len = strlen(str);
-            i8* out = static_cast<i8*>(memccpy(nullptr, str, ' ', len));
-            for (i8* p = out; *p != '\0'; ++p)
-            {
-                if ((flags == 1 && !isdigit(*p)) ||
-                    (flags == 2 && !isdigit(*p)) ||
-                    (flags == 3 && !islower(*p)) ||
-                    (flags == 4 && !isupper(*p)) ||
-                    (*p >= '\0' && *p <= '\n'))
-                {
-                    *p = ' ';
-                }
-            }
-            return { out, static_cast<u32>(len) };
-        }
-
-        void StrCpy(i8* __restrict dest, const i8* __restrict src) const
-        {
-            memcpy(dest, src, strlen(src) + 1);
-        }
-
-        static auto Concat(const i8* s1, const i8* s2) -> i8*
-        {
-            const auto len1 = strlen(s1), len2 = strlen(s2);
-            auto* result = static_cast<i8*>(malloc(len1 + len2 + 1));
-            if (!result)
-                throw std::bad_alloc{};
-            memcpy(result, s1, len1);
-            memcpy(result + len1, s2, len2 + 1);
-            return result;
-        }
-
-        inline auto operator[](u64 index) -> i8 { return *data[index]; }
-        inline explicit operator i8*() { return *data; } // u8*
-        inline explicit operator const i8*() const { return *data; }
-        auto operator=(const i8* str) -> String;
-
-        auto operator=(String str) -> String;
-        auto operator+(const i8* str) -> String;
-        auto operator+(String str) -> String;
-        auto operator+=(const i8* str) -> String;
-        auto operator+=(String str) -> String;
-    };
 
     using ID = u64;
 
@@ -205,7 +33,7 @@ namespace origin
         }
         Color() { r = 0, g = 0, b = 0, a = 0; }
         Color(Color&& /*unused*/) noexcept { r = 0, g = 0, b = 0, a = 0; };
-        auto Length() const -> f64 { return sqrt(r * r + g * g + b * b + a * a); }
+        auto Scale() const -> f64 { return sqrt(r * r + g * g + b * b + a * a); }
         auto Normalize() -> Color&
         {
             f64 inv_length = 1.0 / sqrt(r * r + g * g + b * b + a * a);
@@ -261,7 +89,7 @@ namespace origin
         ~Vertex()
         {
             index = 0;
-            owners = 0;
+            owners = nullptr;
         }
         explicit Vertex(f64* data) { std::memcpy(data, data, 12 * sizeof(f64)); }
         Vertex(const Vec4& coords, const Vec4& normal, const Color& color) noexcept :
@@ -277,7 +105,8 @@ namespace origin
             g{ color.g },
             b{ color.b },
             a{ color.a } {}
-        Vertex(const f64 _x, const f64 _y, const f64 _z, const f64 _w, const f64 _nx, const f64 _ny, const f64 _nz, const f64 _nw, const f64 _r, const f64 _g, const f64 _b, const f64 _a, const u64 _index = 0, const ID* _owners = nullptr) noexcept
+        Vertex(const f64 _x, const f64 _y, const f64 _z, const f64 _w, const f64 _nx, const f64 _ny, const f64 _nz, const f64 _nw, const f64 _r, const f64 _g, const f64 _b, const f64 _a, const u64 _index = 0, const ID* _owners = nullptr) noexcept :
+            index(_index), owners(const_cast<ID*>(_owners))
         {
             x = _x;
             y = _y;
@@ -291,8 +120,6 @@ namespace origin
             g = _g;
             b = _b;
             a = _a;
-            index = (u64)_index;
-            owners = (ID*)_owners;
         }
         Vertex(const Vec4& coords, const Vec4& normal, const Color& color, u32 _index = 0, ID* _owners = nullptr) noexcept :
             index(_index), owners(_owners)
@@ -312,7 +139,7 @@ namespace origin
         auto ClampPosition(const Vec4& _min, const Vec4& _max) noexcept -> Vertex
         {
             Vertex ret = *this;
-            ret.SetPosition((Vec4)this->GetPosition().Clamp(_min, _max));
+            ret.SetPosition(Vec4(this->GetPosition().Clamp(_min, _max)));
             return ret;
         }
         auto ClampColor(const Color& _min, const Color& _max) -> Vertex
@@ -326,24 +153,24 @@ namespace origin
         auto ClampNormal(const Vec4& _min, const Vec4& _max) noexcept -> Vertex
         {
             Vertex ret = *this;
-            ret.SetNormal((Vec4)this->GetNormal().Clamp(_min, _max));
+            ret.SetNormal(Vec4(this->GetNormal().Clamp(_min, _max)));
             return ret;
         }
         auto ClampDistance(const f64 _min, const f64 _max) -> Vertex
         {
             f64 _distance = origin::Clamp(sqrt(x * x + y * y + z * z + w * w), _min, _max);
             Vec4 ret = Vec4(x / _distance, y / _distance, z / _distance, w / _distance);
-            (Vertex(ret, Vec4(nx, ny, nz, nw), Color(r, g, b, a), (u64)index, (ID*)owners));
+            (Vertex(ret, Vec4(nx, ny, nz, nw), Color(r, g, b, a), index, owners));
         };
 
-        auto Distance(const Vertex& rhs) -> f64
+        auto Distance(const Vertex& rhs) const -> f64
         {
             return sqrt((x - rhs.x) * (x - rhs.x) +
                         (y - rhs.y) * (y - rhs.y) +
                         (z - rhs.z) * (z - rhs.z) +
                         (w - rhs.w) * (w - rhs.w));
         }
-        auto DistanceSquared(const Vertex& rhs) -> f64
+        auto DistanceSquared(const Vertex& rhs) const -> f64
         {
             return (x - rhs.x) * (x - rhs.x) +
                    (y - rhs.y) * (y - rhs.y) +
@@ -363,7 +190,7 @@ namespace origin
         }
         static auto Sort(Vertex* _vertices) -> Vertex*
         {
-            u64 size = sizeof(*_vertices) / sizeof(*_vertices[0]);
+            u64 size = sizeof(*_vertices) / sizeof(_vertices[0]);
             Vertex ret = *_vertices;
             std::sort(_vertices, _vertices + size, [](const Vertex& lhs, const Vertex& rhs) -> bool {
                 return lhs.index < rhs.index;
@@ -386,7 +213,7 @@ namespace origin
         auto SetIndex(u32 _index) -> void { index = _index; }
         auto SetOwners(ID* _owners) -> void { owners = _owners; }
         auto GetData() -> f64* { return data; }
-        auto GetLength() -> f64
+        auto GetLength() const -> f64
         {
             Vec4 ret = GetPosition();
             return sqrt(ret.x * ret.x + ret.y * ret.y + ret.z * ret.z + ret.w * ret.w);
@@ -404,7 +231,7 @@ namespace origin
         auto GetOwners() const -> ID* { return owners; }
         auto GetPacked() const -> f64x4*
         {
-            f64x4* ret = (new f64x4[3]);
+            auto* ret = (new f64x4[3]);
             ret[0] = _mm256_loadu_pd(data);
             ret[1] = _mm256_loadu_pd(data + 4);
             ret[2] = _mm256_loadu_pd(data + 8);
@@ -456,7 +283,7 @@ namespace origin
             return !(*this == rhs);
         }
 
-        operator f64*()
+        explicit operator f64*()
         {
             return GetData();
         }
@@ -552,7 +379,7 @@ namespace origin
         ~Mesh<N>() { delete[] this->data; }
 
         auto operator*() { return this->data; }
-        auto operator[](u64 _index[2]) -> Vertex
+        auto operator[](const u64 _index[2]) -> Vertex
         {
             Vertex _vertex = this->data[_index[0]][_index[1]];
             return _vertex;

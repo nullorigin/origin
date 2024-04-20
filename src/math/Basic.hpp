@@ -451,7 +451,6 @@ namespace origin
     {
         if (IsNan(_a))
         {
-            throw("INV_SQRT failed: Not a number");
             return 0;
         }
         return T(1.0 / Sqrt(_a));
@@ -598,11 +597,11 @@ namespace origin
             return { A.real - B.real, A.imag - B.imag };
         }
 
-        auto Mul(const Complex b) -> Complex
+        auto Mul(const Complex b) const -> Complex
         {
             return { real * b.real - imag * b.imag, real * b.imag + imag * b.real };
         }
-        auto Mul(f64* aPtr) noexcept -> f64*
+        auto Mul(f64* aPtr) const noexcept -> f64*
         {
             __m256d a = _mm256_loadu_pd(aPtr);
             __m256d b = _mm256_setr_pd(real, imag, aPtr[2], aPtr[3]);
@@ -616,7 +615,7 @@ namespace origin
             __m128d den = _mm_setr_pd(b.real, b.imag);
             return { _mm_cvtsd_f64(_mm_div_pd(num, den)), _mm_cvtsd_f64(_mm_div_pd(den, num)) };
         }
-        auto FFT(const Complex* input, u64 size) -> Complex*
+        static auto FFT(const Complex* input, u64 size) -> Complex*
         {
             Complex* out = new Complex[size];
             u64 half_size = size >> 1;
@@ -650,7 +649,8 @@ namespace origin
             // Bit reverse
             for (u64 i = 1, j = 0; i < size; ++i)
             {
-                u64 x = i, k = size >> 1;
+                u64 x = i;
+                u64 k = size >> 1;
                 while (j >= k)
                 {
                     x = (x ^ (j & ~k)) & (size - 1);
@@ -658,7 +658,9 @@ namespace origin
                     k >>= 1;
                 }
                 if (i < (j |= k))
+                {
                     std::swap(out[i], out[j]);
+                }
             }
 
             // Normalize
@@ -672,7 +674,7 @@ namespace origin
         }
         static Complex* FFT2(Complex* _C1, const u64 N)
         {
-            Complex* C = reinterpret_cast<Complex*>(_C1);
+            auto* C = reinterpret_cast<Complex*>(_C1);
 
             // Cooley–Tukey FFT (in-place)
             for (u64 s = 1, s_half = 1; s < N; s <<= 2, s_half = s >> 1)
@@ -734,34 +736,45 @@ namespace origin
         Unit unit = Unit::BYTE;
 
     public:
-        f64 size = 0, used = 0, free = 0, total = 0;
-        Mem() = default;
-        explicit Mem(enum Unit _unit = Unit::BYTE) :
-            unit(_unit) {}
-        Mem(f64 _size, f64 _used, f64 _free, f64 _total, Unit _unit = Unit::BYTE) :
+        f64 size = 0.0;
+        f64 used = 0.0;
+        f64 free = 0.0;
+        f64 total = 0.0;
+        explicit Mem(enum Unit _unit) :
+            unit(_unit)
+        {
+            size = used = free = total = 0.0;
+        }
+        explicit Mem(f64 _size = 0.0, f64 _used = 0.0, f64 _free = 0.0, f64 _total = 0.0, Unit _unit = Unit::BYTE) :
             size(_size), used(_used), free(_free), total(_total), unit(_unit) {}
 
-        constexpr auto Convert(Unit _unit) const -> f64
+        constexpr auto Convert(const Unit _unit) const -> f64
         {
-            f64 ratio = f64(1 << (u64(unit) * 10));
-            ratio /= f64(1 << (u64(_unit) * 10));
-            return f64(size * ratio);
+            const u8 one = 1;
+            const u8 unit0 = static_cast<u8>(unit) * 10;
+            const u8 unit1 = static_cast<u8>(_unit) * 10;
+            f64 ratio = one << unit0;
+            ratio /= one << unit1;
+            return size * ratio;
         }
-        auto Convert(Mem _mem) const -> Mem
+        auto Convert(const Mem _mem) const -> Mem
         {
-            f64 ratio = f64(1 << (u64(_mem.unit) * 10));
-            ratio /= f64(1 << (u64(unit) * 10));
-            return { size * ratio, used * ratio, free * ratio, total * ratio, _mem.unit };
+            const u8 one = 1;
+            const u8 unit0 = static_cast<u8>(unit) * 10;
+            const u8 unit1 = static_cast<u8>(_mem.unit) * 10;
+            f64 ratio = one << unit0;
+            ratio /= one << unit1;
+            return Mem{ size * ratio, used * ratio, free * ratio, total * ratio, _mem.unit };
         }
-        auto operator[](Unit _unit) const -> u64 { return Convert(_unit); }
+        auto operator[](Unit _unit) const -> f64 { return Convert(_unit); }
         auto operator=(const Mem& _rhs) -> Mem& = default;
 
-        auto Total() const -> u64 { return used + free; }
-        auto Available() const -> u64 { return free; }
-        auto Used() const -> u64 { return used; }
-        auto Percentage() const -> f64 { return (f64(used) / f64(Total())) * 100.0; }
-        auto PercentageUsed() const -> f64 { return (f64(used) / f64(size)) * 100.0; }
-        auto PercentageFree() const -> f64 { return (f64(free) / f64(size)) * 100.0; }
+        auto Total() const -> f64 { return used + free; }
+        auto Available() const -> f64 { return free; }
+        auto Used() const -> f64 { return used; }
+        auto Percentage() const -> f64 { return ((used) / static_cast<f64>(Total())) * 100.0; }
+        auto PercentageUsed() const -> f64 { return ((used) / (size)) * 100.0; }
+        auto PercentageFree() const -> f64 { return ((free) / (size)) * 100.0; }
     };
 
 } // namespace origin

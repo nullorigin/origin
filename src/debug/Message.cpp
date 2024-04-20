@@ -1,12 +1,13 @@
 #include <Message.hpp>
 #include <sstream>
+#include "String.hpp"
 namespace origin
 {
 
     auto GetHeader() -> std::string
     {
         std::string header[5] = { "[--NONE--]", "[--INFO--]", "[-WARNING-]", "[--ERROR--]", "[--FATAL--]" };
-        MsgHeader = "##########################" + header[i32(MsgStatus)] +
+        MsgHeader = "##########################" + header[MsgStatus] +
                     "#########################";
         return MsgHeader;
     }

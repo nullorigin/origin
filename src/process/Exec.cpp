@@ -1,14 +1,13 @@
 #include "Exec.hpp"
-#include <iostream>
 namespace origin
 {
-    auto Run::Loop(Duration runtime) -> int
+    auto Run::Loop(f128 runtime) -> int
     {
-        if (runtime > Duration(0))
+        if (runtime > 0)
         {
             Timers[0].SetLimit(runtime);
         }
-        while ((GetState() < Exited) && (Timers[0].GetRemaining() > Duration(0)))
+        while ((GetState() < Exited) && (Timers[0].GetRemaining() > 0))
         {
             ProcessCycles();
         }

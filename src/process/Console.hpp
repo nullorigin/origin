@@ -2,8 +2,7 @@
 #define CON_HPP
 #include <cstdio>
 #include <fcntl.h>
-#include <sstream>
-#include <cstdio>
+#include <string>
 #include <termios.h>
 #include <unistd.h>
 namespace origin
@@ -68,7 +67,7 @@ namespace origin
 
         auto KeyHit() -> int;
 
-        auto PrintChar(const char c) -> char;
+        auto PrintChar(char c) -> char;
         auto PrintStr(std::string str) -> int;
         auto PrintStrColor(const std::string& str, int fg, int bg) -> int;
         auto ChangeColor(int fg, int bg) -> int;
@@ -84,5 +83,5 @@ namespace origin
             -> size_t;
         auto WriteText(int l, int t, int r, int b, void* source) -> size_t;
     };
-}
+} // namespace origin
 #endif

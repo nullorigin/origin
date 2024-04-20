@@ -3,6 +3,7 @@
 #include "Message.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <iostream>
 
@@ -75,7 +76,7 @@ namespace origin
         constexpr auto SetData(T* value) -> void { *this->data = *value; }
         constexpr auto SizeConvert(Mem::Unit _mu = Mem::Unit::BYTE) const -> u64
         {
-            return N * sizeof(T) << u64(_mu);
+            return N * sizeof(T) << static_cast<u8>(_mu);
         }
         constexpr auto Size() -> u64 { return N; }
         constexpr auto Find(T min, T max, u64& index) -> T
@@ -1246,10 +1247,10 @@ namespace origin
             __m128d c2 = _mm_setzero_pd();
             __m128d c3 = _mm_setzero_pd();
 
-            for (u32 i = 0; i < 4; i++)
+            for (u64 i = 0; i < 4; i++)
             {
                 c0 = _mm_add_pd(
-                    c0, _mm_mul_pd(_mm_load_pd(&this->data[i * 4]), _mm_set1_pd(rhs[i])));
+                    c0, _mm_mul_pd(_mm_load_pd(&this->data[i]), _mm_set1_pd(rhs[i])));
                 c1 = _mm_add_pd(c1, _mm_mul_pd(_mm_load_pd(&this->data[i * 4 + 2]), _mm_set1_pd(rhs[i + 4])));
                 c2 = _mm_add_pd(c2, _mm_mul_pd(_mm_load_pd(&this->data[i * 4 + 4]), _mm_set1_pd(rhs[i + 8])));
                 c3 = _mm_add_pd(c3, _mm_mul_pd(_mm_load_pd(&this->data[i * 4 + 6]), _mm_set1_pd(rhs[i + 12])));
@@ -1292,7 +1293,7 @@ namespace origin
             }
             return result;
         }
-        static auto Rotate(Quaternion q, Vec4 axis, Face face)
+        static auto Rotate(Quaternion q, const Vec4& axis, Face face)
             -> Quaternion
         {
             f64 a = acos(axis.w) / (axis.LengthSq() * 2.0);
@@ -1398,7 +1399,7 @@ namespace origin
             f64* lhsData = this->data;
             f64* rhsData = rhs.data;
             f64* resData = result.data;
-            for (u32 i = 0; i < 4; i++)
+            for (u64 i = 0; i < 4; i++)
             {
                 f64 r0 = rhsData[i];
                 f64 r1 = rhsData[i + 4];
@@ -1418,13 +1419,13 @@ namespace origin
 
         explicit operator f64*() const
         {
-            f64 ret[16] = { this->data[0], this->data[1], this->data[2], this->data[3], this->data[4], this->data[5], this->data[6], this->data[7], this->data[8], this->data[9], this->data[10], this->data[11], this->data[12], this->data[13], this->data[14], this->data[15] };
-            return (f64*)ret;
+            f64* ret = new f64[16]{ this->data[0], this->data[1], this->data[2], this->data[3], this->data[4], this->data[5], this->data[6], this->data[7], this->data[8], this->data[9], this->data[10], this->data[11], this->data[12], this->data[13], this->data[14], this->data[15] };
+            return ret;
         }
         explicit operator f64*()
         {
-            f64 ret[16] = { this->data[0], this->data[1], this->data[2], this->data[3], this->data[4], this->data[5], this->data[6], this->data[7], this->data[8], this->data[9], this->data[10], this->data[11], this->data[12], this->data[13], this->data[14], this->data[15] };
-            return (f64*)ret;
+            f64* ret = new f64[16]{ this->data[0], this->data[1], this->data[2], this->data[3], this->data[4], this->data[5], this->data[6], this->data[7], this->data[8], this->data[9], this->data[10], this->data[11], this->data[12], this->data[13], this->data[14], this->data[15] };
+            return ret;
         }
 
         auto operator=(const f64* _rhs) -> Quaternion
