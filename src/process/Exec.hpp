@@ -64,7 +64,7 @@ namespace origin
         };
 
         const std::string Cmd[16] = { "init", "1", "start", "2", "pause", "3", "resume", "4", "stop", "5", "restart", "6", "exit", "7", "kill", "8" };
-
+        const u8 CmdLen[16] = { 4, 1, 5, 1, 5, 1, 6, 1, 4, 1, 7, 1, 4, 1, 4, 1 };
         const u8 CmdMap[16] = { 1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15 };
         const std::string CmdArg[16] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
         const int AllTxt = -1, PromptTxt = 0, StateTxt = 1, CycleTxt = 2,

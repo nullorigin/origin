@@ -71,7 +71,7 @@ set(INCLUDE_DIR "${ROOT_DIR}/include")
 set(TOOLS_DIR "${ROOT_DIR}/tools")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(SOURCE "${SRC_DIR}/Origin.cpp" "${SRC_DIR}/math/Geometry.cpp" "${SRC_DIR}/math/Biquad.cpp" "${SRC_DIR}/math/Timer.cpp" "${SRC_DIR}/debug/Message.cpp" "${ROOT_DIR}/test/MemConvert.cpp")
-set(INCLUDE "${SRC_DIR}/Origin.hpp" "${SRC_DIR}/math/Basic.hpp" "${SRC_DIR}/math/Geometry.hpp" "${SRC_DIR}/math/Biquad.hpp" "${SRC_DIR}/math/Timer.hpp" "${SRC_DIR}/debug/Message.hpp")
+set(INCLUDE "${SRC_DIR}/Origin.hpp" "${SRC_DIR}/math/Basic.hpp" "${SRC_DIR}/math/Geometry.hpp" "${SRC_DIR}/math/Biquad.hpp" "${SRC_DIR}/math/Timer.hpp" "${SRC_DIR}/debug/Message.hpp" "${SRC_DIR}/text/String.hpp")
 
 if(WIN32)
     add_executable(Origin WIN32 ${SOURCE} ${INCLUDE})
