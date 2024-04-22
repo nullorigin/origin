@@ -1,6 +1,5 @@
 #include <Message.hpp>
 #include <sstream>
-#include "String.hpp"
 namespace origin
 {
 

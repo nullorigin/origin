@@ -2,10 +2,8 @@
 #include "Message.hpp"
 #include "String.hpp"
 #include "Timer.hpp"
-#include <iostream>
 #include <string>
 #include <unistd.h>
-#include <valarray>
 
 namespace origin
 {

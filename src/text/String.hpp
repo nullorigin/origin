@@ -1,18 +1,13 @@
 #pragma once
-#include <cctype>
-#include <cstring>
-#include <fstream>
-#include <ios>
-#include <istream>
-#include <regex>
-#include <sstream>
-#include <streambuf>
-#include <string>
-#include <string_view>
-#include <valarray>
 #ifndef STRING_HPP
 #define STRING_HPP
 #include "Basic.hpp"
+#include <cctype>
+#include <cstring>
+#include <ios>
+#include <sstream>
+#include <string>
+#include <valarray>
 namespace origin
 {
     class string;

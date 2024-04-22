@@ -1,6 +1,5 @@
 
 #include "Timer.hpp"
-#include "String.hpp"
 namespace origin
 {
     Timer::Timer() :

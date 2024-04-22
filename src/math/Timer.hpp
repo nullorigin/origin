@@ -1,7 +1,6 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 #include "Basic.hpp"
-#include "String.hpp"
 #include <chrono>
 #include <iostream>
 #include <sstream>

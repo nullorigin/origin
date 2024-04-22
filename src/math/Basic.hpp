@@ -140,197 +140,826 @@ namespace origin
 #endif
 #define null ((void*)0)
 #ifndef NO_BUILTIN
-#define ABS __builtin_abs;
-#define ACOS __builtin_acos
-#define ACOSF __builtin_acosf
-#define ACOSH __builtin_acosh
-#define ACOSHF __builtin_acoshf
-#define ACOSHL __builtin_acoshl
-#define ACOSL __builtin_acosl
-#define ASIN __builtin_asin
-#define ASINF __builtin_asinf
-#define ASINH __builtin_asinh
-#define ASINHF __builtin_asinhf
-#define ASINHL __builtin_asinhl
-#define ASINL __builtin_asinl
-#define ATAN __builtin_atan
-#define ATAN2 __builtin_atan2
-#define ATAN2F __builtin_atan2f
-#define ATAN2L __builtin_atan2l
-#define ATANF __builtin_atanf
-#define ATANH __builtin_atanh
-#define ATANHF __builtin_atanhf
-#define ATANHL __builtin_atanhl
-#define ATANL __builtin_atanl
-#define CBRT __builtin_cbrt
-#define CBRTF __builtin_cbrtf
-#define CBRTL __builtin_cbrtl
-#define CEIL __builtin_ceil
-#define CEILF __builtin_ceilf
-#define CEILL __builtin_ceill
-#define COPYSIGN __builtin_copysign
-#define COPYSIGNF __builtin_copysignf
-#define COPYSIGNL __builtin_copysignl
-#define COS __builtin_cos
-#define COSF __builtin_cosf
-#define COSH __builtin_cosh
-#define COSHF __builtin_coshf
-#define COSHL __builtin_coshl
-#define COSL __builtin_cosl
-#define DOUBLE_T __builtin_double_t
-#define ERF __builtin_erf
-#define ERFC __builtin_erfc
-#define ERFCF __builtin_erfcf
-#define ERFCL __builtin_erfcl
-#define ERFF __builtin_erff
-#define ERFL __builtin_erfl
-#define EXP __builtin_exp
-#define EXP2 __builtin_exp2
-#define EXP2F __builtin_exp2f
-#define EXP2L __builtin_exp2l
-#define EXPF __builtin_expf
-#define EXPL __builtin_expl
-#define EXPM1 __builtin_expm1
-#define EXPM1F __builtin_expm1f
-#define EXPM1L __builtin_expmll
-#define FABS __builtin_fabs
-#define FABSF __builtin_fabsf
-#define FABSL __builtin_fabsl
-#define FDIM __builtin_fdim
-#define FDIMF __builtin_fdimf
-#define FDIML __builtin_fdiml
-#define FLOAT_T __builtin_float_t
-#define FLOOR __builtin_floor
-#define FLOORF __builtin_floorf
-#define FLOORL __builtin_floorl
-#define FMA __builtin_fma
-#define FMAF __builtin_fmaf
-#define FMAL __builtin_fmal
-#define FMAX __builtin_fmax
-#define FMAXF __builtin_fmaxf
-#define FMAXL __builtin_fmaxl
-#define FMIN __builtin_fmin
-#define FMINF __builtin_fminf
-#define FMINL __builtin_fminl
-#define FMOD __builtin_fmod
-#define FMODF __builtin_fmodf
-#define FMODL __builtin_fmodl
-#define FPCLASSIFY __builtin_fpclassify
-#define FREXP __builtin_frexp
-#define FREXPF __builtin_frexp
-#define FREXPL __builtin_frexpl
-#define HYPOT __builtin_hypot
-#define HYPOTF __builtin_hypotf
-#define HYPOTL __builtin_hypotl
-#define ILOGB __builtin_ilogb
-#define ILOGBF __builtin_ilogbf
-#define ILOGBL __builtin_ilogbl
-#define ISFINITE __builtin_isfinite
-#define ISGREATER __builtin_isgreater
-#define ISGREATEREQUAL __builtin_isgreaterequal
-#define ISINF __builtin_isinf
-#define ISLESS __builtin_isless
-#define ISLESSEQUAL __builtin_islessequal
-#define ISLESSGREATER __builtin_lessgreater
-#define ISNAN __builtin_isnan
-#define ISNORMAL __builtin_normal
-#define ISUNORDERED __builtin_isunordered
-#define LDEXP __builtin_ldexp
-#define LDEXPF __builtin_ldexpf
-#define LDEXPL __builtin_ldexpl
-#define LGAMMA __builtin_lgamma
-#define LGAMMAF __builtin_lgammaf
-#define LGAMMAL __builtin_lgammal
-#define LLRINT __builtin_llrint
-#define LLRINTF __builtin_llrintf
-#define LLRINTL __builtin_llrintl
-#define LLROUND __builtin_llround
-#define LLROUND __builtin_llround
-#define LLROUNDL __builtin_llroundl
-#define LOG __builtin_log
-#define LOG10 __builtin_log10
-#define LOG10F __builtin_log10f
-#define LOG10L __builtin_log10l
-#define LOG1P __builtin_log1p
-#define LOG1PF __builtin_log1pf
-#define LOG1PL __builtin_log1pl
-#define LOG2 __builtin_log2
-#define LOG2F __builtin_log2f
-#define LOG2L __builtin_log2l
-#define LOGB __builtin_logb
-#define LOGBF __builtin_logbf
-#define LOGBL __builtin_logbl
-#define LOGF __builtin_logf
-#define LOGL __builtin_logl
-#define LRINT __builtin_lrint
-#define LRINTF __builtin_lrintf
-#define LRINTL __builtin_lrintl
-#define LROUND __builtin_lround
-#define LROUNDF __builtin_lroundf
-#define LROUNDL __builtin_lroundl
-#define MODF __builtin_modf
-#define MODFF __builtin_modff
-#define MODFL __builtin_modfl
-#define NAND __builtin_nan
-#define NANF __builtin_nanf
-#define NANL __builtin_nanl
-#define NEARBYINT __builtin_nearbyint
-#define NEARBYINTF __builtin_nearbyintf
-#define NEARBYINTL __builtin_nearbyintl
-#define NEXTAFTER __builtin_nextafter
-#define NEXTAFTERF __builtin_nextafterf
-#define NEXTAFTERL __builtin_nextafterl
-#define NEXTTOWARD __builtin_nexttoward
-#define NEXTTOWARDF __builtin_nexttowardf
-#define NEXTTOWARDL __builtin_nexttowardl
-#define POW __builtin_pow
-#define POWF __builtin_powf
-#define POWI __builtin_powi
-#define POWL __builtin_powl
-#define REMAINDER __builtin_remainder
-#define REMAINDERF __builtin_remainderf
-#define REMAINDERL __builtin_remainderl
-#define REMQUO __builtin_remquo
-#define REMQUOF __builtin_remquof
-#define REMQUOL __builtin_remquol
-#define RINT __builtin_rint
-#define RINTF __builtin_rintf
-#define RINTL __builtin_fintl
-#define ROUND __builtin_round
-#define ROUNDF __builtin_roundf
-#define ROUNDL __builtin_roundl
-#define SCALBIN __builtin_scalbin
-#define SCALBINF __builtin_scalbinf
-#define SCALBINL __builtin_scalbinl
-#define SCALBN __builtin_scalbn
-#define SCALBNF __builtin_scalbnf
-#define SCALBNL __builtin_scalbnl
-#define SIGNBIT __builtin_signbit
-#define SIN __builtin_sin
-#define SINF __builtin_sinf
-#define SINH __builtin_sinh
-#define SINHF __builtin_sinhf
-#define SINHL __builtin_sinhl
-#define SINL __builtin_sinl
-#define SQRT __builtin_sqrt
-#define SQRTF __builtin_sqrtf
-#define SQRTL __builtin_sqrtl
-#define TAN __builtin_tan
-#define TANF __builtin_tanf
-#define TANH __builtin_tanh
-#define TANHF __builtin_tanhf
-#define TANHL __builtin_tanhl
-#define TANL __builtin_tanl
-#define TGAMMA __builtin_tgamma
-#define TGAMMAF __builtin_tgammaf
-#define TGAMMAL __builtin_tgammal
-#define TRUNC __builtin_trunc
-#define TRUNCF __builtin_truncf
-#define TRUNCL __builtin_truncl
+    inline double abs(double x)
+    {
+        return __builtin_fabs(x);
+    }
+    inline float abs(float x)
+    {
+        return __builtin_fabsf(x);
+    }
+    inline long double abs(long double x)
+    {
+        return __builtin_fabsl(x);
+    }
+
+    inline double acos(double x)
+    {
+        return __builtin_acos(x);
+    }
+    inline float acos(float x)
+    {
+        return __builtin_acosf(x);
+    }
+    inline long double acos(long double x)
+    {
+        return __builtin_acosl(x);
+    }
+
+    inline double acosh(double x)
+    {
+        return __builtin_acosh(x);
+    }
+    inline float acosh(float x)
+    {
+        return __builtin_acoshf(x);
+    }
+    inline long double acosh(long double x)
+    {
+        return __builtin_acoshl(x);
+    }
+
+    inline double asin(double x)
+    {
+        return __builtin_asin(x);
+    }
+    inline float asin(float x)
+    {
+        return __builtin_asinf(x);
+    }
+    inline long double asin(long double x)
+    {
+        return __builtin_asinl(x);
+    }
+
+    inline double asinh(double x)
+    {
+        return __builtin_asinh(x);
+    }
+    inline float asinh(float x)
+    {
+        return __builtin_asinhf(x);
+    }
+    inline long double asinh(long double x)
+    {
+        return __builtin_asinhl(x);
+    }
+
+    inline double atan(double x)
+    {
+        return __builtin_atan(x);
+    }
+    inline float atan(float x)
+    {
+        return __builtin_atanf(x);
+    }
+    inline long double atan(long double x)
+    {
+        return __builtin_atanl(x);
+    }
+
+    inline double atan2(double x, double y)
+    {
+        return __builtin_atan2(x, y);
+    }
+    inline float atan2(float x, float y)
+    {
+        return __builtin_atan2f(x, y);
+    }
+    inline long double atan2(long double x, long double y)
+    {
+        return __builtin_atan2l(x, y);
+    }
+
+    inline double cbrt(double x)
+    {
+        return __builtin_cbrt(x);
+    }
+    inline float cbrt(float x)
+    {
+        return __builtin_cbrtf(x);
+    }
+    inline long double cbrt(long double x)
+    {
+        return __builtin_cbrtl(x);
+    }
+
+    inline double ceil(double x)
+    {
+        return __builtin_ceil(x);
+    }
+    inline float ceil(float x)
+    {
+        return __builtin_ceilf(x);
+    }
+    inline long double ceil(long double x)
+    {
+        return __builtin_ceill(x);
+    }
+
+    inline double copysign(double x, double y)
+    {
+        return __builtin_copysign(x, y);
+    }
+    inline float copysign(float x, float y)
+    {
+        return __builtin_copysignf(x, y);
+    }
+    inline long double copysign(long double x, long double y)
+    {
+        return __builtin_copysignl(x, y);
+    }
+
+    inline double cos(double x)
+    {
+        return __builtin_cos(x);
+    }
+    inline float cos(float x)
+    {
+        return __builtin_cosf(x);
+    }
+    inline long double cos(long double x)
+    {
+        return __builtin_cosl(x);
+    }
+
+    inline double cosh(double x)
+    {
+        return __builtin_cosh(x);
+    }
+    inline float cosh(float x)
+    {
+        return __builtin_coshf(x);
+    }
+    inline long double cosh(long double x)
+    {
+        return __builtin_coshl(x);
+    }
+
+    inline double erf(double x)
+    {
+        return __builtin_erf(x);
+    }
+    inline float erf(float x)
+    {
+        return __builtin_erff(x);
+    }
+    inline long double erf(long double x)
+    {
+        return __builtin_erfl(x);
+    }
+
+    inline double erfc(double x)
+    {
+        return __builtin_erfc(x);
+    }
+    inline float erfc(float x)
+    {
+        return __builtin_erfcf(x);
+    }
+    inline long double erfc(long double x)
+    {
+        return __builtin_erfcl(x);
+    }
+
+    inline double exp(double x)
+    {
+        return __builtin_exp(x);
+    }
+    inline float exp(float x)
+    {
+        return __builtin_expf(x);
+    }
+    inline long double exp(long double x)
+    {
+        return __builtin_expl(x);
+    }
+
+    inline double exp2(double x)
+    {
+        return __builtin_exp2(x);
+    }
+    inline float exp2(float x)
+    {
+        return __builtin_exp2f(x);
+    }
+    inline long double exp2(long double x)
+    {
+        return __builtin_exp2l(x);
+    }
+
+    inline double fdim(double x, double y)
+    {
+        return __builtin_fdim(x, y);
+    }
+    inline float fdim(float x, float y)
+    {
+        return __builtin_fdimf(x, y);
+    }
+    inline long double fdim(long double x, long double y)
+    {
+        return __builtin_fdiml(x, y);
+    }
+
+    inline double floor(double x)
+    {
+        return __builtin_floor(x);
+    }
+    inline float floor(float x)
+    {
+        return __builtin_floorf(x);
+    }
+    inline long double floor(long double x)
+    {
+        return __builtin_floorl(x);
+    }
+
+    inline double fma(double x, double y, double z)
+    {
+        return __builtin_fma(x, y, z);
+    }
+    inline float fma(float x, float y, float z)
+    {
+        return __builtin_fmaf(x, y, z);
+    }
+    inline long double fma(long double x, long double y, long double z)
+    {
+        return __builtin_fmal(x, y, z);
+    }
+
+    inline double fmax(double x, double y)
+    {
+        return __builtin_fmax(x, y);
+    }
+    inline float fmax(float x, float y)
+    {
+        return __builtin_fmaxf(x, y);
+    }
+    inline long double fmax(long double x, long double y)
+    {
+        return __builtin_fmaxl(x, y);
+    }
+
+    inline double fmin(double x, double y)
+    {
+        return __builtin_fmin(x, y);
+    }
+    inline float fmin(float x, float y)
+    {
+        return __builtin_fminf(x, y);
+    }
+    inline long double fmin(long double x, long double y)
+    {
+        return __builtin_fminl(x, y);
+    }
+
+    inline double fmod(double x, double y)
+    {
+        return __builtin_fmod(x, y);
+    }
+    inline float fmod(float x, float y)
+    {
+        return __builtin_fmodf(x, y);
+    }
+    inline long double fmod(long double x, long double y)
+    {
+        return __builtin_fmodl(x, y);
+    }
+
+    inline int fpclassify(int a, int b, int c, int d, int e, float f)
+    {
+        return __builtin_fpclassify(a, b, c, d, e, f);
+    }
+
+    inline double hypot(double x, double y)
+    {
+        return __builtin_hypot(x, y);
+    }
+    inline float hypot(float x, float y)
+    {
+        return __builtin_hypotf(x, y);
+    }
+    inline long double hypot(long double x, long double y)
+    {
+        return __builtin_hypotl(x, y);
+    }
+
+    inline int ilogb(double x)
+    {
+        return __builtin_ilogb(x);
+    }
+    inline int ilogb(float x)
+    {
+        return __builtin_ilogbf(x);
+    }
+    inline int ilogb(long double x)
+    {
+        return __builtin_ilogbl(x);
+    }
+
+    inline bool isfinite(double x)
+    {
+        return __builtin_isfinite(x) != 0;
+    }
+    inline bool isfinite(float x)
+    {
+        return __builtin_isfinite(x) != 0;
+    }
+    inline bool isfinite(long double x)
+    {
+        return __builtin_isfinite(x) != 0;
+    }
+
+    inline bool isgreater(double x, double y)
+    {
+        return __builtin_isgreater(x, y) != 0;
+    }
+    inline bool isgreater(float x, float y)
+    {
+        return __builtin_isgreater(x, y) != 0;
+    }
+    inline bool isgreater(long double x, long double y)
+    {
+        return __builtin_isgreater(x, y) != 0;
+    }
+
+    inline bool isgreaterequal(double x, double y)
+    {
+        return __builtin_isgreaterequal(x, y) != 0;
+    }
+    inline bool isgreaterequal(float x, float y)
+    {
+        return __builtin_isgreaterequal(x, y) != 0;
+    }
+    inline bool isgreaterequal(long double x, long double y)
+    {
+        return __builtin_isgreaterequal(x, y) != 0;
+    }
+    inline long double lgammal(long double x)
+    {
+        return __builtin_lgammal(x);
+    }
+    inline long long llrint(double x)
+    {
+        return __builtin_llrint(x);
+    }
+    inline long long llrintf(float x)
+    {
+        return __builtin_llrintf(x);
+    }
+    inline long long llrintl(long double x)
+    {
+        return __builtin_llrintl(x);
+    }
+    inline long long llround(double x)
+    {
+        return __builtin_llround(x);
+    }
+    inline long long llroundf(float x)
+    {
+        return __builtin_llroundf(x);
+    }
+    inline long long llroundl(long double x)
+    {
+        return __builtin_llroundl(x);
+    }
+    inline double log(double x)
+    {
+        return __builtin_log(x);
+    }
+    inline float logf(float x)
+    {
+        return __builtin_logf(x);
+    }
+    inline long double logl(long double x)
+    {
+        return __builtin_logl(x);
+    }
+    inline double log10(double x)
+    {
+        return __builtin_log10(x);
+    }
+    inline float log10f(float x)
+    {
+        return __builtin_log10f(x);
+    }
+    inline long double log10l(long double x)
+    {
+        return __builtin_log10l(x);
+    }
+    inline double log1p(double x)
+    {
+        return __builtin_log1p(x);
+    }
+    inline float log1pf(float x)
+    {
+        return __builtin_log1pf(x);
+    }
+    inline long double log1pl(long double x)
+    {
+        return __builtin_log1pl(x);
+    }
+    inline double log2(double x)
+    {
+        return __builtin_log2(x);
+    }
+    inline float log2f(float x)
+    {
+        return __builtin_log2f(x);
+    }
+    inline long double log2l(long double x)
+    {
+        return __builtin_log2l(x);
+    }
+    inline double logb(double x)
+    {
+        return __builtin_logb(x);
+    }
+    inline float logbf(float x)
+    {
+        return __builtin_logbf(x);
+    }
+    inline long double logbl(long double x)
+    {
+        return __builtin_logbl(x);
+    }
+    inline long lrint(double x)
+    {
+        return __builtin_lrint(x);
+    }
+    inline long int lrintf(float x)
+    {
+        return __builtin_lrintf(x);
+    }
+    inline long double lrintl(long double x)
+    {
+        return __builtin_lrintl(x);
+    }
+    inline long lround(double x)
+    {
+        return __builtin_lround(x);
+    }
+    inline long lroundf(float x)
+    {
+        return __builtin_lroundf(x);
+    }
+    inline long lroundl(long double x)
+    {
+        return __builtin_lroundl(x);
+    }
+    inline double modf(double x, double* y)
+    {
+        return __builtin_modf(x, y);
+    }
+    inline float modff(float x, float* y)
+    {
+        return __builtin_modff(x, y);
+    }
+    inline long double modfl(long double x, long double* y)
+    {
+        return __builtin_modfl(x, y);
+    }
+    inline double nan(const char* s)
+    {
+        return __builtin_nan(s);
+    }
+    inline float nanf(const char* s)
+    {
+        return __builtin_nanf(s);
+    }
+    inline long double nanl(const char* s)
+    {
+        return __builtin_nanl(s);
+    }
+    inline double nearbyint(double x)
+    {
+        return __builtin_nearbyint(x);
+    }
+    inline float nearbyintf(float x)
+    {
+        return __builtin_nearbyintf(x);
+    }
+    inline long double nearbyintl(long double x)
+    {
+        return __builtin_nearbyintl(x);
+    }
+    inline double nextafter(double x, double y)
+    {
+        return __builtin_nextafter(x, y);
+    }
+    inline float nextafterf(float x, float y)
+    {
+        return __builtin_nextafterf(x, y);
+    }
+    inline long double nextafterl(long double x, long double y)
+    {
+        return __builtin_nextafterl(x, y);
+    }
+    inline double nexttoward(double x, long double y)
+    {
+        return __builtin_nexttoward(x, y);
+    }
+    inline float nexttowardf(float x, long double y)
+    {
+        return __builtin_nexttowardf(x, y);
+    }
+    inline long double nexttowardl(long double x, long double y)
+    {
+        return __builtin_nexttowardl(x, y);
+    }
+    inline double pow(double x, double y)
+    {
+        return __builtin_pow(x, y);
+    }
+    inline float powf(float x, float y)
+    {
+        return __builtin_powf(x, y);
+    }
+    inline double powi(double x, int y)
+    {
+        return __builtin_powi(x, y);
+    }
+    inline long double powl(long double x, long double y)
+    {
+        return __builtin_powl(x, y);
+    }
+    inline double remainder(double x, double y)
+    {
+        return __builtin_remainder(x, y);
+    }
+    inline float remainderf(float x, float y)
+    {
+        return __builtin_remainderf(x, y);
+    }
+    inline long double remainderl(long double x, long double y)
+    {
+        return __builtin_remainderl(x, y);
+    }
+    inline double remquo(double x, double y, int* q)
+    {
+        return __builtin_remquo(x, y, q);
+    }
+    inline float remquof(float x, float y, int* q)
+    {
+        return __builtin_remquof(x, y, q);
+    }
+    inline long double remquol(long double x, long double y, int* q)
+    {
+        return __builtin_remquol(x, y, q);
+    }
+    inline double rint(double x)
+    {
+        return __builtin_rint(x);
+    }
+    inline float rintf(float x)
+    {
+        return __builtin_rintf(x);
+    }
+    inline long double rintl(long double x)
+    {
+        return __builtin_rintl(x);
+    }
+    inline double round(double x)
+    {
+        return __builtin_round(x);
+    }
+    inline float roundf(float x)
+    {
+        return __builtin_roundf(x);
+    }
+    inline long double roundl(long double x)
+    {
+        return __builtin_roundl(x);
+    }
+    inline double scalbln(double x, int y)
+    {
+        return __builtin_scalbln(x, y);
+    }
+    inline float scalblnf(float x, int y)
+    {
+        return __builtin_scalblnf(x, y);
+    }
+    inline long double scalblnl(long double x, int y)
+    {
+        return __builtin_scalblnl(x, y);
+    }
+    inline double scalbn(double x, int y)
+    {
+        return __builtin_scalbn(x, y);
+    }
+    inline float scalbnf(float x, int y)
+    {
+        return __builtin_scalbnf(x, y);
+    }
+    inline long double scalbnf(long double x, int y)
+    {
+        return __builtin_scalbnf(x, y);
+    }
+    inline bool signbit(double x)
+    {
+        return __builtin_signbit(x) != 0;
+    }
+    inline bool signbitf(float x)
+    {
+        return __builtin_signbitf(x) != 0;
+    }
+    inline bool signbitl(long double x)
+    {
+        return __builtin_signbitl(x) != 0;
+    }
+    inline double sin(double x)
+    {
+        return __builtin_sin(x);
+    }
+    inline float sinf(float x)
+    {
+        return __builtin_sinf(x);
+    }
+    inline double sinh(double x)
+    {
+        return __builtin_sinh(x);
+    }
+    inline float sinhf(float x)
+    {
+        return __builtin_sinhf(x);
+    }
+    inline long double sinhl(long double x)
+    {
+        return __builtin_sinhl(x);
+    }
+    inline long double sinl(long double x)
+    {
+        return __builtin_sinl(x);
+    }
+    inline double sqrt(double x)
+    {
+        return __builtin_sqrt(x);
+    }
+    inline float sqrtf(float x)
+    {
+        return __builtin_sqrtf(x);
+    }
+    inline long double sqrtl(long double x)
+    {
+        return __builtin_sqrtl(x);
+    }
+    inline double tan(double x)
+    {
+        return __builtin_tan(x);
+    }
+    inline float tanf(float x)
+    {
+        return __builtin_tanf(x);
+    }
+    inline double tanh(double x)
+    {
+        return __builtin_tanh(x);
+    }
+    inline float tanhf(float x)
+    {
+        return __builtin_tanhf(x);
+    }
+    inline long double tanhl(long double x)
+    {
+        return __builtin_tanhl(x);
+    }
+    inline long double tanl(long double x)
+    {
+        return __builtin_tanl(x);
+    }
+    inline double tgamma(double x)
+    {
+        return __builtin_tgamma(x);
+    }
+    inline float tgammaf(float x)
+    {
+        return __builtin_tgammaf(x);
+    }
+    inline long double tgammal(long double x)
+    {
+        return __builtin_tgammal(x);
+    }
+    inline double trunc(double x)
+    {
+        return __builtin_trunc(x);
+    }
+    inline float truncf(float x)
+    {
+        return __builtin_truncf(x);
+    }
+    inline long double truncl(long double x)
+    {
+        return __builtin_truncl(x);
+    }
+    template<typename T>
+    inline auto abs(T a)
+    {
+        return __builtin_elementwise_abs(a);
+    }
+    template<typename T>
+    inline auto ceil(T a)
+    {
+        return __builtin_elementwise_ceil(a);
+    }
+    template<typename T>
+    inline auto floor(T a)
+    {
+        return __builtin_elementwise_floor(a);
+    }
+    template<typename T>
+    inline auto Round(T a)
+    {
+        return __builtin_elementwise_round(a);
+    }
+    template<typename T>
+    inline auto trunc(T a)
+    {
+        return __builtin_elementwise_trunc(a);
+    }
+    template<typename T>
+    inline auto rint(T a)
+    {
+        return __builtin_elementwise_rint(a);
+    }
+    template<typename T>
+    inline auto nearbyint(T a)
+    {
+        return __builtin_elementwise_nearbyint(a);
+    }
+    template<typename T, typename U>
+    inline auto copysign(T a, U b)
+    {
+        return __builtin_elementwise_copysign(a, b);
+    }
+    template<typename T>
+    inline auto sin(T a)
+    {
+        return __builtin_elementwise_sin(a);
+    }
+    template<typename T>
+    inline auto cos(T a)
+    {
+        return __builtin_elementwise_cos(a);
+    }
+    template<typename T>
+    inline auto add_sat(T a, T b)
+    {
+        return __builtin_elementwise_add_sat(a, b);
+    }
+    template<typename T>
+    inline auto sub_sat(T a, T b)
+    {
+        return __builtin_elementwise_sub_sat(a, b);
+    }
+    template<typename T, typename U>
+    inline auto max(T a, U b)
+    {
+        return __builtin_elementwise_max(a, b);
+    }
+    template<typename T, typename U>
+    inline auto min(T a, U b)
+    {
+        return __builtin_elementwise_min(a, b);
+    }
+    template<typename T>
+    inline auto sqrt(T a)
+    {
+        return __builtin_elementwise_sqrt(a);
+    }
+    template<typename T>
+    inline auto log(T a)
+    {
+        return __builtin_elementwise_log(a);
+    }
+    template<typename T>
+    inline auto log2(T a)
+    {
+        return __builtin_elementwise_log2(a);
+    }
+    template<typename T>
+    inline auto log10(T a)
+    {
+        return __builtin_elementwise_log10(a);
+    }
+    template<typename T>
+    inline auto exp(T a)
+    {
+        return __builtin_elementwise_exp(a);
+    }
+    template<typename T>
+    inline auto exp2(T a)
+    {
+        return __builtin_elementwise_exp2(a);
+    }
+    template<typename T, typename U>
+    inline auto pow(T a, U b)
+    {
+        return __builtin_elementwise_pow(a, b);
+    }
 #endif // NO_BUILTIN
     using ID = u64;
     template<typename T>
-    inline constexpr auto IsNum(const T _a) -> bool
+    inline auto isnum(const T _a) -> bool
     {
         return !(bool(isnan(_a))) && !(bool(isinf(_a)));
     }
@@ -418,7 +1047,7 @@ namespace origin
     template<typename T>
     inline constexpr auto Abs(const T _a) -> T
     {
-        return __builtin_elementwise_abs(_a);
+        return ABS(_a);
     }
     template<typename T>
     inline constexpr auto Sign(const T _a) -> T
@@ -456,11 +1085,6 @@ namespace origin
         return T(1.0 / Sqrt(_a));
     }
     template<typename T>
-    inline constexpr auto Pow(const T _a, const T _b) -> T
-    {
-        return __builtin_elementwise_pow(_a, _b);
-    }
-    template<typename T>
     inline constexpr auto Round(const T _a) -> T
     {
         return __builtin_elementwise_round(_a);
@@ -478,7 +1102,7 @@ namespace origin
     template<typename T>
     inline constexpr auto Length(T _a, T _b) -> T
     {
-        return T(SQRT((_a * _a) + (_b * _b)));
+        return T(Sqrt((_a * _a) + (_b * _b)));
     }
     template<typename T, u64 N>
     inline constexpr auto Normalize(const T _a[N]) -> T*
@@ -534,27 +1158,27 @@ namespace origin
     template<typename T>
     inline constexpr auto Tan(T _a) noexcept -> T
     {
-        return T(TAN(f64(_a)));
+        return T(tan(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Asin(T _a) noexcept -> T
     {
-        return T(ASIN(f64(_a)));
+        return T(asin(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Acos(T _a) noexcept -> T
     {
-        return T(ACOS(f64(_a)));
+        return T(acos(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Atan(T _a) noexcept -> T
     {
-        return T(ATAN(f64(_a)));
+        return T(atan(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Atan2(T _a, T _b) noexcept -> T
     {
-        return T(ATAN2(f64(_a), f64(_b)));
+        return T(Atan2(f64(_a), f64(_b)));
     }
     template<typename T>
     inline auto Log(T _a) noexcept -> T
