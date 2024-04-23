@@ -1,7 +1,7 @@
 #include "Console.hpp"
+#include <cstdio>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <sstream>
 #include <cstddef>
 namespace origin
 {
@@ -241,12 +241,12 @@ namespace origin
      *
      * @throws None
      */
-    auto Console::PrintStr(std::string str) -> int
+    auto Console::PrintStr(string str) -> int
     {
         printf("%s", str.c_str());
         return 0;
     }
-    auto Console::PrintStrColor(const std::string& str, int fg, int bg) -> int
+    auto Console::PrintStrColor(const string& str, int fg, int bg) -> int
     {
         SetFgColor(fg);
         SetBgColor(bg);
@@ -288,27 +288,26 @@ namespace origin
         printf("%s", str);
         return 0;
     }
-    auto Console::GetHome() -> std::string
+    auto Console::GetHome() -> string
     {
         return GetEnv("HOME");
     }
-    auto Console::GetCwd() -> std::string
+    auto Console::GetCwd() -> string
     {
         char cwd[1024];
         return getcwd(cwd, sizeof(cwd));
     }
-    auto Console::GetUser() -> std::string
+    auto Console::GetUser() -> string
     {
-        auto ss = std::stringstream{};
-        ss << cuserid(nullptr);
-        return ss.str();
+        string ss = cuserid(nullptr);
+        return ss;
     }
     /**
      * Get the hostname of the system.
      *
      * @return The hostname as a string
      */
-    auto Console::GetHostname() -> std::string
+    auto Console::GetHostname() -> string
     {
         char hostname[1024];
         gethostname(hostname, sizeof(hostname));
@@ -320,7 +319,7 @@ namespace origin
         printf("%c", *prompt);
         return fgets(pass, 100, stdin);
     }
-    auto Console::GetEnv(const std::string& name) -> std::string
+    auto Console::GetEnv(const string& name) -> string
     {
         return getenv(name.c_str());
     }

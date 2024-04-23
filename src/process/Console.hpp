@@ -8,6 +8,7 @@
 namespace origin
 {
 #define FIONREAD 0x541B
+    using std::string;
     struct Console
     {
         int Height;
@@ -68,17 +69,17 @@ namespace origin
         auto KeyHit() -> int;
 
         auto PrintChar(char c) -> char;
-        auto PrintStr(std::string str) -> int;
-        auto PrintStrColor(const std::string& str, int fg, int bg) -> int;
+        auto PrintStr(string str) -> int;
+        auto PrintStrColor(const string& str, int fg, int bg) -> int;
         auto ChangeColor(int fg, int bg) -> int;
         auto ChangeColor(int color) -> int;
         auto PrintCStr(const char* str) -> int;
-        auto GetHome() -> std::string;
-        auto GetCwd() -> std::string;
-        auto GetUser() -> std::string;
-        static auto GetHostname() -> std::string;
+        auto GetHome() -> string;
+        auto GetCwd() -> string;
+        auto GetUser() -> string;
+        static auto GetHostname() -> string;
         auto GetPass(const char* prompt) -> char*;
-        auto GetEnv(const std::string& name) -> std::string;
+        auto GetEnv(const string& name) -> string;
         auto ReadText(int l, int t, int r, int b, void* destination)
             -> size_t;
         auto WriteText(int l, int t, int r, int b, void* source) -> size_t;

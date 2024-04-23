@@ -1,12 +1,13 @@
 #include "Basic.hpp"
 #include "Message.hpp"
-#include "String.hpp"
 #include "Timer.hpp"
 #include <string>
 #include <unistd.h>
+#include "String.hpp"
 
 namespace origin
 {
+    using std::string;
     auto main() -> int
     {
         SetStatus(INFO);
@@ -23,10 +24,18 @@ namespace origin
         mem.total = 1024;
         const f64 memsize = mem.size;
         mem.size = mem.Convert(Mem::Unit::MBYTE);
-        DBG(std::to_string(memsize) + "GB = " + std::to_string(mem.size) + "MB", INFO);
-        DBG("Elapsed: " + std::to_string(timer.GetElapsed()), INFO);
+        DBG("Memory: " + (std::to_string(memsize)) + "GB = " + std::to_string(mem.size) + "MB", INFO);
         str = "Goodbye, World!";
         DBG(str, INFO);
+        str = Trim("Good", "Bye", str);
+        DBG(str, INFO);
+        str = "Hello, World!";
+        str = Replace("World", "Universe", str);
+        DBG(str, INFO);
+        str = "Hello, World! I'm Matthew Fay";
+        str = Replace("World", "Universe", str);
+        DBG(str, INFO);
+        DBG("Elapsed: " + ToString(timer.GetElapsed()), INFO);
         return 0;
     }
 } // namespace origin

@@ -12,8 +12,8 @@ namespace origin
     class Run
     {
         u8 MinArgs = 0;
-        std::string Output{};
-        std::string Input{};
+        string Output{};
+        string Input{};
         Timer Timers[2] = { Timer(), Timer() };
         int RunState{};
         long Cycles{};
@@ -24,7 +24,7 @@ namespace origin
                         Resuming = 7, Resumed = 8, Stopping = 9, Stopped = 10,
                         Restarting = 11, Restarted = 12, Exiting = 13, Exited = 14,
                         Killing = 15, Killed = 16;
-        const std::string RunStates[17] = {
+        const string RunStates[17] = {
             "Uninitialized",
             "Initializing",
             "Initialized",
@@ -63,14 +63,14 @@ namespace origin
             { Killed, Uninitialized, -1, -1, -1, -1, -1, -1 }
         };
 
-        const std::string Cmd[16] = { "init", "1", "start", "2", "pause", "3", "resume", "4", "stop", "5", "restart", "6", "exit", "7", "kill", "8" };
+        const string Cmd[16] = { "init", "1", "start", "2", "pause", "3", "resume", "4", "stop", "5", "restart", "6", "exit", "7", "kill", "8" };
         const u8 CmdLen[16] = { 4, 1, 5, 1, 5, 1, 6, 1, 4, 1, 7, 1, 4, 1, 4, 1 };
         const u8 CmdMap[16] = { 1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15 };
-        const std::string CmdArg[16] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+        const string CmdArg[16] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
         const int AllTxt = -1, PromptTxt = 0, StateTxt = 1, CycleTxt = 2,
                   TimerTxt = 3, ExecTxt = 4;
         explicit Run(const i8* cmd) { Parse(cmd); }
-        explicit Run(const std::string& cmd) { Parse(cmd.c_str()); }
+        explicit Run(const string& cmd) { Parse(cmd.c_str()); }
         Run(const i8* cmd, i8 const* argv[]) { Exec(cmd, argv); }
         /* A dependency map of applicable run states to enter into after a state
 switch. Uses the constants above as specifiers for the equivalent index. */
@@ -130,12 +130,12 @@ switch. Uses the constants above as specifiers for the equivalent index. */
             return &RunMap[state];
         }
         // Returns the string representation of a given run state.
-        inline auto GetStateString(i32 state) -> std::string
+        inline auto GetStateString(i32 state) -> string
         {
             return RunStates[state];
         }
-        auto GetArg(const std::string& command) -> std::string;
-        auto GetCmd(const std::string& command) -> int;
+        auto GetArg(const string& command) -> string;
+        auto GetCmd(const string& command) -> int;
         // Returns the string representation of a given command from its index.
         inline auto GetCmd(i8 index) -> int { return CmdMap[index]; }
         // Determines if the application is in a state in which it is actually
@@ -144,8 +144,8 @@ switch. Uses the constants above as specifiers for the equivalent index. */
         // Returns true if the application is in the specified state.
         inline auto Is(i8 state) const -> bool { return (RunState == state); }
         inline auto GetState() const -> i8 { return RunState; }
-        inline auto GetOutput() -> std::string { return Output; }
-        inline auto GetInput() -> std::string { return Input; }
+        inline auto GetOutput() -> string { return Output; }
+        inline auto GetInput() -> string { return Input; }
         inline auto GetCycles() const -> long { return Cycles; }
         inline auto SetCycles(long cycles) -> void { Cycles = cycles; }
         auto IncrementCycles() -> void;
@@ -160,12 +160,12 @@ switch. Uses the constants above as specifiers for the equivalent index. */
         auto SetMinArgs(u8 min_args) -> void;
         auto GetMinArgs() -> u8;
 
-        auto Call(const std::string& cmd) -> std::string;
+        auto Call(const string& cmd) -> string;
 
-        auto Call(const char* cmd) -> std::string;
+        auto Call(const char* cmd) -> string;
         auto Exec(const char* command, char const* const argv[]) -> void;
-        static auto Parse(const char* cmd) -> std::string { return { cmd }; }
-        auto Parse(const std::string& cmd) -> std::string;
+        static auto Parse(const char* cmd) -> string { return { cmd }; }
+        auto Parse(const string& cmd) -> string;
     };
 } // namespace origin
 #endif

@@ -7,8 +7,10 @@
 #include <utility>
 #include <immintrin.h>
 #include <xmmintrin.h>
+#include <string>
 namespace origin
 {
+    using std::string;
     using i8 = char;
     using i16 = short;
     using i32 = int;

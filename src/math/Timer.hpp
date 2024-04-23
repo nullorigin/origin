@@ -4,10 +4,10 @@
 #include <chrono>
 #include <iostream>
 #include <sstream>
-#include <string>
 
 namespace origin
 {
+    
     static ID TimerID = 0;
     enum class TimeUnit : u8
     {
@@ -72,7 +72,7 @@ namespace origin
         {
             return Duration(this->nano, tu);
         }
-        auto GetString(TimeUnit tu = TimeUnit::Nano) const -> std::string
+        auto GetString(TimeUnit tu = TimeUnit::Nano) const -> string
         {
             std::stringstream ss = std::stringstream();
             ss.precision(20);
@@ -81,7 +81,7 @@ namespace origin
             return ss.str();
         }
         explicit operator i128() const { return this->nano; }
-        explicit operator std::string() { return GetString(); }
+        explicit operator string() const { return GetString(); }
 
         auto operator+(const Duration& _rhs) const -> Duration
         {
@@ -181,11 +181,11 @@ namespace origin
         f128 restarted;
         f128 limit;
         f128 offset;
-        std::string name;
+        string name;
         ID id = {};
         TimerState state = TimerState::None;
         Timer();
-        explicit Timer(std::string _name);
+        explicit Timer(string _name);
         ~Timer();
         static auto Nano() -> f128
         {
@@ -199,7 +199,7 @@ namespace origin
         static auto Hour() -> f128 { return (Nano() / 3600000000000.0); };
         static auto Day() -> f128 { return (Nano() / 86400000000000.0); }
         static auto Week() -> f128 { return (Nano() / 604800000000000.0); }
-        auto SetName(const std::string& name) -> void { this->name = name; }
+        auto SetName(const string& name) -> void { this->name = name; }
         auto SetLimit(const f128 _limit) -> void
         {
             this->limit = _limit;
@@ -210,7 +210,7 @@ namespace origin
         }
 
         auto GetID() const -> ID { return TimerID; }
-        auto GetName() const -> std::string { return this->name; }
+        auto GetName() const -> string { return this->name; }
         auto GetStart() const -> f128 { return this->started; }
         auto GetResumed() const -> f128 { return this->resumed; }
         auto GetPaused() const -> f128 { return this->paused; }
@@ -387,7 +387,7 @@ namespace origin
             return TimePoint[id];
         }
         static auto Reset(ID id) -> void { TimePoint[id] = Nano(); }
-        static auto ToString(ID id) -> std::string
+        static auto ToString(ID id) -> string
         {
             return std::to_string(TimePoint[id]) + "ns";
         }

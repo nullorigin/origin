@@ -1433,9 +1433,9 @@ namespace origin
             std::memcpy(this->data, _rhs, 16 * sizeof(f64));
             return *this;
         }
-        explicit operator std::string() const
+        explicit operator string() const
         {
-            std::string ret = "[";
+            string ret = "[";
             for (u32 i = 0; i < 16; i++)
             {
                 ret += std::to_string(this->data[i]);

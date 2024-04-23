@@ -67,8 +67,6 @@ namespace origin
         if (SetState(Restarting))
         {
             Timers[0].Restart();
-            Output.clear();
-            Input.clear();
             ResetCycles();
             return SetState(Restarted);
         }
@@ -94,7 +92,7 @@ namespace origin
         }
         return false;
     }
-    auto Run::GetArg(const std::string& command) -> std::string
+    auto Run::GetArg(const string& command) -> string
     {
         for (i8 i = 0; i < 16; i++)
         {
@@ -105,7 +103,7 @@ namespace origin
         }
         return "";
     }
-    auto Run::GetCmd(const std::string& command) -> int
+    auto Run::GetCmd(const string& command) -> int
     {
         for (i8 i = 0; i < 16; i++)
         {
@@ -269,9 +267,9 @@ namespace origin
         }
         return MinArgs;
     }
-    auto Run::Call(const std::string& cmd) -> std::string
+    auto Run::Call(const string& cmd) -> string
     {
-        std::string output;
+        string output;
         std::unique_ptr<FILE, decltype(&pclose)> in{ popen(cmd.c_str(), "r"), pclose };
         if (!in)
         {
@@ -291,10 +289,10 @@ namespace origin
         DBG("Command executed successfully.", INFO);
         return output;
     }
-    auto Run::Call(const char* cmd) -> std::string
+    auto Run::Call(const char* cmd) -> string
     {
         i8 buffer[128];
-        std::string result;
+        string result;
         FILE* pipe = popen(cmd, "r");
         if (pipe == nullptr)
         {
@@ -325,8 +323,8 @@ namespace origin
             DBG("Null pointer passed to Exec().", ERROR);
             return;
         }
-        std::string output = Call(std::string(command) + " " + std::string(argv[0]));
-        if (output.length() <= std::string::npos && output.length() > 0)
+        string output = Call(string(command) + " " + string(argv[0]));
+        if (output.length() <= string::npos && output.length() > 0)
         {
             DBG("Invalid command string passed.", ERROR);
             return;
@@ -334,9 +332,9 @@ namespace origin
         Output = output.substr(0, output.length() - 1);
         DBG("Command Successfully Executed.", INFO);
     }
-    auto Run::Parse(const std::string& cmd) -> std::string
+    auto Run::Parse(const string& cmd) -> string
     {
-        if (cmd.length() <= std::string::npos && cmd.length() > 0)
+        if (cmd.length() <= string::npos && cmd.length() > 0)
         {
             DBG("Invalid command string passed.", ERROR);
             return "";
