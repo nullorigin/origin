@@ -1,14 +1,15 @@
 #include "Console.hpp"
+#include "Basic.hpp"
 #include <cstdio>
-#include <unistd.h>
+#include <iostream>
+#include <string>
 #include <sys/ioctl.h>
-#include <cstddef>
+#include <unistd.h>
 namespace origin
 {
-    Console::Console()
+    Console::Console() :
+        Height(25), Width(80)
     {
-        Height = 25;
-        Width = 80;
         BgColor = BLACK;
         FgColor = WHITE;
     }
@@ -20,7 +21,7 @@ namespace origin
     {
         printf("\033[%dA", 1);
     }
-    auto Console::GotoXY(int x, int y) -> void
+    auto Console::GotoXY(i32 x, i32 y) -> void
     {
         printf("\033[%d;%df", y, x);
     }
@@ -29,40 +30,40 @@ namespace origin
      *
      * @return void
      */
-    auto Console::ClearScreen() -> void
+    auto Console::ClearScreen() const -> void
     {
         printf("\033[%dm\033[2J\033[1;1f", BgColor);
     }
-    auto Console::SetBgColor(int color) -> void
+    auto Console::SetBgColor(i32 color) -> void
     {
         BgColor = 40 + (color % 16);
     }
-    auto Console::SetFgColor(int color) -> void
+    auto Console::SetFgColor(i32 color) -> void
     {
         FgColor = 30 + (color % 16);
     }
-    auto Console::PrintBgColor(int color) -> void
+    auto Console::PrintBgColor(i32 color) const -> void
     {
-        constexpr int offset = 30;
-        constexpr int bright_offset = 60;
+        constexpr i32 offset = 30;
+        constexpr i32 bright_offset = 60;
 
         printf("\033[%d;%dm", (color < 16) ? offset : bright_offset, BgColor + color % 16);
     }
-    auto Console::PrintFgColor(int color) -> void
+    auto Console::PrintFgColor(i32 color) const -> void
     {
-        constexpr int offset = 30;
-        constexpr int bright_offset = 90;
-        constexpr int fg_colors[] = {
+        constexpr i32 offset = 30;
+        constexpr i32 bright_offset = 90;
+        constexpr i32 fg_colors[] = {
             0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14, 9, 13, 11, 15
         };
 
         printf("\033[%d;%dm", (color < 16) ? offset : bright_offset, fg_colors[color % 16] + FgColor);
     }
-    auto Console::PrintColor(int fg, int bg) -> void
+    auto Console::PrintColor(i32 fg, i32 bg) const -> void
     {
-        constexpr int offset = 30;
-        constexpr int bright_offset = 60;
-        constexpr int fg_colors[] = {
+        constexpr i32 offset = 30;
+        constexpr i32 bright_offset = 60;
+        constexpr i32 fg_colors[] = {
             0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14, 9, 13, 11, 15
         };
 
@@ -71,11 +72,11 @@ namespace origin
                fg_colors[fg % 16] + FgColor,
                BgColor + bg % 16);
     }
-    auto Console::UngetChar(char ch) -> int
+    auto Console::UngetChar(i32 ch) -> i32
     {
         return ungetc(ch, stdin);
     }
-    auto Console::GetChar(bool echo) -> int
+    auto Console::GetChar(bool echo) -> i32
     {
         struct termios oldt
         {
@@ -94,7 +95,7 @@ namespace origin
             oldt.c_lflag = flags;
         }
         tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-        int ch = getchar();
+        i32 ch = getchar();
         tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
         return ch;
     }
@@ -107,10 +108,10 @@ namespace origin
      *
      * @return the product of X and Y coordinates
      */
-    auto Console::GetXY(int& x, int& y) -> int
+    auto Console::GetXY(i32& x, i32& y) -> i32
     {
-        static constexpr char seq[] = "\033[6n";
-        static constexpr char end[] = "R";
+        static constexpr i8 seq[] = "\033[6n";
+        static constexpr i8 end[] = "R";
         static constexpr size_t seq_len = sizeof(seq) - 1;
         static constexpr size_t end_len = sizeof(end) - 1;
 
@@ -124,14 +125,14 @@ namespace origin
             return 0;
         }
 
-        char* p = buf + seq_len;
-        char* end_p = static_cast<char*>(memchr(p, end[0], len - seq_len));
+        i8p p = buf + seq_len;
+        i8p end_p = static_cast<i8p>(memchr(p, end[0], len - seq_len));
         if (end_p == nullptr || end_p - p < end_len)
         {
             return 0;
         }
 
-        int ly = 0;
+        i32 ly = 0;
         for (char* q = p; q < end_p; ++q)
         {
             if (*q == ';')
@@ -142,8 +143,8 @@ namespace origin
             ly = ly * 10 + *q - '0';
         }
 
-        int lx = 0;
-        for (char* q = p; q < end_p; ++q)
+        i32 lx = 0;
+        for (i8p q = p; q < end_p; ++q)
         {
             lx = lx * 10 + *q - '0';
         }
@@ -157,10 +158,10 @@ namespace origin
      *
      * @return the x-coordinate value
      */
-    auto Console::GetX() -> int
+    auto Console::GetX() -> i32
     {
-        int x = 0;
-        int y = 0;
+        i32 x = 0;
+        i32 y = 0;
         GetXY(x, y);
         return x;
     }
@@ -169,10 +170,10 @@ namespace origin
      *
      * @return the Y coordinate value
      */
-    auto Console::GetY() -> int
+    auto Console::GetY() -> i32
     {
-        int x = 0;
-        int y = 0;
+        i32 x = 0;
+        i32 y = 0;
         GetXY(x, y);
         return y;
     }
@@ -181,10 +182,10 @@ namespace origin
      * If there are bytes available, enable cannonical and echo modes
      * so that the next read call retrieves the keypress
      */
-    auto Console::KeyHit() -> int
+    auto Console::KeyHit() -> i32
     {
-        constexpr int ICANON_ECHO = (ICANON | ECHO);
-        int available = 0;
+        constexpr i32 ICANON_ECHO = (ICANON | ECHO);
+        i32 available = 0;
 
         if (ioctl(0, FIONREAD, &available) == -1)
         {
@@ -215,7 +216,7 @@ namespace origin
             }
         }
 
-        return static_cast<int>(available > 0);
+        return static_cast<i32>(available > 0);
     }
 
     /**
@@ -241,12 +242,12 @@ namespace origin
      *
      * @throws None
      */
-    auto Console::PrintStr(string str) -> int
+    auto Console::PrintStr(const string& str) -> i32
     {
         printf("%s", str.c_str());
         return 0;
     }
-    auto Console::PrintStrColor(const string& str, int fg, int bg) -> int
+    auto Console::PrintStrColor(const string& str, i32 fg, i32 bg) -> i32
     {
         SetFgColor(fg);
         SetBgColor(bg);
@@ -265,12 +266,12 @@ namespace origin
      *
      * @throws None
      */
-    auto Console::ChangeColor(int fg, int bg) -> int
+    auto Console::ChangeColor(i32 fg, i32 bg) -> i32
     {
         printf("\033[%d;%dm", fg + 30, bg + 40);
         return 0;
     }
-    auto Console::ChangeColor(int color) -> int
+    auto Console::ChangeColor(i32 color) -> i32
     {
         return ChangeColor(color % 16, color / 16);
     }
@@ -283,7 +284,7 @@ namespace origin
      *
      * @throws None
      */
-    auto Console::PrintCStr(const char* str) -> int
+    auto Console::PrintCStr(const char* str) -> i32
     {
         printf("%s", str);
         return 0;
@@ -313,27 +314,47 @@ namespace origin
         gethostname(hostname, sizeof(hostname));
         return hostname;
     }
-    auto Console::GetPass(const char* prompt) -> char*
+    auto Console::IsValidPass(const string& passwd) -> bool
     {
-        char* pass = nullptr;
-        printf("%c", *prompt);
-        return fgets(pass, 100, stdin);
+        return (passwd.length() > 0 && passwd.length() <= 32 && passwd.find_first_not_of("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz./") == string::npos);
+    }
+    auto Console::GetPass(const string& prompt) -> string
+    {
+        string passwd;
+        passwd.resize(32);
+        for (i32 i = 3; i >= 0; i--)
+        {
+            std::cout << prompt;
+            std::cin >> passwd;
+            if (IsValidPass(passwd))
+            {
+                return passwd;
+                break;
+            };
+        }
+        return "";
     }
     auto Console::GetEnv(const string& name) -> string
     {
         return getenv(name.c_str());
     }
-    auto Console::ReadText(int l, int t, int r, int b, void* destination)
+    auto Console::ReadText(i32 l, i32 t, i32 r, i32 b, void* destination)
         -> size_t
     {
         printf("\033[%d;%d;%d;%dH", b, t, r, l);
-        fflush(stdout);
+        if (fflush(stdout) == EOF)
+        {
+            return 0;
+        }
         return fread(destination, 1, static_cast<size_t>(l * t) * r, stdin);
     }
-    auto Console::WriteText(int l, int t, int r, int b, void* source) -> size_t
+    auto Console::WriteText(i32 l, i32 t, i32 r, i32 b, void* source) -> size_t
     {
         printf("\033[%d;%d;%d;%dH", b, t, r, l);
-        fflush(stdout);
+        if (fflush(stdout) == EOF)
+        {
+            return 0;
+        };
         return fwrite(source, 1, static_cast<size_t>(l * t) * r, stdout);
     }
 } // namespace origin

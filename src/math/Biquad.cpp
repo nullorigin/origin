@@ -17,18 +17,15 @@
 //
 
 #include "Biquad.hpp"
-#include "Basic.hpp"
-
 #include <cmath>
 namespace origin
 {
-
     Biquad::Biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB)
     {
-        a0 = 1.0;
-        a1 = a2 = b1 = b2 = 0.0;
+        A0 = 1.0;
+        A1 = A2 = B1 = B2 = 0.0;
         SetBiquad(type, Fc, Q, peakGainDB);
-        z1 = z2 = 0.0;
+        Z1 = Z2 = 0.0;
     }
 
     void Biquad::SetType(u8 type)
@@ -51,7 +48,7 @@ namespace origin
 
     void Biquad::SetPeakGain(f64 peakGainDB)
     {
-        this->peakGain = peakGainDB;
+        this->PeakGain = peakGainDB;
         CalcBiquad();
     }
 
@@ -66,109 +63,109 @@ namespace origin
     void Biquad::CalcBiquad()
     {
         f64 norm = NAN;
-        const f64 V = powi(abs(peakGain) / 20.0, 10);
-        const f64 K = tan(PI * Fc);
-        const f64 V2 = V * 2;
-        const f64 KK = K * K;
-        const f64 KKK = KK * K;
+        const f64 v = Powi(Abs(PeakGain) / 20.0, 10);
+        const f64 k = Tan(PI * Fc);
+        const f64 v2 = v * 2;
+        const f64 kk = k * k;
+        const f64 kkk = kk * k;
         const f64 sqrt2 = 1.4142135623730950488016887242097;
-        const f64 sqrtV2 = sqrt(V2);
+        const f64 sqrt_v2 = Sqrt(v2);
         switch (this->Type)
         {
         case Lowpass:
-            norm = 1 / (1 + K / Q + KK);
-            a0 = KK * norm;
-            a1 = 2 * a0;
-            a2 = a0;
-            b1 = 2 * (KK - 1) * norm;
-            b2 = (1 - K / Q + KK) * norm;
+            norm = 1 / (1 + k / Q + kk);
+            A0 = kk * norm;
+            A1 = 2 * A0;
+            A2 = A0;
+            B1 = 2 * (kk - 1) * norm;
+            B2 = (1 - k / Q + kk) * norm;
             break;
 
         case Highpass:
-            norm = 1 / (1 + K / Q + KK);
-            a0 = 1 * norm;
-            a1 = -2 * a0;
-            a2 = a0;
-            b1 = 2 * (KK - 1) * norm;
-            b2 = (1 - K / Q + KK) * norm;
+            norm = 1 / (1 + k / Q + kk);
+            A0 = 1 * norm;
+            A1 = -2 * A0;
+            A2 = A0;
+            B1 = 2 * (kk - 1) * norm;
+            B2 = (1 - k / Q + kk) * norm;
             break;
 
         case Bandpass:
-            norm = 1 / (1 + K / Q + KK);
-            a0 = K / Q * norm;
-            a1 = 0;
-            a2 = -a0;
-            b1 = 2 * (KK - 1) * norm;
-            b2 = (1 - K / Q + KK) * norm;
+            norm = 1 / (1 + k / Q + kk);
+            A0 = k / Q * norm;
+            A1 = 0;
+            A2 = -A0;
+            B1 = 2 * (kk - 1) * norm;
+            B2 = (1 - k / Q + kk) * norm;
             break;
 
         case Notch:
-            norm = 1 / (1 + K / Q + KK);
-            a0 = (1 + KK) * norm;
-            a1 = 2 * (KK - 1) * norm;
-            a2 = a0;
-            b1 = a1;
-            b2 = (1 - K / Q + KK) * norm;
+            norm = 1 / (1 + k / Q + kk);
+            A0 = (1 + kk) * norm;
+            A1 = 2 * (kk - 1) * norm;
+            A2 = A0;
+            B1 = A1;
+            B2 = (1 - k / Q + kk) * norm;
             break;
 
         case Peak:
-            if (peakGain >= 0)
+            if (PeakGain >= 0)
             { // boost
-                norm = 1 / (1 + 1 / Q * KKK);
-                a0 = (1 + V / Q * K + KK) * norm;
-                a1 = 2 * (KK - 1) * norm;
-                a2 = (1 - V / Q * KKK) * norm;
-                b1 = a1;
-                b2 = (1 - 1 / Q * K + KK) * norm;
+                norm = 1 / (1 + 1 / Q * kkk);
+                A0 = (1 + v / Q * k + kk) * norm;
+                A1 = 2 * (kk - 1) * norm;
+                A2 = (1 - v / Q * kkk) * norm;
+                B1 = A1;
+                B2 = (1 - 1 / Q * k + kk) * norm;
             }
             else
             { // cut
-                norm = 1 / (1 + V / Q * K + KK);
-                a0 = (1 + 1 / Q * K + KK) * norm;
-                a1 = 2 * (KK - 1) * norm;
-                a2 = (1 - 1 / Q * K + KK) * norm;
-                b1 = a1;
-                b2 = (1 - V / Q * K + KK) * norm;
+                norm = 1 / (1 + v / Q * k + kk);
+                A0 = (1 + 1 / Q * k + kk) * norm;
+                A1 = 2 * (kk - 1) * norm;
+                A2 = (1 - 1 / Q * k + kk) * norm;
+                B1 = A1;
+                B2 = (1 - v / Q * k + kk) * norm;
             }
             break;
         case Lowshelf:
-            if (peakGain >= 0)
+            if (PeakGain >= 0)
             { // boost
-                norm = 1 / (1 + sqrt2 * K + KK);
-                a0 = (1 + sqrtV2 * K + V * KK) * norm;
-                a1 = 2 * (V * KK - 1) * norm;
-                a2 = (1 - sqrtV2 * K + V * KK) * norm;
-                b1 = 2 * (KK - 1) * norm;
-                b2 = (1 - sqrt2 * K + KK) * norm;
+                norm = 1 / (1 + sqrt2 * k + kk);
+                A0 = (1 + sqrt_v2 * k + v * kk) * norm;
+                A1 = 2 * (v * kk - 1) * norm;
+                A2 = (1 - sqrt_v2 * k + v * kk) * norm;
+                B1 = 2 * (kk - 1) * norm;
+                B2 = (1 - sqrt2 * k + kk) * norm;
             }
             else
             { // cut
-                norm = 1 / (1 + sqrtV2 * K + V * K * K);
-                a0 = (1 + sqrt2 * K + KK) * norm;
-                a1 = 2 * (KK - 1) * norm;
-                a2 = (1 - sqrt2 * K + KK) * norm;
-                b1 = 2 * (V * KK - 1) * norm;
-                b2 = (1 - sqrtV2 * K + V * KK) * norm;
+                norm = 1 / (1 + sqrt_v2 * k + v * k * k);
+                A0 = (1 + sqrt2 * k + kk) * norm;
+                A1 = 2 * (kk - 1) * norm;
+                A2 = (1 - sqrt2 * k + kk) * norm;
+                B1 = 2 * (v * kk - 1) * norm;
+                B2 = (1 - sqrt_v2 * k + v * kk) * norm;
             }
             break;
         case Highshelf:
-            if (peakGain >= 0)
+            if (PeakGain >= 0)
             { // boost
-                norm = 1 / (1 + sqrt2 * K + KK);
-                a0 = (V + sqrtV2 * K + KK) * norm;
-                a1 = 2 * (KK - V) * norm;
-                a2 = (V - sqrtV2 * K + KK) * norm;
-                b1 = 2 * (KK - 1) * norm;
-                b2 = (1 - sqrt2 * K + KK) * norm;
+                norm = 1 / (1 + sqrt2 * k + kk);
+                A0 = (v + sqrt_v2 * k + kk) * norm;
+                A1 = 2 * (kk - v) * norm;
+                A2 = (v - sqrt_v2 * k + kk) * norm;
+                B1 = 2 * (kk - 1) * norm;
+                B2 = (1 - sqrt2 * k + kk) * norm;
             }
             else
             { // cut
-                norm = 1 / (V + sqrtV2 * K + KK);
-                a0 = (1 + sqrt2 * K + KK) * norm;
-                a1 = 2 * (KK - 1) * norm;
-                a2 = (1 - sqrt2 * K + KK) * norm;
-                b1 = 2 * (KK - V) * norm;
-                b2 = (V - sqrtV2 * K + KK) * norm;
+                norm = 1 / (v + sqrt_v2 * k + kk);
+                A0 = (1 + sqrt2 * k + kk) * norm;
+                A1 = 2 * (kk - 1) * norm;
+                A2 = (1 - sqrt2 * k + kk) * norm;
+                B1 = 2 * (kk - v) * norm;
+                B2 = (v - sqrt_v2 * k + kk) * norm;
             }
             break;
         }

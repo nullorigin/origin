@@ -5,7 +5,6 @@
 #include "Basic.hpp"
 #include "Message.hpp"
 #include "Timer.hpp"
-#include <string>
 
 namespace origin
 {
@@ -15,15 +14,15 @@ namespace origin
         string Output{};
         string Input{};
         Timer Timers[2] = { Timer(), Timer() };
-        int RunState{};
+        i32 RunState{};
         long Cycles{};
         long MaxCycles{};
         bool Status{};
-        static const i8 Uninitialized = 0, Initializing = 1, Initialized = 2,
-                        Starting = 3, Started = 4, Pausing = 5, Paused = 6,
-                        Resuming = 7, Resumed = 8, Stopping = 9, Stopped = 10,
-                        Restarting = 11, Restarted = 12, Exiting = 13, Exited = 14,
-                        Killing = 15, Killed = 16;
+        static const i8 UNINITIALIZED = 0, INITIALIZING = 1, INITIALIZED = 2,
+                        STARTING = 3, STARTED = 4, PAUSING = 5, PAUSED = 6,
+                        RESUMING = 7, RESUMED = 8, STOPPING = 9, STOPPED = 10,
+                        RESTARTING = 11, RESTARTED = 12, EXITING = 13, EXITED = 14,
+                        KILLING = 15, KILLED = 16;
         const string RunStates[17] = {
             "Uninitialized",
             "Initializing",
@@ -44,34 +43,34 @@ namespace origin
             "Killed"
         };
         const i8 RunMap[17][8] = {
-            { Uninitialized, Initializing, -1, -1, -1, -1, -1, -1 },
-            { Initializing, Initialized, Exiting, Killing, -1, -1, -1, -1 },
-            { Initialized, Starting, Exiting, Killing, -1, -1, -1, -1 },
-            { Starting, Started, Restarting, Exiting, Killing, -1, -1, -1 },
-            { Started, Pausing, Stopping, Restarting, Exiting, Killing, -1, -1 },
-            { Pausing, Paused, Resuming, Restarting, Exiting, Killing, -1, -1 },
-            { Paused, Resuming, Stopping, Restarting, Exiting, Killing, -1, -1 },
-            { Resuming, Resumed, Stopping, Restarting, Exiting, Killing - 1, -1, -1 },
-            { Resumed, Pausing, Stopping, Restarting, Exiting, Killing, -1, -1 },
-            { Stopping, Stopped, Restarting, Exiting, Killing, -1, -1, -1 },
-            { Stopped, Starting, Restarting, Exiting, Killing, -1, -1, -1 },
-            { Restarting, Restarted, Exiting, Killing, -1, -1, -1, -1 },
-            { Restarted, Restarting, Starting, Exiting, Killing, -1, -1, -1 },
-            { Exiting, Exited, Killing, -1, -1, -1, -1, -1 },
-            { Exited, Killing, -1, -1, -1, -1, -1, -1 },
-            { Killing, Killed, -1, -1, -1, -1, -1, -1 },
-            { Killed, Uninitialized, -1, -1, -1, -1, -1, -1 }
+            { UNINITIALIZED, INITIALIZING, -1, -1, -1, -1, -1, -1 },
+            { INITIALIZING, INITIALIZED, EXITING, KILLING, -1, -1, -1, -1 },
+            { INITIALIZED, STARTING, EXITING, KILLING, -1, -1, -1, -1 },
+            { STARTING, STARTED, RESTARTING, EXITING, KILLING, -1, -1, -1 },
+            { STARTED, PAUSING, STOPPING, RESTARTING, EXITING, KILLING, -1, -1 },
+            { PAUSING, PAUSED, RESUMING, RESTARTING, EXITING, KILLING, -1, -1 },
+            { PAUSED, RESUMING, STOPPING, RESTARTING, EXITING, KILLING, -1, -1 },
+            { RESUMING, RESUMED, STOPPING, RESTARTING, EXITING, KILLING - 1, -1, -1 },
+            { RESUMED, PAUSING, STOPPING, RESTARTING, EXITING, KILLING, -1, -1 },
+            { STOPPING, STOPPED, RESTARTING, EXITING, KILLING, -1, -1, -1 },
+            { STOPPED, STARTING, RESTARTING, EXITING, KILLING, -1, -1, -1 },
+            { RESTARTING, RESTARTED, EXITING, KILLING, -1, -1, -1, -1 },
+            { RESTARTED, RESTARTING, STARTING, EXITING, KILLING, -1, -1, -1 },
+            { EXITING, EXITED, KILLING, -1, -1, -1, -1, -1 },
+            { EXITED, KILLING, -1, -1, -1, -1, -1, -1 },
+            { KILLING, KILLED, -1, -1, -1, -1, -1, -1 },
+            { KILLED, UNINITIALIZED, -1, -1, -1, -1, -1, -1 }
         };
 
         const string Cmd[16] = { "init", "1", "start", "2", "pause", "3", "resume", "4", "stop", "5", "restart", "6", "exit", "7", "kill", "8" };
         const u8 CmdLen[16] = { 4, 1, 5, 1, 5, 1, 6, 1, 4, 1, 7, 1, 4, 1, 4, 1 };
         const u8 CmdMap[16] = { 1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15 };
         const string CmdArg[16] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
-        const int AllTxt = -1, PromptTxt = 0, StateTxt = 1, CycleTxt = 2,
+        const i32 AllTxt = -1, PromptTxt = 0, StateTxt = 1, CycleTxt = 2,
                   TimerTxt = 3, ExecTxt = 4;
         explicit Run(const i8* cmd) { Parse(cmd); }
-        explicit Run(const string& cmd) { Parse(cmd.c_str()); }
-        Run(const i8* cmd, i8 const* argv[]) { Exec(cmd, argv); }
+        explicit Run(const string& cmd) { Parse(cmd); }
+        Run(i8p cmd, i8p argv[]) { Exec(cmd, argv); }
         /* A dependency map of applicable run states to enter into after a state
 switch. Uses the constants above as specifiers for the equivalent index. */
 
@@ -80,13 +79,13 @@ switch. Uses the constants above as specifiers for the equivalent index. */
         static auto GetCode() -> ExCode { return origin::GetCode(); }
         static auto SetCode(ExCode code) -> void { origin::SetCode(code); }
         Run(i32 argc, i8** argv) :
-            MaxCycles(1000000000) { SetState(Uninitialized); }
+            MaxCycles(1000000000) { SetState(UNINITIALIZED); }
         ~Run() = default;
 
         // The main loop of the application. Splits the output into a separate thread
         // and continues updating the input status until the application is exited or
         // a time limit is reached.
-        auto Loop(f128 runtime) -> int;
+        auto Loop(f128 runtime) -> i32;
         // Sets the run state of the application to 'Initializing' and Upon success,
         // sets the run state to 'Initialized'.
         auto DoInit() -> bool;
@@ -135,9 +134,9 @@ switch. Uses the constants above as specifiers for the equivalent index. */
             return RunStates[state];
         }
         auto GetArg(const string& command) -> string;
-        auto GetCmd(const string& command) -> int;
+        auto GetCmd(const string& command) -> i32;
         // Returns the string representation of a given command from its index.
-        inline auto GetCmd(i8 index) -> int { return CmdMap[index]; }
+        inline auto GetCmd(i8 index) -> i32 { return CmdMap[index]; }
         // Determines if the application is in a state in which it is actually
         // running.
         auto IsRunning() const -> bool;
@@ -146,11 +145,11 @@ switch. Uses the constants above as specifiers for the equivalent index. */
         inline auto GetState() const -> i8 { return RunState; }
         inline auto GetOutput() -> string { return Output; }
         inline auto GetInput() -> string { return Input; }
-        inline auto GetCycles() const -> long { return Cycles; }
-        inline auto SetCycles(long cycles) -> void { Cycles = cycles; }
+        inline auto GetCycles() const -> u64 { return Cycles; }
+        inline auto SetCycles(u64 cycles) -> void { Cycles = cycles; }
         auto IncrementCycles() -> void;
-        inline auto GetMaxCycles() const -> long { return MaxCycles; }
-        auto SetMaxCycles(long cycles) -> i8;
+        inline auto GetMaxCycles() const -> u64 { return MaxCycles; }
+        auto SetMaxCycles(u64 cycles) -> i8;
         auto ResetCycles() -> void { Cycles = 0; }
         auto SetStatus(bool status) -> bool;
         auto GetStatus() const -> bool { return Status; }
@@ -162,9 +161,9 @@ switch. Uses the constants above as specifiers for the equivalent index. */
 
         auto Call(const string& cmd) -> string;
 
-        auto Call(const char* cmd) -> string;
-        auto Exec(const char* command, char const* const argv[]) -> void;
-        static auto Parse(const char* cmd) -> string { return { cmd }; }
+        auto Call(i8p cmd) -> string;
+        auto Exec(i8p command, const i8p argv[]) -> void;
+        static auto Parse(const i8p cmd) -> string { return { cmd }; }
         auto Parse(const string& cmd) -> string;
     };
 } // namespace origin

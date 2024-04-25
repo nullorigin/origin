@@ -1,15 +1,12 @@
 #pragma once
+#include "Basic.hpp"
 #include <algorithm>
 #include <cstring>
 #include <fstream>
-#include <limits>
 #include <sstream>
 #include <string>
-#include <valarray>
 #include <utility>
-#include "Basic.hpp"
-#include "Message.hpp"
-#include <functional>
+#include <valarray>
 namespace origin
 {
     template<typename X, typename Y>
@@ -137,36 +134,43 @@ namespace origin
         result += str.substr(prev_pos);
         return result;
     }
-    static auto Replace(string search, string repl, string file_name,u32 retries) -> string
+    static auto Replace(const string& search, const string& repl, const string& file_name, u32 retries) -> string
     {
         string result;
         bool success = false;
         u32 retries_count = retries;
         std::fstream file(file_name, std::fstream::in | std::fstream::out | std::fstream::trunc);
-        while (!success && retries > 0) {
-        file.open(file_name, std::fstream::in | std::fstream::out | std::fstream::trunc);
-        if(file.is_open()) {
-            try {
-                (file.seekp(0, std::ios::end));
-                result.resize(file.tellp());
-                file << Replace(search, repl, result);
-                file.seekp(0, std::ios::beg);
-                file << result;
-                success = true;
-            } catch (std::exception& e) {
-                if(file.is_open()) {
-                    file.close();
+        while (!success && retries > 0)
+        {
+            file.open(file_name, std::fstream::in | std::fstream::out | std::fstream::trunc);
+            if (file.is_open())
+            {
+                try
+                {
+                    (file.seekp(0, std::ios::end));
+                    result.resize(file.tellp());
+                    file << Replace(search, repl, result);
+                    file.seekp(0, std::ios::beg);
+                    file << result;
+                    success = true;
                 }
+                catch (std::exception& e)
+                {
+                    if (file.is_open())
+                    {
+                        file.close();
+                    }
+                    retries_count--;
+                    continue;
+                }
+            }
+            else
+            {
                 retries_count--;
-                continue;
             }
         }
-        else {
-            retries_count--;
-        }
+        return result;
     }
-    return result;
-}
     static auto Clean(string str, u32 flags)
     {
         auto dst = str.begin();
@@ -186,11 +190,11 @@ namespace origin
         return str;
     }
 
-    static auto Length(const string str) -> u64
+    static auto Length(const string& str) -> u64
     {
         return str.size();
     }
-    static auto Format(const string str, u32 flags) -> string
+    static auto Format(const string& str, u32 flags) -> string
     {
         u64 len = str.size();
         string out;
@@ -199,10 +203,10 @@ namespace origin
         auto s = str.cbegin();
         for (; s != str.cend(); ++s, ++p)
         {
-            if ((flags == 1 && !isdigit(*s)) ||
-                (flags == 2 && !isdigit(*s)) ||
-                (flags == 3 && !islower(*s)) ||
-                (flags == 4 && !isupper(*s)) ||
+            if ((flags == 1 && (isdigit(*s) == 0)) ||
+                (flags == 2 && (isdigit(*s) == 0)) ||
+                (flags == 3 && (islower(*s) == 0)) ||
+                (flags == 4 && (isupper(*s) == 0)) ||
                 (*s >= '\0' && *s <= '\n'))
             {
                 *p = ' ';
@@ -220,7 +224,7 @@ namespace origin
         memcpy(dest, src, strlen(src) + 1);
     }
 
-    static auto Concatenate(const string first, const string second) -> string
+    static auto Concatenate(const string& first, const string& second) -> string
     {
         const auto first_len = first.size();
         const auto second_len = second.size();
@@ -231,7 +235,7 @@ namespace origin
         return result;
     }
 
-    static auto Concatenate(const string first, const string second, const string third) -> string
+    static auto Concatenate(const string& first, const string& second, const string& third) -> string
     {
         const auto first_len = first.size();
         const auto second_len = second.size();
@@ -249,24 +253,24 @@ namespace origin
     }
     static auto EraseAll(string& str, const string& toErase) -> string&
     {
-        auto lastPos = str.find_first_not_of(toErase);
-        auto pos = str.find_first_of(toErase, lastPos);
-        while (string::npos != pos || string::npos != lastPos)
+        auto last_pos = str.find_first_not_of(toErase);
+        auto pos = str.find_first_of(toErase, last_pos);
+        while (string::npos != pos || string::npos != last_pos)
         {
             str.erase(pos, toErase.length());
-            lastPos = pos + 1;
-            pos = str.find_first_of(toErase, lastPos);
+            last_pos = pos + 1;
+            pos = str.find_first_of(toErase, last_pos);
         }
         return str;
     }
-    auto NumDigits(f128 num, string& buf) -> f128
+    inline auto NumDigits(f128 num, string& buf) -> f128
     {
         f128 ret = floor(log10(num) + 1);
-        buf = std::to_string((u64)ret);
+        buf = std::to_string(static_cast<u64>(ret));
         return ret;
     }
 
-    auto ToString(f128 num) -> string
+    inline auto ToString(f128 num) -> string
     {
         string buffer(38, '\0');
         string digits(38, '\0');

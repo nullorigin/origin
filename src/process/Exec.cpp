@@ -1,13 +1,13 @@
 #include "Exec.hpp"
 namespace origin
 {
-    auto Run::Loop(f128 runtime) -> int
+    auto Run::Loop(f128 runtime) -> i32
     {
         if (runtime > 0)
         {
             Timers[0].SetLimit(runtime);
         }
-        while ((GetState() < Exited) && (Timers[0].GetRemaining() > 0))
+        while ((GetState() < EXITED) && (Timers[0].GetRemaining() > 0))
         {
             ProcessCycles();
         }
@@ -15,68 +15,68 @@ namespace origin
     }
     auto Run::DoInit() -> bool
     {
-        if (RunState == Uninitialized)
+        if (RunState == UNINITIALIZED)
         {
-            if (SetState(Initializing))
+            if (SetState(INITIALIZING))
             {
-                return SetState(Initialized);
+                return SetState(INITIALIZED);
             }
         }
         return false;
     }
     auto Run::DoStart() -> bool
     {
-        if (SetState(Starting))
+        if (SetState(STARTING))
         {
             Timers[0].Start();
-            return SetState(Started);
+            return SetState(STARTED);
         }
         return false;
     }
     auto Run::DoPause() -> bool
     {
-        if (SetState(Pausing))
+        if (SetState(PAUSING))
         {
             Timers[0].Pause();
-            return SetState(Paused);
+            return SetState(PAUSED);
         }
         return false;
     }
     auto Run::DoResume() -> bool
     {
-        if (SetState(Resuming))
+        if (SetState(RESUMING))
         {
             Timers[0].Resume();
-            return SetState(Resumed);
+            return SetState(RESUMED);
         }
         return false;
     }
     auto Run::DoStop() -> bool
     {
-        if (SetState(Stopping))
+        if (SetState(STOPPING))
         {
             Timers[0].Stop();
             ResetCycles();
-            return SetState(Stopped);
+            return SetState(STOPPED);
         }
 
         return false;
     }
     auto Run::DoRestart() -> bool
     {
-        if (SetState(Restarting))
+        if (SetState(RESTARTING))
         {
             Timers[0].Restart();
             ResetCycles();
-            return SetState(Restarted);
+            return SetState(RESTARTED);
         }
         return false;
     }
     auto Run::DoExit() -> bool
     {
-        if (SetState(Exiting))
+        if (SetState(EXITING))
         {
-            if (SetState(Exited))
+            if (SetState(EXITED))
             {
                 DoKill();
             }
@@ -85,9 +85,9 @@ namespace origin
     }
     auto Run::DoKill() -> bool
     {
-        if (SetState(Killing))
+        if (SetState(KILLING))
         {
-            SetState(Killed);
+            SetState(KILLED);
             ::exit(-1);
         }
         return false;
@@ -103,7 +103,7 @@ namespace origin
         }
         return "";
     }
-    auto Run::GetCmd(const string& command) -> int
+    auto Run::GetCmd(const string& command) -> i32
     {
         for (i8 i = 0; i < 16; i++)
         {
@@ -117,9 +117,9 @@ namespace origin
     auto Run::IsRunning() const -> bool
     {
         i8 const state = GetState();
-        return ((state < Paused) && (state > Uninitialized)) ||
-               (state < Exited && state >= Resuming && state != Stopped &&
-                state != Restarted);
+        return ((state < PAUSED) && (state > UNINITIALIZED)) ||
+               (state < EXITED && state >= RESUMING && state != STOPPED &&
+                state != RESTARTED);
     }
     auto Run::IncrementCycles() -> void
     {
@@ -132,7 +132,7 @@ namespace origin
             DoExit();
         }
     }
-    auto Run::SetMaxCycles(long cycles) -> i8
+    auto Run::SetMaxCycles(u64 cycles) -> i8
     {
         if (cycles <= 0)
         {
@@ -150,7 +150,7 @@ namespace origin
     auto Run::SetState(i8 target) -> bool
     {
         bool status = false;
-        int state = GetState();
+        i32 state = GetState();
         i8 i = 0;
         if (state == target)
         {
@@ -184,60 +184,60 @@ namespace origin
     {
         switch (state)
         {
-        case Initializing:
+        case INITIALIZING:
             if (SetStatus(DoInit()))
             {
                 DBG("Initialized", INFO);
-                return Initialized;
+                return INITIALIZED;
             }
             break;
-        case Starting:
+        case STARTING:
             if (SetStatus(DoStart()))
             {
                 DBG("Started", INFO);
-                return Started;
+                return STARTED;
             }
             break;
-        case Pausing:
+        case PAUSING:
             if (SetStatus(DoPause()))
             {
                 DBG("Paused", INFO);
-                return Paused;
+                return PAUSED;
             }
             break;
-        case Resuming:
+        case RESUMING:
             if (SetStatus(DoResume()))
             {
                 DBG("Resumed", INFO);
-                return Resumed;
+                return RESUMED;
             }
             break;
-        case Stopping:
+        case STOPPING:
             if (SetStatus(DoStop()))
             {
                 DBG("Stopped", INFO);
-                return Stopped;
+                return STOPPED;
             }
             break;
-        case Restarting:
+        case RESTARTING:
             if (SetStatus(DoRestart()))
             {
                 DBG("Restarted", INFO);
-                return Restarted;
+                return RESTARTED;
             }
             break;
-        case Exiting:
+        case EXITING:
             if (SetStatus(DoExit()))
             {
                 DBG("Exited", INFO);
-                return Exited;
+                return EXITED;
             }
             break;
-        case Killing:
+        case KILLING:
             if (SetStatus(DoKill()))
             {
                 DBG("Killed", INFO);
-                return Killed;
+                return KILLED;
             }
             break;
         default:
@@ -289,7 +289,7 @@ namespace origin
         DBG("Command executed successfully.", INFO);
         return output;
     }
-    auto Run::Call(const char* cmd) -> string
+    auto Run::Call(const i8p cmd) -> string
     {
         i8 buffer[128];
         string result;
@@ -316,7 +316,7 @@ namespace origin
         DBG("Command executed successfully.", INFO);
         return result;
     }
-    auto Run::Exec(const char* command, char const* const argv[]) -> void
+    auto Run::Exec(const i8p command, const i8p argv[]) -> void
     {
         if (command == nullptr || argv == nullptr)
         {

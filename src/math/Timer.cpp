@@ -3,32 +3,31 @@
 namespace origin
 {
     Timer::Timer() :
-        started{}, paused{}, resumed{}, stopped{}, restarted{}, limit{ 100000000000 }, offset(0.0), id(TimerID++)
+        Limit{ 100000000000 }, Name("Timer_" + std::to_string(Id) + "]-(Timer" + std::to_string(Id) + ")"), Id(timer_id++)
     {
-        name = "Timer_" + std::to_string(id) + "]-(Timer" + std::to_string(id) + ")";
     }
 
     Timer::Timer(const string _name) :
-        started(0.0), resumed(0.0), paused(0.0), stopped(0.0), restarted(0.0), limit(10000000000), offset(0.0)
+        Limit(10000000000)
     {
-        TimerID = { ++TimerID };
-        this->name = "Timer_" + _name + "]-(Timer" + std::to_string(TimerID) + ")";
+        timer_id = { ++timer_id };
+        this->Name = "Timer_" + _name + "]-(Timer" + std::to_string(timer_id) + ")";
     }
     Timer::~Timer()
     {
-        state = TimerState::None;
-        resumed = 0.0;
-        paused = 0.0;
-        started = 0.0;
-        stopped = 0.0;
-        restarted = 0.0;
-        offset = 0.0;
-        limit = 1000000000;
-        TimerID--;
+        State = TimerState::None;
+        Resumed = 0.0;
+        Paused = 0.0;
+        Started = 0.0;
+        Stopped = 0.0;
+        Restarted = 0.0;
+        Offset = 0.0;
+        Limit = 1000000000;
+        timer_id--;
     }
 
     bool Timer::Is(TimerState _state)
     {
-        return this->state == _state;
+        return this->State == _state;
     }
 }; // namespace origin

@@ -3,7 +3,6 @@
 #include "Message.hpp"
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
 #include <cstring>
 #include <iostream>
 
@@ -58,79 +57,71 @@ namespace origin
     template<typename T, u64 N>
     class Vec
     {
-        T data[N];
+        T* data = new T[N];
 
     public:
         Vec<T, N>() { memset(this->data, 0, sizeof(T) * N); }
-        explicit Vec<T, N>(T* data) :
-            data{} { std::copy(this->data, this->data + N, data); }
-        auto operator=(const Vec& /*unused*/) -> Vec& { return *this; };
-        auto operator=(Vec&& /*unused*/) noexcept -> Vec& { return *this; };
-        Vec(const Vec& /*unused*/) { memset(this->data, 0, sizeof(T) * N); };
-        Vec(Vec&& /*unused*/) noexcept :
-            data{} { memset(this->data, 0, sizeof(T)); };
+        Vec(const Vec&) { *this = *this; }
+        Vec(Vec&&) noexcept { *this = std::move(*this); }
+        Vec& operator=(const Vec&) { return *this; }
+        Vec& operator=(Vec&&) noexcept { return *this; }
+        Vec<T, N>(T* value) { *this->data = *value; }
         constexpr auto GetData(u64 index) const -> T { return this->data[index]; }
         constexpr T* GetData() { return this->data; }
         constexpr const T* GetData() const { return this->data; }
         constexpr auto SetData(u64 index, T value) -> void { this->data[index] = value; }
         constexpr auto SetData(T* value) -> void { *this->data = *value; }
-        constexpr auto SizeConvert(Mem::Unit _mu = Mem::Unit::BYTE) const -> u64
+        constexpr auto SizeConvert(enum Mem::Unit _mu = Mem::Unit::BYTE) const -> u64
         {
             return N * sizeof(T) << static_cast<u8>(_mu);
         }
         constexpr auto Size() -> u64 { return N; }
-        constexpr auto Find(T min, T max, u64& index) -> T
+        constexpr auto Find(T minValue, T maxValue, u64& index) -> T
         {
-            if (this->data == nullptr)
+            u64* end = this->data + (N & ~(sizeof(u64) - 1));
+            u64 mask = (static_cast<u64>(minValue) ^ static_cast<u64>(maxValue)) >> 63;
+            for (auto data = this->data; data != end; data += sizeof(u64))
             {
-                DBG("Null pointer reference", ERROR);
-            }
-            const T* dataEnd = this->data + (N & ~(sizeof(u64) - 1));
-            u64 mask = ((min - T{}) ^ (max - T{})) >> 63;
-            for (; this->data != dataEnd; this->data += sizeof(u64))
-            {
-                u64 v = *reinterpret_cast<const u64*>(this->data) & mask;
-                u64 index = __builtin_ctzll(v);
-                if (index < sizeof(u64) * 8)
+                u64 value = *reinterpret_cast<const u64*>(data) & mask;
+                if (value != 0)
                 {
+                    index = __builtin_ctzll(value);
                     return this->data[index];
                 }
             }
-            index = N;
-            for (; this->data != (this->data + N); ++data, ++index)
+            for (index = 0; this->data != end && index < N; index++)
             {
-                if (*data >= min && *data <= max)
+                T value = this->data[index];
+                if (value >= minValue && value <= maxValue)
                 {
-                    return *data;
+                    return value;
                 }
             }
             return T(0);
         }
-        constexpr auto Find(T min, T max) -> Vec<T, N>
+
+        constexpr auto Find(T minValue, T maxValue) -> Vec<T, N>
         {
-            if (this->data == nullptr)
+            Vec<T, N> result{};
+            u32 count = 0;
+            const T* end = this->data + (N & ~(sizeof(u64) - 1));
+            for (; this->data != end; this->data += sizeof(u64))
             {
-                DBG("Null pointer reference", ERROR);
+                u64 value = *reinterpret_cast<const u64*>(this->data);
+                u64 mask = (static_cast<u64>(minValue) ^ static_cast<u64>(maxValue)) >> 63;
+                u64 found = ((value & mask) + ((value ^ mask) & value)) >> 1;
+                result[count++] = *reinterpret_cast<T*>(&found);
             }
-            Vec<T, N> ret{};
-            u32 index = 0;
-            const T* dataEnd = this->data + (N & ~(sizeof(u64) - 1));
-            for (; this->data != dataEnd; this->data += sizeof(u64))
+            for (; count < N; ++count)
             {
-                u64 v = *reinterpret_cast<const u64*>(this->data);
-                u64 mask = ((min - v) ^ (v - max)) >> 63;
-                u64 r = (v & mask) + (((v ^ mask) & v) >> 1);
-                ret[index++] = *reinterpret_cast<T*>(&r);
-            }
-            for (; index < N; ++index)
-            {
-                if (this->data[index] >= min && this->data[index] <= max)
+                if (this->data[count] >= minValue && this->data[count] <= maxValue)
                 {
-                    ret[index] = this->data[index];
+                    result[count] = this->data[count];
                 }
             }
-            return ret;
+            return result;
         }
+
         constexpr auto Find(T value, void (*callback)(T)) -> Vec<T, N>
         {
             if (this->data == nullptr)
@@ -165,100 +156,65 @@ namespace origin
             return ret;
         }
 
-        constexpr auto Replace(T min, T max, T value) -> Vec<T, N>
+        constexpr auto Replace(T from, T to, T replacement) -> Vec<T, N>
         {
-            if (this->data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
+            T* current = this->data;
             const T* const end = this->data + N;
-            const T* lhs = this->data;
-            T* rhs = this->data;
-            for (; lhs != end; ++lhs, ++rhs)
+            for (; current != end; ++current)
             {
-                *rhs = (*lhs < min || *lhs > max) ? *lhs : value;
+                if (*current == from || *current == to)
+                {
+                    *current = replacement;
+                }
             }
             return *this;
         }
 
-        constexpr auto Index(Vec<T, N> value) -> Vec<u64, N>
+        constexpr auto Index(Vec<T, N> values) -> Vec<u64, N>
         {
-            Vec<u64, N> ret{};
+            Vec<u64, N> indices{};
+            u64* indicesData = indices.data;
 
-            const T* valData = value.data;
-            const T* dataEnd = this->data + N;
-            u64* retData = ret.data;
+            for (const T* it = this->data; it != this->data + N; ++it, ++indicesData)
+            {
+                *indicesData = static_cast<u64>(std::distance(values.data, std::find(values.data, values.data + N, *it)));
+            }
 
-            if constexpr (std::is_same_v<T, u64>)
-            {
-                const u64* data = reinterpret_cast<const u64*>(this->data);
-                const u64* valDataEnd = reinterpret_cast<const u64*>(valData + N);
-                for (; valData != valDataEnd; ++valData, ++retData)
-                {
-                    *retData = static_cast<u64>(std::distance(this->data, std::find(this->data, dataEnd, *valData)));
-                }
-            }
-            else
-            {
-                for (const T* it = this->data; it != dataEnd; ++it, ++retData)
-                {
-                    *retData = static_cast<u64>(std::distance(valData, std::find(valData, valData + N, *it)));
-                }
-            }
-            return ret;
+            return indices;
         }
 
-        constexpr auto Index(Vec<T, N> value, T min, T max) -> Vec<u64, N>
+        constexpr auto IndexOf(Vec<T, N> values, T lower, T upper) -> Vec<u64, N>
         {
-            Vec<u64, N> ret{};
-            if (!this->data)
-            {
-                DBG("Null pointer reference", ERROR);
-                return ret;
-            }
-            u64* retData = ret.data;
-            const T* valData = value.data;
-            const T* dataEnd = this->data + N;
+            Vec<u64, N> indices{};
+            u64* indicesData = indices.data;
 
-            for (; this->data != dataEnd; ++this->data, ++valData, ++retData)
+            for (const T* it = this->data; it != this->data + N; ++it, ++indicesData)
             {
-                if (*this->data >= min && *this->data <= max && *this->data == *valData)
+                if (*it >= lower && *it <= upper)
                 {
-                    *retData = this->data - this->data;
+                    *indicesData = std::distance(values.data, std::find(values.data, values.data + N, *it));
                 }
             }
-            return ret;
+
+            return indices;
         }
 
-        auto Index(T value, T threshold) -> Vec<u64, N>
+        auto indexThreshold(T value, T threshold) const -> Vec<u64, N>
         {
-            Vec<u64, N> ret{};
-            if (!this->data)
+            Vec<u64, N> result{};
+            T lowerBound = value - threshold;
+            T upperBound = value + threshold;
+            u64* resultData = result.data;
+            for (auto it = this->data; it != this->data + N; ++it, ++resultData)
             {
-                DBG("Null pointer reference", ERROR);
-                return ret;
-            }
-            T lt = value - threshold;
-            T gt = value + threshold;
-            u64* retData = ret.data;
-            const T* dataEnd = this->data + N;
-            for (const T* it = this->data; it != dataEnd; ++it, ++retData)
-            {
-                T cur = *it;
-                if ((cur >= lt) && (cur <= gt))
+                auto current = *it;
+                if (current >= lowerBound && current <= upperBound)
                 {
-                    *retData = it - this->data;
+                    *resultData = std::distance(this->data, it);
                 }
             }
-            return ret;
+            return result;
         }
-
-        explicit Vec<T, N>(const Vec<T, N>* _rhs) :
-            data(new T[N]()) { *this->data = _rhs; }
-        explicit Vec<T, N>(const T* _rhs) :
-            data(new T[N]) { *this->data = _rhs; }
-        explicit Vec<T, N>(T* _rhs[N]) :
-            data(new T[N]) { *this->data = _rhs; }
         ~Vec<T, N>() { delete[] &this->data; }
         auto Set(T _rhs) -> Vec<T, N>
         {
@@ -270,12 +226,12 @@ namespace origin
         }
         auto Set(T* _rhs) -> Vec<T, N>
         {
-            std::memcpy(this->data, _rhs, sizeof(T) * N);
+            std::copy(_rhs, _rhs + N, this->data);
             return *this;
         }
         auto Set(const Vec<T, N>& _rhs) -> Vec<T, N>
         {
-            std::memcpy(this->data, _rhs.data, sizeof(T) * N);
+            std::copy(_rhs.data, _rhs.data + N, this->data);
             return *this;
         }
 
@@ -286,108 +242,84 @@ namespace origin
         }
         auto Get() -> Vec<T, N> { return this->data; }
         auto Get(u32 _index) -> Vec<T, N> { return this->data[_index]; }
-        auto Add(const Vec<T, N> _rhs) noexcept -> Vec<T, N>
+        auto Add(Vec<T, N> _rhs) noexcept -> Vec<T, N>
         {
             Vec<T, N> ret = *this;
-            return __builtin_elementwise_add_sat(ret.data, _rhs.data);
+            return Add(_rhs.data, ret.data);
         }
 
-        auto Sub(const Vec<T, N> _rhs) noexcept -> Vec<T, N>
+        auto Sub(Vec<T, N> _rhs) noexcept -> Vec<T, N>
         {
             Vec<T, N> ret = *this;
-            for (u32 i = 0; i < N; i++)
-            {
-                __builtin_elementwise_sub_sat(ret.data[i], _rhs.data[i]);
-            }
-            return ret;
+            return std::transform(this->data, this->data + N, _rhs.data, ret.data, std::minus<T>());
         }
-        auto Mul(const Vec<T, N> _rhs) -> Vec<T, N>
+        auto Mul(const Vec<T, N>& rhs) const -> Vec<T, N>
         {
-            Vec<T, N> ret{ this->data }; // avoid copying elements
-            for (u32 i = 0; i < N; i += sizeof(T))
-            {
-                *reinterpret_cast<T*>(ret.data + i) *=
-                    *reinterpret_cast<const T*>(_rhs.data + i);
-            }
-            return ret;
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, rhs.data, ret.data, std::multiplies<T>());
         }
 
         auto Div(const Vec<T, N> _rhs) noexcept -> Vec<T, N>
         {
-            Vec<T, N> ret{};
-            std::transform(this->data, this->data + N, _rhs.data, ret.data, [](T lhs, T rhs) { return lhs / rhs; });
-            return ret;
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, _rhs.data, ret.data, std::divides<T>());
         }
 
         auto Mod(const Vec<T, N> _rhs) noexcept -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            std::transform(this->data, this->data + N, _rhs.data, ret.data, std::modulus<T>());
-            return ret;
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, _rhs.data, ret.data, std::modulus<T>());
         }
 
         auto And(const Vec<T, N> _rhs) noexcept -> Vec<T, N>
         {
             Vec<T, N> ret;
-            std::transform(this->data, this->data + N, _rhs.data, ret.data, std::bit_and<T>());
-            return ret;
+            return std::transform(this->data, this->data + N, _rhs.data, ret.data, std::bit_and<T>());
         }
 
         auto Or(const Vec<T, N> _rhs) -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            std::transform(this->data, this->data + N, _rhs.data, ret.data, std::bit_or<T>());
-            return ret;
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, _rhs.data, ret.data, std::bit_or<T>());
         }
-        auto Xor(const Vec<T, N> _rhs) noexcept -> Vec<T, N>
+        auto Xor(const Vec<T, N>& rhs) noexcept -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            if (this->data && _rhs.data)
-            {
-                const T* lhs = this->data;
-                const T* rhs = _rhs.data;
-                T* retData = ret.data;
-                for (u32 i = 0; i < N; i++)
-                {
-                    *retData++ = *lhs++ ^ *rhs++;
-                }
-            }
-            return ret;
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, rhs.data, ret.data, std::bit_xor<T>());
         }
 
-        auto Neg() noexcept -> Vec<T, N>
+        auto Neg() -> Vec<T, N>
         {
-            Vec<T, N> ret{ this->data };
-            for (T* it = ret.data; it != ret.data + N; ++it)
-            {
-                *it = -*it;
-            }
-            return ret;
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, ret.data, std::negate<T>());
         }
-        auto Pow(const Vec<T, N> _rhs) -> Vec<T, N>
+        auto Inv() -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            const T* src = this->data;
-            T* dst = ret.data;
-            for (u32 i = 0; i < N; i++, src++, dst++)
-            {
-                *dst = std::pow(*src, _rhs[i]);
-            }
-            return ret;
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, ret.data, std::bit_not<T>());
+        }
+        auto Pow(const Vec<T, N> exp) -> Vec<T, N>
+        {
+            Vec<T, N> ret = *this;
+            return std::transform(this->data, this->data + N, exp.data, ret.data, std::multiplies<T>());
         }
         auto Swap(Vec<T, N> _rhs) -> Vec<T, N>
         {
-            std::swap(this->data, _rhs.data);
-            return *this;
+            Vec<T, N> ret = *this;
+            for (u32 i = 0; i < N; i++)
+            {
+                std::swap<T>(ret[i], _rhs[i]);
+            }
+            return ret;
         }
         auto Length() const -> T
         {
             T ret = 0;
             for (u32 i = 0; i < N; i++)
             {
-                ret += this->data[i] * this->data[i];
+                ret += this->data[i] * ret.data[i];
             }
-            return Sqrt(ret);
+            return std::sqrt(ret);
         }
 
         auto Dot(const Vec<T, N> _rhs) const -> T
@@ -395,452 +327,313 @@ namespace origin
             T ret = 0;
             for (u32 i = 0; i < N; i++)
             {
-                ret += this->data[i] * _rhs[i];
+                ret += ret * _rhs[i];
             }
             return ret;
         }
-        auto LengthSq() const -> T { return Dot(*this); }
-        auto Cross(const Vec<T, N> _rhs, const Vec<T, N> _rhs2) -> Vec<T, N>
+        auto LengthSquared() const -> T { return Dot(*this); }
+        auto Cross(const Vec<T, N> a, const Vec<T, N> b) -> Vec<T, N>
         {
-            const Vec<T, N>* src[3] = { this, &_rhs, &_rhs2 };
-            T* dst = this->data;
+            Vec<T, N> ret = *this;
 
             for (u32 i = 0; i < N; i += 3)
             {
-                const auto s1 = src[i / 3]->data[i];
-                const auto s2 = src[i / 3]->data[i + 1];
-                const auto s3 = src[i / 3]->data[i + 2];
-                const auto d1 = src[(i + 1) / 3]->data[i + 1];
-                const auto d2 = src[(i + 2) / 3]->data[i];
-                const auto d3 = src[(i + 2) / 3]->data[i + 2];
-
-                dst[i] = s2 * d3 - s3 * d2;
-                dst[i + 1] = s3 * d1 - s1 * d3;
-                dst[i + 2] = s1 * d2 - s2 * d1;
+                ret[i] = a.data[i + 1] * b.data[i + 2] - a.data[i + 2] * b.data[i + 1];
+                ret[i + 1] = a.data[i + 2] * b.data[i] - a.data[i] * b.data[i + 2];
+                ret[i + 2] = a.data[i] * b.data[i + 1] - a.data[i + 1] * b.data[i];
             }
             return *this;
         }
         auto Abs() -> Vec<T, N>
         {
-            Vec<T, N> ret{ this->data };
-            T* dst = ret.data;
-            for (u32 i = 0; i < N; i++, dst++)
+            Vec<T, N> ret = *this;
+            for (u32 i = 0; i < N; i++)
             {
-                *dst = origin::Abs(*dst);
+                ret[i] = origin::Abs<T>(ret[i]);
             }
             return ret;
         }
 
         auto Sqrt() -> Vec<T, N>
         {
-            Vec<T, N> ret{ this->data }; // Copy the this->data pointer
-            std::transform(reinterpret_cast<const T*>(this->data),
-                           reinterpret_cast<const T*>(this->data) + N,
-                           reinterpret_cast<T*>(ret.data),
-                           [](T x) { return origin::Sqrt(x); });
-            return ret;
-        }
-        auto Lerp(const Vec<T, N> _rhs, const Vec<T, N> _exp) -> Vec<T, N>
-        {
-            T* retData = const_cast<T*>(this->data);
-            if constexpr (std::is_same_v<T, f32>)
-            {
-                const f32* lhs = reinterpret_cast<const f32*>(this->data);
-                const f32* rhs = reinterpret_cast<const f32*>(_rhs.data);
-                const f32* exp = reinterpret_cast<const f32*>(_exp.data);
-                for (u32 i = 0; i < N; i++, lhs++, rhs++, exp++, retData++)
-                {
-                    *retData = *lhs + (*exp * (*rhs - *lhs));
-                }
-            }
-            else
-            {
-                const T* lhs = this->data;
-                const T* rhs = _rhs.data;
-                const T* exp = _exp.data;
-                for (u32 i = 0; i < N; i++, lhs++, rhs++, exp++, retData++)
-                {
-                    *retData = fma(*exp, *rhs - *lhs, *lhs);
-                }
-            }
-            return { retData };
-        }
-
-        auto Eq(const Vec<T, N> _rhs) noexcept -> Vec<bool, N>
-        {
-            return Vec<bool, N>{ this->data } == _rhs;
-        }
-        auto Neq(const Vec<T, N> _rhs) noexcept -> Vec<bool, N>
-        {
-            return Vec<bool, N>{ this->data } != _rhs;
-        }
-
-        auto Gt(const Vec<T, N> _rhs) -> Vec<bool, N>
-        {
-            Vec<bool, N> ret;
-            if (this->data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            const T* lhs = this->data;
-            const T* rhs = _rhs.data;
-            std::transform(lhs, lhs + N, rhs, ret.data, std::greater<T>());
-            return ret;
-        }
-
-        auto Gte(const Vec<T, N> _rhs) -> Vec<bool, N>
-        {
-            if (this->data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            Vec<bool, N> ret{ data, _rhs.data, std::greater_equal<T>() };
-            return ret;
-        }
-
-        auto Lt(const Vec<T, N> _rhs) -> Vec<bool, N>
-        {
-            if (this->data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            Vec<bool, N> ret{ data, _rhs.data, std::less<T>() };
-            return ret;
-        }
-        auto Lte(const Vec<T, N> _rhs) -> Vec<bool, N>
-        {
-            if (this->data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            Vec<bool, N> ret{ data, _rhs.data, std::less_equal<T>() };
-            return ret;
-        }
-
-        auto Max(const Vec<T, N> _rhs) -> Vec<T, N>
-        {
-            Vec<T, N> ret;
-            const T* const end = ret.data + N;
-            const T* data = this->data;
-            const T* rhsData = _rhs.data;
-            if (this->data && rhsData)
-            {
-                std::transform(this->data, this->data + N, rhsData, ret.data, std::max<T>());
-                return ret;
-            }
-            DBG("Null pointer reference", ERROR);
-        }
-        auto Min(const Vec<T, N> _rhs) -> Vec<T, N>
-        {
-            Vec<T, N> ret;
-            const T* const end = ret.data + N;
-            const T* lhs = this->data;
-            const T* rhs = _rhs.data;
-            T* retData = ret.data;
-            if (lhs && rhs)
-            {
-                std::transform(lhs, lhs + N, rhs, retData, std::min<T>());
-            }
-            else
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            return ret;
-        }
-        auto Clamp(const T _min, const T _max) -> Vec<T, N>
-        {
-            T* retData = this->data ? this->data : (T*)alloca(N * sizeof(T));
-            const T* const end = retData + N;
-            const T* const minData = &_min;
-            const T* const maxData = &_max;
-            for (; retData != end; ++retData)
-            {
-                *retData = std::min(*std::max(minData, std::min(maxData, retData)), maxData[-1]);
-            }
-            return { retData, N };
-        }
-        auto Clamp(const Vec<T, N> _min, const Vec<T, N> _max) -> Vec<T, N>
-        {
-            Vec<T, N> ret;
-            const T* minData = _min.data;
-            const T* maxData = _max.data;
-            T* retData = ret.data;
-            if (this->data && minData && maxData)
-            {
-                for (u32 i = 0; i < N; ++i)
-                {
-                    retData[i] = origin::Clamp(this->data[i], minData[i], maxData[i]);
-                }
-            }
-            else
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            return ret;
-        }
-
-        auto Rand(T _min, T _max) -> Vec<T, N>
-        {
-            if (_min > _max)
-            {
-                DBG("Min > Max", ERROR);
-            }
-            T diff = _max - _min;
-            T scale = static_cast<T>(RAND_MAX) / diff;
             Vec<T, N> ret = *this;
+            for (u32 i = 0; i < N; i++)
+            {
+                ret[i] = origin::Sqrt<T>(ret[i]);
+            }
+            return ret;
+        }
+        auto Lerp(const Vec<T, N> endValue, const Vec<T, N> alpha) -> Vec<T, N>
+        {
+            T* dst = data;
+            const T* start = data;
+            const T* end = endValue.data;
+            const T* weight = alpha.data;
+
+            for (u32 i = 0; i < N; i++, dst++, start++, end++, weight++)
+            {
+                *dst = *start + (*weight * (*end - *start));
+            }
+
+            return { dst };
+        }
+
+        auto Equal(const Vec<T, N> _rhs) noexcept -> Vec<bool, N>
+        {
+            Vec<bool, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = ret.data[i] == _rhs.data[i];
+            }
+            return ret;
+        }
+        auto NotEqual(const Vec<T, N>& rhs) noexcept -> Vec<bool, N>
+        {
+            Vec<bool, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = ret[i] != rhs[i];
+            }
+            return ret;
+        }
+
+        auto Greater(const Vec<T, N>& rhs) const -> Vec<bool, N>
+        {
+            Vec<bool, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Max<T, T>(ret[i], rhs[i]);
+            }
+            return ret;
+        }
+
+        auto GreaterEqual(const Vec<T, N>& rhs) const noexcept -> Vec<bool, N>
+        {
+            Vec<bool, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Min<T, T>(ret[i], rhs[i]);
+            }
+            return ret;
+        }
+
+        auto Lesser(const Vec<T, N>& rhs) const noexcept -> Vec<bool, N>
+        {
+            Vec<bool, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Min<T, T>(ret[i], rhs[i]);
+            }
+            return ret;
+        }
+        auto LessEqual(const Vec<T, N>& rhs) const noexcept -> Vec<bool, N>
+        {
+            Vec<bool, N> ret = *this;
+
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Max<T, T>(ret[i], rhs[i]);
+            }
+        }
+
+        auto Max(const Vec<T, N>& rhs) const -> Vec<T, N>
+        {
+            Vec<T, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Max<T, T>(ret[i], rhs[i]);
+            }
+            return ret;
+        }
+        auto Min(const Vec<T, N> rhs) const -> Vec<T, N>
+        {
+            Vec<T, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Min<T, T>(ret[i], rhs[i]);
+            }
+            return ret;
+        }
+        auto Clamp(T minValue, T maxValue) -> Vec<T, N>
+        {
+            Vec<T, N> ret = *this;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Clamp(ret[i], minValue, maxValue);
+            }
+            return ret;
+        }
+        auto Clamp(Vec<T, N> min, Vec<T, N> max) -> Vec<T, N>
+        {
+            Vec<T, N> ret;
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = origin::Clamp(ret[i], min[i], max[i]);
+            }
+            return ret;
+        }
+
+        auto Random(T min, T max) -> Vec<T, N>
+        {
+            T range = max - min;
+            T scale = range / static_cast<T>(RAND_MAX);
+            Vec<T, N> result;
             for (u64 i = 0; i < N; i++)
             {
-                ret[i] = _min + (static_cast<T>(std::rand()) * scale);
+                result[i] = min + static_cast<T>(std::rand()) * scale;
             }
-            return ret;
+            return result;
         }
-        auto ShiftL(const Vec<T, N> _rhs) const -> Vec<T, N>
+        auto ShiftLeft(const Vec<T, N>& rhs) const -> Vec<T, N>
         {
-            if (this->data == nullptr || _rhs.data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
             Vec<T, N> ret;
-            std::transform(this->data, this->data + N, _rhs.data, ret.data, [](T a, T b) { return a << b; });
+            for (u32 i = 0; i < N; ++i)
+            {
+                ret[i] = ret[i] << rhs[i];
+            }
             return ret;
         }
 
-        auto ShiftR(const Vec<T, N> _rhs) const -> Vec<T, N>
+        auto ShiftRight(const Vec<T, N>& rhs) const noexcept -> Vec<T, N>
         {
-            if (this->data == nullptr)
+            Vec<T, N> result = *this;
+            for (u32 i = 0; i < N; ++i)
             {
-                DBG("Null pointer reference", ERROR);
+                result[i] = result[i] >> rhs[i];
             }
-            Vec<T, N> ret;
-            std::transform(this->data, this->data + N, _rhs.data, ret.data, [](T a, T b) { return a >> b; });
-            return ret;
+            return result;
         }
-        auto Pow(const Vec<T, N> _rhs) const -> Vec<T, N>
+        auto Pow(const Vec<T, N>& rhs) const -> Vec<T, N>
         {
-            if (this->data == nullptr || _rhs.data == nullptr)
+            Vec<T, N> result = *this;
+            for (u32 i = 0; i < N; ++i)
             {
-                DBG("Null pointer reference", ERROR);
+                result[i] = T(origin::Pow(f64(result[i]), f64(rhs[i])));
             }
-            Vec<T, N> ret;
-            try
-            {
-                for (u32 i = 0; i < N; i++)
-                {
-                    ret[i] = std::pow(this->data[i], _rhs[i]);
-                }
-            }
-            catch (std::exception& e)
-            {
-                DBG(e.what(), ERROR);
-            }
-            return ret;
+            return result;
         }
-        auto Lerp(const Vec<T, N> _rhs, u32 _exp) const -> Vec<T, N>
+        auto Lerp(const Vec<T, N>& rhs, T exponent) const -> Vec<T, N>
         {
-            if (this->data == nullptr || _rhs.data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            const T* data = this->data;
-            const T* rhsData = _rhs.data;
-            T* retData = (T*)alloca(N * sizeof(T));
-
+            Vec<T, N> result = *this;
             for (u32 i = 0; i < N; i++)
             {
-                retData[i] = this->data[i] + (rhsData[i] - this->data[i]) * _exp;
+                result[i] = origin::Add(result[i] * exponent, rhs[i] * (T(1) - exponent));
             }
-
-            return Vec<T, N>(retData);
+            return Vec<T, N>(result);
         }
-        auto Lerp(const Vec<T, N> _rhs, const Vec<T, N> _exp) const -> Vec<T, N>
+        auto Lerp(const Vec<T, N>& rhs, const Vec<T, N>& exp) const -> Vec<T, N>
         {
-            const T* data = this->data;
-            const T* rhsData = _rhs.data;
-            const T* expData = _exp.data;
-            T* retData = (T*)alloca(N * sizeof(T));
-
+            Vec<T, N> result = *this;
             for (u32 i = 0; i < N; i++)
             {
-                retData[i] = this->data[i] + (rhsData[i] - this->data[i]) * expData[i];
+                result[i] = origin::Add(result[i] * exp[i], rhs[i] * (T(1) - exp[i]));
             }
-
-            return Vec<T, N>(retData);
+            return result;
         }
-        auto Clamp(const Vec<T, N> _min, const Vec<T, N> _max) const -> Vec<T, N>
+        auto Clamp(Vec<T, N> min, Vec<T, N> max) const -> Vec<T, N>
         {
-            if (this->data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-
-            Vec<T, N> ret;
-            const T* minData = _min.data;
-            const T* maxData = _max.data;
-            T* retData = ret.data;
-
+            Vec<T, N> result = *this;
             for (u32 i = 0; i < N; i++)
             {
-                retData[i] = origin::Clamp(this->data[i], minData[i], maxData[i]);
+                result[i] = origin::Clamp(result[i], min[i], max[i]);
             }
-
-            return ret;
+            return result;
         }
 
-        auto Clamp(const T _min, const T _max) const -> Vec<T, N>
+        auto Clamp(T min, T max) const -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            const T* d = this->data;
-            T* r = ret.data;
-            if (d == nullptr)
+            Vec<T, N> result;
+            for (u32 i = 0; i < N; ++i)
             {
-                DBG("Null pointer reference", ERROR);
+                result[i] = origin::Clamp(data[i], min, max);
             }
-            for (u32 i = 0; i < N; i++)
-            {
-                r[i] = origin::Clamp(d[i], _min, _max);
-            }
-            return ret;
+            return result;
         }
 
         auto Abs() const noexcept -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            T* r = ret.data;
-            const T* d = this->data;
-            if (d == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
+            Vec<T, N> result;
+            T* resultData = result.data;
+            const T* thisData = this->data;
+
             for (u32 i = 0; i < N; i++)
             {
-                r[i] = d[i] < T(0) ? -d[i] : d[i];
+                resultData[i] = Abs(thisData[i]);
             }
-            return ret;
+
+            return result;
         }
         auto Sign() const noexcept -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            const T* d = this->data;
-            T* r = ret.data;
-            if (d == nullptr)
+            Vec<T, N> result;
+            const T* src = this->data;
+            T* dst = result.data;
+            for (u32 i = 0; i < N; ++i)
             {
-                DBG("Null pointer reference", ERROR);
+                dst[i] = origin::Sign(src[i]);
             }
-            for (u32 i = 0; i < N; i++)
-            {
-                r[i] = origin::Sign(d[i]);
-            }
-            return ret;
+            return result;
         }
         auto Sqrt() const -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            const T* d = this->data;
-            T* r = ret.data;
-            if (d == nullptr)
+            Vec<T, N> result{ *this };
+            for (u32 i = 0; i < N; ++i)
             {
-                DBG("Null pointer reference", ERROR);
+                result[i] = T(origin::Sqrt(f64(result[i])));
             }
-            for (u32 i = 0; i < N; i++)
-            {
-                r[i] = origin::Sqrt(d[i]);
-            }
-            return ret;
+            return result;
         }
-        auto Sq() const -> Vec<T, N>
+        auto Square() const noexcept -> Vec<T, N>
         {
-            Vec<T, N> ret;
-            T* r = ret.data;
-            const T* d = this->data;
-            if (d == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
+            Vec<T, N> result;
+            T* resultData = result.data;
+            const T* thisData = this->data;
+
             for (u32 i = 0; i < N; i++)
             {
-                r[i] = d[i] * d[i];
+                resultData[i] = thisData[i] * thisData[i];
             }
-            return ret;
+
+            return result;
         }
         auto RSqrt() const -> Vec<T, N>
         {
-            if (this->data == nullptr)
+            Vec<T, N> result{ *this };
+            for (u32 i = 0; i < N; ++i)
             {
-                DBG("Null pointer reference", ERROR);
+                result[i] = T(1.0 / origin::Sqrt(f64(result[i])));
             }
-            Vec<T, N> ret = *this;
-            for (u32 i = 0; i < N; i++)
-            {
-                ret[i] = (T)(1.0 / sqrt(double(ret[i])));
-            }
-            return ret;
+            return result;
         }
 
-        auto Rand(T _min, T _max) const -> Vec<T, N>
+        auto Rand(T min, T max) -> Vec<T, N>
         {
-            if (this->data == nullptr)
+            const T scale = T(RAND_MAX) / (max - min);
+            for (u32 i = 0; i < N; ++i)
             {
-                DBG("Null pointer reference", ERROR);
-            }
-            const T range = _max - _min;
-            const T scale = (T)(RAND_MAX / range);
-            for (u32 i = 0; i < N; i++)
-            {
-                this->data[i] = _min + (T)(std::rand() * scale);
+                data[i] = min + T((std::rand()) * scale);
             }
             return *this;
         }
-        auto IsNan(bool set_zero = false) const noexcept -> bool
+        auto IsNan() const noexcept -> bool
         {
-            if (this->data == nullptr)
-            {
-                return false;
-            }
             bool result = false;
             for (u32 i = 0; i < N; i++)
             {
-                if (isnan(this->data[i][0]))
-                {
-                    result = true;
-                    if (set_zero)
-                    {
-                        this->data[i][0] = 0;
-                    }
-                    break;
-                }
+                result |= origin::IsNan(this[i]);
             }
             return result;
         }
         auto IsNum() const -> bool { return !IsNan(); }
         inline auto operator[](u32 index) -> T& { return this->data[index]; }
-        auto operator=(T* _data) -> Vec<T, N>&
+        auto operator=(T* src) -> Vec<T, N>&
         {
-            if (_data == nullptr)
-            {
-                DBG("Null pointer reference", ERROR);
-            }
-            std::memcpy(this->data, _data, N * sizeof(T));
+            std::memcpy(data, src, N * sizeof(T));
             return *this;
         }
-        auto operator=(const Vec<T, N>* _rhs) -> Vec<T, N>
+        constexpr auto operator[](u32 index) const noexcept -> T
         {
-            if (_rhs == nullptr)
-            {
-                throw std::runtime_error("Null pointer reference");
-            }
-            for (u32 i = 0; i < N; i++)
-            {
-                this->data[i] = _rhs[i];
-            }
-            return this;
-        }
-        auto operator[](u32 i) const -> T
-        {
-            if (i < N)
-            {
-                return this->data[i];
-            }
-            return 0;
+            return index < N ? this->data[index] : T{};
         }
         explicit operator Vec<T, N>*() { return this; }
         auto operator+(const T _rhs) -> Vec<T, N> { return this->Add(_rhs); }
@@ -851,62 +644,76 @@ namespace origin
         auto operator&(const T _rhs) -> Vec<T, N> { return this->And(_rhs); }
         auto operator|(const T _rhs) -> Vec<T, N> { return this->Or(_rhs); }
         auto operator^(const T _rhs) -> Vec<T, N> { return this->Pow(_rhs); }
-        auto operator<<(const T _rhs) -> Vec<T, N> { return this->ShiftL(_rhs); }
-        auto operator>>(const T _rhs) -> Vec<T, N> { return this->ShiftR(_rhs); }
-        auto operator==(const T _rhs) -> Vec<bool, N> { return this->Eq(_rhs); }
-        auto operator!=(const T _rhs) -> Vec<bool, N> { return this->Neq(_rhs); }
+        auto operator<<(const T _rhs) -> Vec<T, N> { return this->ShiftLeft(_rhs); }
+        auto operator>>(const T _rhs) -> Vec<T, N> { return this->ShiftRight(_rhs); }
+        auto operator==(const T _rhs) -> Vec<bool, N> { return this->Equal(_rhs); }
+        auto operator!=(const T _rhs) -> Vec<bool, N> { return this->NotEqual(_rhs); }
         auto operator<(const T _rhs) -> Vec<bool, N> { return this->Lt(_rhs); }
-        auto operator<=(const T _rhs) -> Vec<bool, N> { return this->Lte(_rhs); }
-        auto operator>(const T _rhs) -> Vec<bool, N> { return this->Gt(_rhs); }
-        auto operator>=(const T _rhs) -> Vec<bool, N> { return this->Gte(_rhs); }
+        auto operator<=(const T _rhs) -> Vec<bool, N> { return this->LessEqual(_rhs); }
+        auto operator>(const T _rhs) -> Vec<bool, N> { return this->Greater(_rhs); }
+        auto operator>=(const T _rhs) -> Vec<bool, N> { return this->GreaterEqual(_rhs); }
         auto operator-() -> Vec<T, N> { return Neg(); }
         auto operator~() const -> Vec<T, N> { return Vec<T, N>(~*this); }
         auto operator+=(const T _rhs) -> Vec<T, N>
         {
-            *this = this->Add(_rhs);
+            for (u32 i = 0; i < N; i++)
+            {
+                this[i] += _rhs;
+            }
             return *this;
         }
         auto operator-=(const T _rhs) -> Vec<T, N>
         {
-            *this = this->Sub(_rhs);
+            for (u32 i = 0; i < N; i++)
+            {
+                this[i] -= _rhs;
+            }
             return *this;
         }
         auto operator*=(const T _rhs) -> Vec<T, N>
         {
-            *this = this->Mul(_rhs);
-            return *this;
+            for (u32 i = 0; i < N; i++)
+            {
+                this[i] *= _rhs;
+            }
         }
         auto operator/=(const T _rhs) -> Vec<T, N>
         {
-            *this = this->Div(_rhs);
+            for (u32 i = 0; i < N; i++)
+            {
+                this[i] /= _rhs;
+            }
             return *this;
         }
-        auto operator%=(const T _rhs) -> Vec<T, N>
+        auto operator%=(const Vec<T, N> _rhs) -> Vec<T, N>
         {
-            *this = this->Mod(_rhs);
+            for (u32 i = 0; i < N; i++)
+            {
+                this[i] %= _rhs[i];
+            }
             return *this;
         }
-        auto operator&=(const T& _rhs) -> Vec<T, N>
+        auto operator&=(const Vec<T, N>& _rhs) -> Vec<T, N>
         {
             *this = this->And(_rhs);
             return *this;
         }
-        auto operator|=(const T& _rhs) -> Vec<T, N>
+        auto operator|=(const Vec<T, N>& _rhs) -> Vec<T, N>
         {
             *this = this->Or(_rhs);
             return *this;
         }
-        auto operator^=(const T& _rhs) -> Vec<T, N>
+        auto operator^=(const Vec<T, N>& _rhs) -> Vec<T, N>
         {
             *this = this->Pow(_rhs);
             return *this;
         }
-        auto operator<<=(const T& _rhs) -> Vec<T, N>
+        auto operator<<=(const Vec<T, N>& _rhs) -> Vec<T, N>
         {
             *this = this->ShiftL(_rhs);
             return *this;
         }
-        auto operator>>=(const T& _rhs) -> Vec<T, N>
+        auto operator>>=(const Vec<T, N>& _rhs) -> Vec<T, N>
         {
             *this = this->ShiftR(_rhs);
             return *this;
@@ -953,11 +760,6 @@ namespace origin
             *this = Div(_rhs);
             return *this;
         }
-        auto operator%=(const Vec<T, N> _rhs) -> Vec<T, N>
-        {
-            *this = Mod(_rhs);
-            return *this;
-        }
         auto operator&=(const Vec<T, N> _rhs) -> Vec<T, N>
         {
             *this = And(_rhs);
@@ -975,16 +777,66 @@ namespace origin
         };
         auto operator<<=(const Vec<T, N> _rhs) -> Vec<T, N>
         {
-            *this = ShiftL(_rhs);
+            *this = ShiftLeft(_rhs);
             return *this;
         };
         auto operator>>=(const Vec<T, N> _rhs) -> Vec<T, N>
         {
-            *this = ShiftR(_rhs);
+            *this = ShiftRight(_rhs);
             return *this;
         };
     };
-    class Vec2 : public Vec<f64, 2>
+
+    template<u64 N>
+    class Vecf : private Vec<f64, N>
+    {
+    public:
+        Vecf() = default;
+        explicit Vecf(Vecf const& _rhs) :
+            Vec<f64, 2>(_rhs) {}
+        Vecf(f64 const* ap, u64 count = N)
+        {
+            this->data = new f64[N];
+            for (auto i = 0; i < N; ++i)
+            {
+                this->data[i] = ap[i];
+            }
+        }
+
+        ~Vecf() { delete[] this->data; }
+
+        auto GetData() const -> f64* { return this->data; }
+
+        auto operator=(Vecf const& _rhs) -> Vecf&
+        {
+            std::memcpy(this->data, _rhs.GetData(), N * sizeof(f64));
+            return *this;
+        }
+        auto operator=(f64 const* ap) -> Vecf&
+        {
+            std::memcpy(this->data, ap, N * sizeof(f64));
+            return *this;
+        }
+
+        auto operator[](u64 i) -> f64& { return this->data[i]; }
+        auto operator[](u64 i) const -> f64 { return this->data[i]; }
+
+        auto operator+(f64 const& _rhs) -> Vecf
+        {
+            Vecf<N> v = new Vecf<N>(*this);
+            for (auto i = 0; i < N; ++i)
+            {
+                v[i] = v[i] + _rhs;
+            }
+            return *v;
+        }
+    };
+    using Vec2i = Vec<i64, 2>;
+    using Vec3i = Vec<i64, 3>;
+    using Vec4i = Vec<i64, 4>;
+    using Vec16f = Vec<f64, 16>;
+    using Vec16i = Vec<i64, 16>;
+    class Vec2f
     {
     public:
         union
@@ -994,20 +846,22 @@ namespace origin
             {
                 f64 x;
                 f64 y;
-            };
+            } __attribute__((aligned(16)));
         };
-        explicit Vec2(Vec<f64, 2>& _rhs) { this->data = _rhs.GetData(); };
-        explicit Vec2(const Vec<f64, 2>& _rhs)
+        Vec2f() = default;
+        explicit Vec2f(Vec2f const& _rhs)
         {
-            std::memcpy(this->data, _rhs.GetData(), sizeof(f64) * 2);
+            std::memcpy(this->data, _rhs.data, 2 * sizeof(f64));
         }
-        explicit Vec2(f64 _x = 0, f64 _y = 0)
+        Vec2f(f64 _x, f64 _y)
         {
-            x = _x;
-            y = _y;
+            this->data[0] = _x;
+            this->data[1] = _y;
         }
+        ~Vec2f() { delete[] this->data; }
     };
-    class Vec3 : public Vec<f64, 3>
+
+    class Vec3f
     {
     public:
         union
@@ -1018,15 +872,22 @@ namespace origin
                 f64 x;
                 f64 y;
                 f64 z;
-            };
+            } __attribute__((aligned(32)));
         };
-        Vec3() = default;
-        explicit Vec3(Vec<f64, 3>& _rhs) { this->data = _rhs.GetData(); }
-        explicit Vec3(Vec<f64, 3> const& _rhs) { *data = *_rhs.GetData(); }
-        explicit Vec3(f64 _x, f64 _y, f64 _z) :
-            x(_x), y(_y), z(_z) {}
+        Vec3f() = default;
+        Vec3f(Vec3f const& _rhs)
+        {
+            std::memcpy(this->data, _rhs.data, 3 * sizeof(f64));
+        }
+        Vec3f(f64 _x, f64 _y, f64 _z)
+        {
+            this->data[0] = _x;
+            this->data[1] = _y;
+            this->data[2] = _z;
+        }
     };
-    class Vec4 : public Vec<f64, 4>
+
+    class Vec4f
     {
     public:
         union
@@ -1038,248 +899,153 @@ namespace origin
                 f64 y;
                 f64 z;
                 f64 w;
-            };
+            } __attribute__((aligned(32)));
         };
-        explicit Vec4(Vec<f64, 4>& _rhs) { this->data = _rhs.GetData(); }
-        explicit Vec4(const Vec<f64, 4>& _rhs) { *data = *_rhs.GetData(); }
-        explicit Vec4(f64 _x = 0, f64 _y = 0, f64 _z = 0, f64 _w = 0)
+        Vec4f() = default;
+        Vec4f(Vec4f const& _rhs)
         {
-            if (this->data == nullptr)
-            {
-                DBG("Vec4 ctor: data is nullptr", ERROR);
-            }
-            x = _x;
-            y = _y;
-            z = _z;
-            w = _w;
+            std::memcpy(this->data, _rhs.data, 4 * sizeof(f64));
         }
-    };
-    class Vec16 : public Vec<f64, 16>
-    {
-        union
+        Vec4f(f64 _x, f64 _y, f64 _z, f64 _w)
         {
-            f64* data = new f64[16];
-            struct
-            {
-                f64 x[4];
-                f64 y[4];
-                f64 z[4];
-                f64 w[4];
-            };
-        };
+            this->data[0] = _x;
+            this->data[1] = _y;
+            this->data[2] = _z;
+            this->data[3] = _w;
+        }
 
-    public:
-        Vec16() = default;
-        explicit Vec16(Vec<f64, 16>& _rhs) :
-            Vec16() { this->data = _rhs.GetData(); }
-        explicit Vec16(Vec<f64, 16> const& _rhs) { *data = *_rhs.GetData(); }
-        explicit Vec16(const f64 _x[4], const f64 _y[4], const f64 _z[4], const f64 _w[4])
+        ~Vec4f() { delete[] this->data; }
+
+        auto operator[](u64 i) -> f64& { return this->data[i]; }
+        auto operator[](u64 i) const -> f64 { return this->data[i]; }
+        auto operator=(Vec4f const& _rhs) -> Vec4f&
         {
-            *x = *_x;
-            *y = *_y;
-            *z = *_z;
-            *w = *_w;
+            std::memcpy(this->data, _rhs.data, 4 * sizeof(f64));
+            return *this;
         }
+        auto operator+(Vec4f const& _rhs) -> Vec4f { return { this->data[0] + _rhs.data[0], this->data[1] + _rhs.data[1], this->data[2] + _rhs.data[2], this->data[3] + _rhs.data[3] }; }
+
+        auto operator-(Vec4f const& _rhs) -> Vec4f { return { this->data[0] - _rhs.data[0], this->data[1] - _rhs.data[1], this->data[2] - _rhs.data[2], this->data[3] - _rhs.data[3] }; }
+
+        auto operator*(f64 _rhs) -> Vec4f { return { this->data[0] * _rhs, this->data[1] * _rhs, this->data[2] * _rhs, this->data[3] * _rhs }; }
+
+        auto operator/(f64 _rhs) -> Vec4f { return { this->data[0] / _rhs, this->data[1] / _rhs, this->data[2] / _rhs, this->data[3] / _rhs }; }
     };
-    class Quaternion : public Vec16
+    class Vec16 : public Vec16f
     {
+    public:
         union
         {
             f64* data = new f64[16];
             struct
             {
+                f64 x0;
                 f64 x1;
-                f64 y1;
-                f64 z1;
-                f64 w1;
                 f64 x2;
-                f64 y2;
-                f64 z2;
-                f64 w2;
                 f64 x3;
+                f64 y0;
+                f64 y1;
+                f64 y2;
                 f64 y3;
+                f64 z0;
+                f64 z1;
+                f64 z2;
                 f64 z3;
+                f64 w0;
+                f64 w1;
+                f64 w2;
                 f64 w3;
-                f64 x4;
-                f64 y4;
-                f64 z4;
-                f64 w4;
-            };
+            } __attribute__((aligned(128)));
+        };
+        Vec16() = default;
+        Vec16(Vec<f64, 16>& _rhs) :
+            Vec16() { this->data = _rhs.GetData(); }
+        Vec16(Vec<f64, 16> const& _rhs) { *data = *_rhs.GetData(); }
+        Vec16(f64 x0, f64 x1, f64 x2, f64 x3, f64 y0, f64 y1, f64 y2, f64 y3, f64 z0, f64 z1, f64 z2, f64 z3, f64 w0, f64 w1, f64 w2, f64 w3)
+        {
+            this->data[0] = x0;
+            this->data[1] = x1;
+            this->data[2] = x2;
+            this->data[3] = x3;
+            this->data[4] = y0;
+            this->data[5] = y1;
+            this->data[6] = y2;
+            this->data[7] = y3;
+            this->data[8] = z0;
+            this->data[9] = z1;
+            this->data[10] = z2;
+            this->data[11] = z3;
+            this->data[12] = w0;
+            this->data[13] = w1;
+            this->data[14] = w2;
+            this->data[15] = w3;
+        }
+        Vec16(f64 x[4], f64 y[4], f64 z[4], f64 w[4]) :
+            Vec16(x[0], x[1], x[2], x[3], y[0], y[1], y[2], y[3], z[0], z[1], z[2], z[3], w[0], w[1], w[2], w[3])
+        {
+        }
+    };
+    class Quaternion : Vec16
+    {
+    private:
+        int* ptr{};
+        union
+        {
+            f64* data = new f64[16];
+            struct
+            {
+                f64 x0;
+                f64 x1;
+                f64 x2;
+                f64 x3;
+                f64 y0;
+                f64 y1;
+                f64 y2;
+                f64 y3;
+                f64 z0;
+                f64 z1;
+                f64 z2;
+                f64 z3;
+                f64 w0;
+                f64 w1;
+                f64 w2;
+                f64 w3;
+            } __attribute__((aligned(128)));
         };
 
     public:
-        explicit Quaternion(Vec<f64, 4>& _rhs)
+        Quaternion()
         {
-            if (_rhs.GetData() == nullptr)
-            {
-                DBG("Null pointer reference in Quaternion constructor.", ERROR);
-            }
-            std::copy(_rhs.GetData(), _rhs.GetData() + 4, data);
+            *ptr = 0;
+            std::fill(data, data + 16, 0.0);
+        };
+        Quaternion(const Quaternion& rhs) :
+            ptr(rhs.ptr),
+            Vec16(rhs)
+        {
+            std::copy(rhs.GetData(), rhs.GetData() + 16, data);
         }
-        explicit Quaternion(f64 x[4], f64 y[4], f64 z[4], f64 w[4]) :
-            Vec16(x, y, z, w) {}
-        explicit Quaternion(f64 q1x = 0, f64 q1y = 0, f64 q1z = 0, f64 q1w = 0, f64 q2x = 0, f64 q2y = 0, f64 q2z = 0, f64 q2w = 0, f64 q3x = 0, f64 q3y = 0, f64 q3z = 0, f64 q3w = 0, f64 q4x = 0, f64 q4y = 0, f64 q4z = 0, f64 q4w = 0)
+        explicit Quaternion(const f64 (&src)[16]) :
+            Vec16(src[0], src[1], src[2], src[3], src[4], src[5], src[6], src[7], src[8], src[9], src[10], src[11], src[12], src[13], src[14], src[15])
         {
-            __m128d c0 = _mm_set_pd(q1z, q1x);
-            __m128d c1 = _mm_set_pd(q1w, q2x);
-            __m128d c2 = _mm_set_pd(q2z, q2y);
-            __m128d c3 = _mm_set_pd(q2w, q3x);
-            __m128d c4 = _mm_set_pd(q3z, q3y);
-            __m128d c5 = _mm_set_pd(q3w, q4x);
-            __m128d c6 = _mm_set_pd(q4z, q4y);
-            __m128d c7 = _mm_set_pd(q4w, 0);
-
-            _mm_storeu_pd(&this->data[0], c0);
-            _mm_storeu_pd(&this->data[2], c1);
-            _mm_storeu_pd(&this->data[4], c2);
-            _mm_storeu_pd(&this->data[6], c3);
-            _mm_storeu_pd(&this->data[8], c4);
-            _mm_storeu_pd(&this->data[10], c5);
-            _mm_storeu_pd(&this->data[12], c6);
-            _mm_storeu_pd(&this->data[14], c7);
+            *ptr = 0;
+            std::copy(src, src + 16, data);
         }
-        explicit Quaternion(const Vec4 _q[4]) :
-            Quaternion(_q[0].x, _q[0].y, _q[0].z, _q[0].w, _q[1].x, _q[1].y, _q[1].z, _q[1].w, _q[2].x, _q[2].y, _q[2].z, _q[2].w, _q[3].x, _q[3].y, _q[3].z, _q[3].w)
+        Quaternion(const f64 x[4], const f64 y[4], const f64 z[4], const f64 w[4]) :
+            Vec16({ x[0], x[1], x[2], x[3], y[0], y[1], y[2], y[3], z[0], z[1], z[2], z[3], w[0], w[1], w[2], w[3] })
         {
-            __m128d c0 = _mm_loadu_pd(&_q[0].x);
-            __m128d c1 = _mm_loadu_pd(&_q[1].x);
-            __m128d c2 = _mm_loadu_pd(&_q[2].x);
-            __m128d c3 = _mm_loadu_pd(&_q[3].x);
-            _mm_store_pd(&this->data[0], c0);
-            _mm_store_pd(&this->data[2], c1);
-            _mm_store_pd(&this->data[4], c2);
-            _mm_store_pd(&this->data[6], c3);
+            std::copy(x, x + 4, data);
+            std::copy(y, y + 4, data + 4);
+            std::copy(z, z + 4, data + 8);
+            std::copy(w, w + 4, data + 12);
         }
 
-        auto operator*(Quaternion& rhs) const -> Quaternion
-        {
-            __m128d c0 = _mm_load_pd(&this->data[0]);
-            __m128d c1 = _mm_load_pd(&this->data[2]);
-            __m128d c2 = _mm_load_pd(&rhs.data[0]);
-            __m128d c3 = _mm_load_pd(&rhs.data[2]);
-            __m128d c4 = _mm_mul_pd(c0, c2);
-            __m128d c5 = _mm_mul_pd(c1, c3);
-            __m128d c6 = _mm_mul_pd(c0, c3);
-            __m128d c7 = _mm_mul_pd(c1, c2);
-            c4 = _mm_add_pd(c4, c5);
-            c6 = _mm_xor_pd(c6, _mm_set_pd(-0.0, 0.0));
-            c7 = _mm_xor_pd(c7, _mm_set_pd(-0.0, 0.0));
-            c6 = _mm_add_pd(c6, c7);
-            _mm_store_pd(&this->data[0], c4);
-            _mm_store_pd(&this->data[2], c6);
-            return *this;
-        }
-
-        auto operator*(f64 scale) const -> Quaternion
-        {
-            __m128d c0 = _mm_load_pd(&this->data[0]);
-            __m128d c1 = _mm_load_pd(&this->data[2]);
-            __m128d c2 = _mm_mul_pd(c0, _mm_set1_pd(scale));
-            __m128d c3 = _mm_mul_pd(c1, _mm_set1_pd(scale));
-            _mm_store_pd(&this->data[0], c2);
-            _mm_store_pd(&this->data[2], c3);
-            return *this;
-        }
-
-        auto operator==(const Quaternion& _rhs) const -> bool
-        {
-            __m128d c0 = _mm_load_pd(&this->data[0]);
-            __m128d c1 = _mm_load_pd(&_rhs.data[0]);
-            __m128d c2 = _mm_cmpeq_pd(c0, c1);
-            return _mm_movemask_pd(c2) == 3;
-        }
-
-        auto operator!=(const Quaternion& _rhs) const -> bool
-        {
-            return !(*this == _rhs);
-        }
-
-        auto Mul(const Vec4& rhs) const -> Vec4
-        {
-            __m128d c0 = _mm_load_pd(&this->data[0]);
-            __m128d c1 = _mm_load_pd(&this->data[2]);
-            __m128d c2 = _mm_load_pd(&this->data[4]);
-            __m128d c3 = _mm_load_pd(&this->data[6]);
-
-            __m128d a0 = _mm_mul_pd(c0, _mm_set1_pd(rhs.x));
-            __m128d a1 = _mm_mul_pd(c1, _mm_set1_pd(rhs.y));
-            __m128d a2 = _mm_mul_pd(c2, _mm_set1_pd(rhs.z));
-            __m128d a3 = _mm_mul_pd(c3, _mm_set1_pd(rhs.w));
-
-            __m128d r0 = _mm_add_pd(a0, a1);
-            __m128d r1 = _mm_add_pd(a2, a3);
-            __m128d r2 = _mm_add_pd(r0, r1);
-
-            Vec4 result{};
-            _mm_storeu_pd(&result.x, r2);
-            return result;
-        }
-
-        auto Mul(const Quaternion& rhs) const -> Vec3
-        {
-            __m128d c0 = _mm_set_pd(this->data[3], this->data[0]);
-            __m128d c1 = _mm_set_pd(this->data[7], this->data[4]);
-            __m128d c2 = _mm_set_pd(this->data[11], this->data[8]);
-            __m128d c3 = _mm_set_pd(rhs.data[3], rhs.data[0]);
-
-            __m128d a0 = _mm_mul_pd(c0, c3);
-            __m128d a1 = _mm_mul_pd(c1, c3);
-            __m128d a2 = _mm_mul_pd(c2, c3);
-
-            __m128d b0 = _mm_unpackhi_pd(a0, a1);
-            __m128d b1 = _mm_unpacklo_pd(a0, a1);
-            __m128d b2 = _mm_unpackhi_pd(a2, _mm_setzero_pd());
-
-            __m128d r0 = _mm_add_pd(b0, b1);
-            __m128d r1 = _mm_add_pd(b2, _mm_setzero_pd());
-
-            Vec3 result{};
-            _mm_storeu_pd(&result.x, r0);
-            _mm_storeu_pd(&result.z, r1);
-            return result;
-        }
-
-        auto Mul(const Vec16& rhs) const -> Quaternion
-        {
-            Quaternion result;
-            __m128d c0 = _mm_setzero_pd();
-            __m128d c1 = _mm_setzero_pd();
-            __m128d c2 = _mm_setzero_pd();
-            __m128d c3 = _mm_setzero_pd();
-
-            for (u64 i = 0; i < 4; i++)
-            {
-                c0 = _mm_add_pd(
-                    c0, _mm_mul_pd(_mm_load_pd(&this->data[i]), _mm_set1_pd(rhs[i])));
-                c1 = _mm_add_pd(c1, _mm_mul_pd(_mm_load_pd(&this->data[i * 4 + 2]), _mm_set1_pd(rhs[i + 4])));
-                c2 = _mm_add_pd(c2, _mm_mul_pd(_mm_load_pd(&this->data[i * 4 + 4]), _mm_set1_pd(rhs[i + 8])));
-                c3 = _mm_add_pd(c3, _mm_mul_pd(_mm_load_pd(&this->data[i * 4 + 6]), _mm_set1_pd(rhs[i + 12])));
-            }
-
-            _mm_store_pd(&result[0], c0);
-            _mm_store_pd(&result[2], c1);
-            _mm_store_pd(&result[4], c2);
-            _mm_store_pd(&result[6], c3);
-
-            return result;
-        }
-
-        auto Divide(const Quaternion& rhs) const -> Quaternion
-        {
-            Quaternion result;
-            for (u32 i = 0; i < 4; i++)
-            {
-                result.data[i] = this->data[i] / rhs.data[0] - this->data[i + 4] / rhs.data[1] -
-                                 this->data[i + 8] / rhs.data[2] - this->data[i + 12] / rhs.data[3];
-            }
-            return result;
-        }
         auto Add(const Quaternion& rhs) const -> Quaternion
         {
             Quaternion result;
-            for (u32 i = 0; i < 4; i++)
+            for (u32 i = 0; i < 4; ++i)
             {
-                result.data[i] = this->data[i] + rhs.data[i];
+                result[i] = data[i] + rhs[i];
             }
             return result;
         }
@@ -1287,17 +1053,70 @@ namespace origin
         auto Sub(const Quaternion& rhs) const -> Quaternion
         {
             Quaternion result;
-            for (u32 i = 0; i < 4; i++)
+            for (u32 i = 0; i < 4; ++i)
             {
-                result.data[i] = this->data[i] - rhs.data[i];
+                result[i] = data[i] - rhs[i];
             }
             return result;
         }
-        static auto Rotate(Quaternion q, const Vec4& axis, Face face)
+        auto Mul(const Vec4f& rhs) const -> Vec4f
+        {
+            Vec4f result;
+            for (u32 i = 0; i < 4; ++i)
+            {
+                result[i] = data[i * 4] * rhs[0] + data[i * 4 + 1] * rhs[1] + data[i * 4 + 2] * rhs[2] + data[i * 4 + 3] * rhs[3];
+            }
+            return result;
+        }
+        auto Mul(const Quaternion& rhs) const -> Quaternion
+        {
+            Quaternion result{};
+            for (u32 i = 0; i < 4; ++i)
+            {
+                for (u32 j = 0; j < 4; ++j)
+                {
+                    result.data[i * 4 + j] = data[i * 4] * rhs.data[j] + data[i * 4 + 1] * rhs.data[j + 4] + data[i * 4 + 2] * rhs.data[j + 8] + data[i * 4 + 3] * rhs.data[j + 12];
+                }
+            }
+
+            return result;
+        }
+        auto Div(const Quaternion& rhs) const -> Quaternion
+        {
+            return Mul(rhs.Inverse());
+        }
+        auto Div(const Vec4f& rhs) const -> Vec4f
+        {
+            Quaternion inv = Inverse();
+            return inv.Mul(rhs);
+        }
+        auto Inverse() const -> Quaternion
+        {
+            Quaternion result;
+            result.data[0] = data[0];
+            result.data[1] = -data[1];
+            result.data[2] = -data[2];
+            result.data[3] = -data[3];
+            result.data[4] = data[4];
+            result.data[5] = -data[5];
+            result.data[6] = -data[6];
+            result.data[7] = -data[7];
+            result.data[8] = data[8];
+            result.data[9] = -data[9];
+            result.data[10] = -data[10];
+            result.data[11] = -data[11];
+            result.data[12] = data[12];
+            result.data[13] = -data[13];
+            result.data[14] = -data[14];
+            result.data[15] = -data[15];
+            return result;
+        }
+
+        static auto Rotate(const Quaternion q, Vec4f& axis, Face face)
             -> Quaternion
         {
-            f64 a = acos(axis.w) / (axis.LengthSq() * 2.0);
-            Vec4 dv;
+            f64 a = Acos(axis.w) / ((axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2] + axis[3] * axis[3]) * 2.0);
+            Vec4f dv;
             switch (face)
             {
             case Face::Right:
@@ -1318,121 +1137,110 @@ namespace origin
             case Face::Down:
                 dv.z = -sin(a);
                 break;
+            case Face::None:
+                break;
             }
-            q = Quaternion(0, axis.x, axis.y, axis.z);
-            q *= Quaternion(0, dv.x, dv.y, dv.z);
-            return Transform(q, axis);
+
+            Quaternion result = Quaternion(&axis.x, &axis.y, &axis.z, &axis.w);
+            result *= Quaternion(&dv.x, &dv.y, &dv.z, &dv.w);
+            return Transform(result, axis);
         }
 
-        static auto Transform(Quaternion& q, const Vec4& v) -> Quaternion
+        static auto Transform(const Quaternion& q, const Vec4f& v) -> Quaternion
         {
-            return Quaternion{ q.data[3] * v.x + q.data[1] * v.y + q.data[2] * v.z -
-                                   q.data[0] * v.x - q.data[4] * v.y - q.data[5] * v.z,
-                               q.data[0] * v.x + q.data[4] * v.y + q.data[5] * v.z -
-                                   q.data[3] * v.x - q.data[7] * v.y - q.data[8] * v.z,
-                               q.data[6] * v.x + q.data[7] * v.y + q.data[8] * v.z -
-                                   q.data[0] * v.x - q.data[1] * v.y - q.data[2] * v.z,
-                               0 };
+            return Quaternion{ { { q.data[0] * v.x + q.data[1] * v.y + q.data[2] * v.z },
+                                 { q.data[1] * v.x - q.data[0] * v.y - q.data[3] * v.z }, //
+                                 { q.data[2] * v.x - q.data[3] * v.y + q.data[0] * v.z }, //
+                                 { q.data[3] * v.x + q.data[2] * v.y - q.data[1] * v.z } } };
         }
 
-        static auto Rotate(Quaternion& q, const Vec4& v, f64 angle) -> Quaternion
+        static auto Rotate(const Quaternion& q, const Vec4f& v, f64 angle) -> Quaternion
         {
             f64 s{ 0 };
             f64 c{ 0 };
-            sincos(angle * PI / 180.0, &s, &c);
-            f64 qx = q.data[3] * v.x + q.data[1] * v.y - q.data[2] * v.z;
-            f64 qy = q.data[3] * v.y + q.data[2] * v.x - q.data[0] * v.z;
-            f64 qz = q.data[3] * v.z + q.data[0] * v.y - q.data[1] * v.x;
-            Quaternion ret = Quaternion{
-                qx * s + q.data[0] * v.x - q.data[1] * v.y - q.data[2] * v.z, //
-                qy * s + q.data[1] * v.x + q.data[2] * v.y - q.data[0] * v.z, //
-                qz * s + q.data[2] * v.x + q.data[0] * v.y - q.data[1] * v.z,
-                q.data[0] * v.x + q.data[1] * v.y + q.data[2] * v.z
-            };
-            return Quaternion{ 0, 0, 0, c } * q * ret;
-        }
-        static auto Translate(const Quaternion& q, const Vec3& v) -> Quaternion
-        {
-            Quaternion ret;
-            ret.data[0] =
-                q.data[0] + v.x * q.data[3] + v.y * q.data[2] - v.z * q.data[1];
-            ret.data[1] =
-                q.data[1] + v.x * q.data[2] + v.y * q.data[3] - v.z * q.data[0];
-            ret.data[2] =
-                q.data[2] + v.x * q.data[0] + v.y * q.data[1] - v.z * q.data[2];
-            ret.data[3] =
-                q.data[3] + v.x * q.data[1] + v.y * q.data[0] - v.z * q.data[3];
+            sincos(angle, &s, &c);
+            f64 qx = q.data[1] * v.x + q.data[2] * v.y + q.data[3] * v.z * c - q.data[0] * v.x * s;
+            f64 qy = q.data[2] * v.x - q.data[1] * v.y - q.data[3] * v.z * c - q.data[0] * v.y * s;
+            f64 qz = q.data[3] * v.x - q.data[2] * v.y + q.data[1] * v.z * c - q.data[0] * v.z * s;
+            f64 qw = q.data[0] * v.x + q.data[3] * v.y - q.data[2] * v.z * c + q.data[1] * v.w * s;
+
+            Quaternion ret{ { qx, qy, qz, qw } };
             return ret;
         }
-
-        static auto Translate(const Quaternion& q, const Vec3& v, Face face)
-            -> Quaternion
+        auto Dot(const Quaternion& rhs, const Vec4f& t) const -> f64
         {
-            if (q.data == nullptr || v.data == nullptr)
-            {
-                throw std::runtime_error{
-                    "Null pointer reference in Quaternion translation"
-                };
-            }
-            u32 idx = static_cast<int>(face) * 4;
-            f64 x =
-                q.data[3 + idx] * v.x + q.data[7 + idx] * v.y + q.data[11 + idx] * v.z;
-            q.data[3] +=
-                q.data[idx] * v.x + q.data[1 + idx] * v.y + q.data[2 + idx] * v.z;
-            q.data[7] +=
-                q.data[1 + idx] * v.x - q.data[idx] * v.y - q.data[2 + idx] * v.z;
-            q.data[11] +=
-                q.data[2 + idx] * v.x - q.data[1 + idx] * v.y + q.data[idx] * v.z;
-            q.data[15] -=
-                q.data[0 + idx] * v.x - q.data[1 + idx] * v.y - q.data[2 + idx] * v.z;
-            return q;
+            return data[0] * rhs.data[0] + data[1] * rhs.data[1] + data[2] * rhs.data[2] + data[3] * rhs.data[3] + t.x * rhs.data[0] + t.y * rhs.data[1] + t.z * rhs.data[2] + t.w * rhs.data[3] + t.x * rhs.data[0] + t.y * rhs.data[1] + t.z * rhs.data[2] + t.w * rhs.data[3];
         }
+        auto LengthSquared() const -> f64 { return Dot(*this, Vec4f(data[0], data[1], data[2], data[3])); }
 
-        auto operator=(const Quaternion& _rhs) noexcept -> Quaternion
+        auto Length() const -> f64 { return origin::Sqrt(LengthSquared()); }
+        auto Translate(const Quaternion& q, const Vec4f& t) -> Quaternion
         {
-            std::memcpy(this->data, _rhs.data, 16 * sizeof(f64));
-            return *this;
-        }
-        auto operator*(Quaternion& rhs) -> Quaternion
-        {
-            Quaternion result{};
-            f64* lhsData = this->data;
-            f64* rhsData = rhs.data;
-            f64* resData = result.data;
-            for (u64 i = 0; i < 4; i++)
+            Quaternion result;
+            for (u32 i = 0; i < 4; ++i)
             {
-                f64 r0 = rhsData[i];
-                f64 r1 = rhsData[i + 4];
-                f64 r2 = rhsData[i + 8];
-                f64 r3 = rhsData[i + 12];
-                resData[i * 4] =
-                    lhsData[0] * r0 + lhsData[1] * r1 + lhsData[2] * r2 + lhsData[3] * r3;
-                resData[i * 4 + 1] =
-                    lhsData[1] * r0 + lhsData[4] * r1 + lhsData[5] * r2 + lhsData[7] * r3;
-                resData[i * 4 + 2] = lhsData[2] * r0 + lhsData[5] * r1 + lhsData[8] * r2 +
-                                     lhsData[11] * r3;
-                resData[i * 4 + 3] = lhsData[3] * r0 + lhsData[7] * r1 +
-                                     lhsData[11] * r2 + lhsData[15] * r3;
+                result.data[i] = q.data[i] + result.Dot(q, t);
             }
             return result;
         }
 
-        explicit operator f64*() const
+        explicit operator Quaternion*()
         {
-            f64* ret = new f64[16]{ this->data[0], this->data[1], this->data[2], this->data[3], this->data[4], this->data[5], this->data[6], this->data[7], this->data[8], this->data[9], this->data[10], this->data[11], this->data[12], this->data[13], this->data[14], this->data[15] };
-            return ret;
-        }
-        explicit operator f64*()
-        {
-            f64* ret = new f64[16]{ this->data[0], this->data[1], this->data[2], this->data[3], this->data[4], this->data[5], this->data[6], this->data[7], this->data[8], this->data[9], this->data[10], this->data[11], this->data[12], this->data[13], this->data[14], this->data[15] };
-            return ret;
+            return this;
         }
 
-        auto operator=(const f64* _rhs) -> Quaternion
+        auto operator=(f64 const* _rhs) -> Quaternion&
         {
+            ;
             std::memcpy(this->data, _rhs, 16 * sizeof(f64));
             return *this;
         }
+        auto operator=(Quaternion&& _rhs) noexcept -> Quaternion&
+        {
+            *this->data = *_rhs.data;
+            return *this;
+        }
+        auto operator*(Quaternion const& rhs) const -> Quaternion
+        {
+            return Mul(rhs);
+        }
+        auto operator*(Quaternion& rhs) const -> Quaternion { return Mul(rhs); }
+        auto operator*(const f64 scalar[16]) const -> Quaternion
+        {
+            Quaternion result;
+            for (u64 i = 0; i < 4; i++)
+            {
+                for (u64 j = 0; j < 4; j++)
+                {
+                    result.data[i * 4 + j] = data[i * 4] * scalar[j] + data[i * 4 + 1] * scalar[j + 4] + data[i * 4 + 2] * scalar[j + 8] + data[i * 4 + 3] * scalar[j + 12];
+                }
+            }
+            return result;
+        }
+        auto operator/(const Quaternion& rhs) const -> Quaternion
+        {
+            return Div(rhs);
+        }
+
+        auto operator+(const Quaternion& rhs) const noexcept -> Quaternion
+        {
+            return Add(rhs);
+        }
+
+        auto operator-(const Quaternion& rhs) const noexcept -> Quaternion
+        {
+            return Sub(rhs);
+        }
+        auto operator-() const noexcept -> Quaternion { return Inverse(); }
+        auto operator*=(const Quaternion& _rhs) noexcept -> Quaternion { return *this = this->Mul(_rhs); }
+        auto operator/=(const Quaternion& _rhs) noexcept -> Quaternion { return *this = this->Div(_rhs); }
+        auto operator+=(const Quaternion& _rhs) noexcept -> Quaternion { return *this = this->Add(_rhs); }
+        auto operator-=(const Quaternion& _rhs) noexcept -> Quaternion { return *this = this->Sub(_rhs); }
+        explicit operator f64*() const
+        {
+            return new f64[16]{ this->data[0], this->data[1], this->data[2], this->data[3], this->data[4], this->data[5], this->data[6], this->data[7], this->data[8], this->data[9], this->data[10], this->data[11], this->data[12], this->data[13], this->data[14], this->data[15] };
+        }
+
         explicit operator string() const
         {
             string ret = "[";
@@ -1448,10 +1256,14 @@ namespace origin
             return ret;
         }
 
-        auto operator+=(const Quaternion& _rhs) noexcept -> Quaternion
+        auto operator==(const Quaternion& rhs) const -> bool
         {
-            std::transform(this->data, this->data + 16, _rhs.data, data, std::plus<f64>());
-            return *this;
+            return std::equal(data, data + 16, rhs.data);
+        }
+
+        auto operator!=(const Quaternion& _rhs) const -> bool
+        {
+            return !(*this == _rhs);
         }
     }; // namespace origin
 } // namespace origin

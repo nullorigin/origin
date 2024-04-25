@@ -1,13 +1,22 @@
 #pragma once
-#include <cstddef>
-#include <cstdlib>
-#include <cstring>
-#include <emmintrin.h>
 #include <cmath>
-#include <utility>
+
+#include <cstddef>
+
+#include <cstdlib>
+
+#include <cstring>
+#include <cstdarg>
+#include <emmintrin.h>
+
 #include <immintrin.h>
-#include <xmmintrin.h>
+
 #include <string>
+
+#include <utility>
+
+#include <xmmintrin.h>
+
 namespace origin
 {
     using std::string;
@@ -142,826 +151,827 @@ namespace origin
 #endif
 #define null ((void*)0)
 #ifndef NO_BUILTIN
-    inline double abs(double x)
+    using V = __builtin_va_list;
+    inline double Abs(double x)
     {
         return __builtin_fabs(x);
     }
-    inline float abs(float x)
+    inline float Abs(float x)
     {
         return __builtin_fabsf(x);
     }
-    inline long double abs(long double x)
+    inline long double Abs(long double x)
     {
         return __builtin_fabsl(x);
     }
 
-    inline double acos(double x)
+    inline double Acos(double x)
     {
         return __builtin_acos(x);
     }
-    inline float acos(float x)
+    inline float Acos(float x)
     {
         return __builtin_acosf(x);
     }
-    inline long double acos(long double x)
+    inline long double Acos(long double x)
     {
         return __builtin_acosl(x);
     }
 
-    inline double acosh(double x)
+    inline double Acosh(double x)
     {
         return __builtin_acosh(x);
     }
-    inline float acosh(float x)
+    inline float Acosh(float x)
     {
         return __builtin_acoshf(x);
     }
-    inline long double acosh(long double x)
+    inline long double Acosh(long double x)
     {
         return __builtin_acoshl(x);
     }
 
-    inline double asin(double x)
+    inline double Asin(double x)
     {
         return __builtin_asin(x);
     }
-    inline float asin(float x)
+    inline float Asin(float x)
     {
         return __builtin_asinf(x);
     }
-    inline long double asin(long double x)
+    inline long double Asin(long double x)
     {
         return __builtin_asinl(x);
     }
 
-    inline double asinh(double x)
+    inline double Asinh(double x)
     {
         return __builtin_asinh(x);
     }
-    inline float asinh(float x)
+    inline float Asinh(float x)
     {
         return __builtin_asinhf(x);
     }
-    inline long double asinh(long double x)
+    inline long double Asinh(long double x)
     {
         return __builtin_asinhl(x);
     }
 
-    inline double atan(double x)
+    inline double Atan(double x)
     {
         return __builtin_atan(x);
     }
-    inline float atan(float x)
+    inline float Atan(float x)
     {
         return __builtin_atanf(x);
     }
-    inline long double atan(long double x)
+    inline long double Atan(long double x)
     {
         return __builtin_atanl(x);
     }
 
-    inline double atan2(double x, double y)
+    inline double Atan2(double x, double y)
     {
         return __builtin_atan2(x, y);
     }
-    inline float atan2(float x, float y)
+    inline float Atan2(float x, float y)
     {
         return __builtin_atan2f(x, y);
     }
-    inline long double atan2(long double x, long double y)
+    inline long double Atan2(long double x, long double y)
     {
         return __builtin_atan2l(x, y);
     }
 
-    inline double cbrt(double x)
+    inline double Cbrt(double x)
     {
         return __builtin_cbrt(x);
     }
-    inline float cbrt(float x)
+    inline float Cbrt(float x)
     {
         return __builtin_cbrtf(x);
     }
-    inline long double cbrt(long double x)
+    inline long double Cbrt(long double x)
     {
         return __builtin_cbrtl(x);
     }
 
-    inline double ceil(double x)
+    inline double Ceil(double x)
     {
         return __builtin_ceil(x);
     }
-    inline float ceil(float x)
+    inline float Ceil(float x)
     {
         return __builtin_ceilf(x);
     }
-    inline long double ceil(long double x)
+    inline long double Ceil(long double x)
     {
         return __builtin_ceill(x);
     }
 
-    inline double copysign(double x, double y)
+    inline double Copysign(double x, double y)
     {
         return __builtin_copysign(x, y);
     }
-    inline float copysign(float x, float y)
+    inline float Copysign(float x, float y)
     {
         return __builtin_copysignf(x, y);
     }
-    inline long double copysign(long double x, long double y)
+    inline long double Copysign(long double x, long double y)
     {
         return __builtin_copysignl(x, y);
     }
 
-    inline double cos(double x)
+    inline double Cos(double x)
     {
         return __builtin_cos(x);
     }
-    inline float cos(float x)
+    inline float Cos(float x)
     {
         return __builtin_cosf(x);
     }
-    inline long double cos(long double x)
+    inline long double Cos(long double x)
     {
         return __builtin_cosl(x);
     }
 
-    inline double cosh(double x)
+    inline double Cosh(double x)
     {
         return __builtin_cosh(x);
     }
-    inline float cosh(float x)
+    inline float Cosh(float x)
     {
         return __builtin_coshf(x);
     }
-    inline long double cosh(long double x)
+    inline long double Cosh(long double x)
     {
         return __builtin_coshl(x);
     }
 
-    inline double erf(double x)
+    inline double Erf(double x)
     {
         return __builtin_erf(x);
     }
-    inline float erf(float x)
+    inline float Erf(float x)
     {
         return __builtin_erff(x);
     }
-    inline long double erf(long double x)
+    inline long double Erf(long double x)
     {
         return __builtin_erfl(x);
     }
 
-    inline double erfc(double x)
+    inline double Erfc(double x)
     {
         return __builtin_erfc(x);
     }
-    inline float erfc(float x)
+    inline float Erfc(float x)
     {
         return __builtin_erfcf(x);
     }
-    inline long double erfc(long double x)
+    inline long double Erfc(long double x)
     {
         return __builtin_erfcl(x);
     }
 
-    inline double exp(double x)
+    inline double Exp(double x)
     {
         return __builtin_exp(x);
     }
-    inline float exp(float x)
+    inline float Exp(float x)
     {
         return __builtin_expf(x);
     }
-    inline long double exp(long double x)
+    inline long double Exp(long double x)
     {
         return __builtin_expl(x);
     }
 
-    inline double exp2(double x)
+    inline double Exp2(double x)
     {
         return __builtin_exp2(x);
     }
-    inline float exp2(float x)
+    inline float Exp2(float x)
     {
         return __builtin_exp2f(x);
     }
-    inline long double exp2(long double x)
+    inline long double Exp2(long double x)
     {
         return __builtin_exp2l(x);
     }
 
-    inline double fdim(double x, double y)
+    inline double Fdim(double x, double y)
     {
         return __builtin_fdim(x, y);
     }
-    inline float fdim(float x, float y)
+    inline float Fdim(float x, float y)
     {
         return __builtin_fdimf(x, y);
     }
-    inline long double fdim(long double x, long double y)
+    inline long double Fdim(long double x, long double y)
     {
         return __builtin_fdiml(x, y);
     }
 
-    inline double floor(double x)
+    inline double Floor(double x)
     {
         return __builtin_floor(x);
     }
-    inline float floor(float x)
+    inline float Floor(float x)
     {
         return __builtin_floorf(x);
     }
-    inline long double floor(long double x)
+    inline long double Floor(long double x)
     {
         return __builtin_floorl(x);
     }
 
-    inline double fma(double x, double y, double z)
+    inline double Fma(double x, double y, double z)
     {
         return __builtin_fma(x, y, z);
     }
-    inline float fma(float x, float y, float z)
+    inline float Fma(float x, float y, float z)
     {
         return __builtin_fmaf(x, y, z);
     }
-    inline long double fma(long double x, long double y, long double z)
+    inline long double Fma(long double x, long double y, long double z)
     {
         return __builtin_fmal(x, y, z);
     }
 
-    inline double fmax(double x, double y)
+    inline double Fmax(double x, double y)
     {
         return __builtin_fmax(x, y);
     }
-    inline float fmax(float x, float y)
+    inline float Fmax(float x, float y)
     {
         return __builtin_fmaxf(x, y);
     }
-    inline long double fmax(long double x, long double y)
+    inline long double Fmax(long double x, long double y)
     {
         return __builtin_fmaxl(x, y);
     }
 
-    inline double fmin(double x, double y)
+    inline double Fmin(double x, double y)
     {
         return __builtin_fmin(x, y);
     }
-    inline float fmin(float x, float y)
+    inline float Fmin(float x, float y)
     {
         return __builtin_fminf(x, y);
     }
-    inline long double fmin(long double x, long double y)
+    inline long double Fmin(long double x, long double y)
     {
         return __builtin_fminl(x, y);
     }
 
-    inline double fmod(double x, double y)
+    inline double Fmod(double x, double y)
     {
         return __builtin_fmod(x, y);
     }
-    inline float fmod(float x, float y)
+    inline float Fmod(float x, float y)
     {
         return __builtin_fmodf(x, y);
     }
-    inline long double fmod(long double x, long double y)
+    inline long double Fmod(long double x, long double y)
     {
         return __builtin_fmodl(x, y);
     }
 
-    inline int fpclassify(int a, int b, int c, int d, int e, float f)
+    inline int Fpclassify(int a, int b, int c, int d, int e, float f)
     {
         return __builtin_fpclassify(a, b, c, d, e, f);
     }
 
-    inline double hypot(double x, double y)
+    inline double Hypot(double x, double y)
     {
         return __builtin_hypot(x, y);
     }
-    inline float hypot(float x, float y)
+    inline float Hypot(float x, float y)
     {
         return __builtin_hypotf(x, y);
     }
-    inline long double hypot(long double x, long double y)
+    inline long double Hypot(long double x, long double y)
     {
         return __builtin_hypotl(x, y);
     }
 
-    inline int ilogb(double x)
+    inline int Ilogb(double x)
     {
         return __builtin_ilogb(x);
     }
-    inline int ilogb(float x)
+    inline int Ilogb(float x)
     {
         return __builtin_ilogbf(x);
     }
-    inline int ilogb(long double x)
+    inline int Ilogb(long double x)
     {
         return __builtin_ilogbl(x);
     }
 
-    inline bool isfinite(double x)
+    inline bool Isfinite(double x)
     {
         return __builtin_isfinite(x) != 0;
     }
-    inline bool isfinite(float x)
+    inline bool Isfinite(float x)
     {
         return __builtin_isfinite(x) != 0;
     }
-    inline bool isfinite(long double x)
+    inline bool Isfinite(long double x)
     {
         return __builtin_isfinite(x) != 0;
     }
 
-    inline bool isgreater(double x, double y)
+    inline bool Isgreater(double x, double y)
     {
         return __builtin_isgreater(x, y) != 0;
     }
-    inline bool isgreater(float x, float y)
+    inline bool Isgreater(float x, float y)
     {
         return __builtin_isgreater(x, y) != 0;
     }
-    inline bool isgreater(long double x, long double y)
+    inline bool Isgreater(long double x, long double y)
     {
         return __builtin_isgreater(x, y) != 0;
     }
 
-    inline bool isgreaterequal(double x, double y)
+    inline bool Isgreaterequal(double x, double y)
     {
         return __builtin_isgreaterequal(x, y) != 0;
     }
-    inline bool isgreaterequal(float x, float y)
+    inline bool Isgreaterequal(float x, float y)
     {
         return __builtin_isgreaterequal(x, y) != 0;
     }
-    inline bool isgreaterequal(long double x, long double y)
+    inline bool Isgreaterequal(long double x, long double y)
     {
         return __builtin_isgreaterequal(x, y) != 0;
     }
-    inline long double lgammal(long double x)
+    inline long double Lgammal(long double x)
     {
         return __builtin_lgammal(x);
     }
-    inline long long llrint(double x)
+    inline long long Llrint(double x)
     {
         return __builtin_llrint(x);
     }
-    inline long long llrintf(float x)
+    inline long long Llrintf(float x)
     {
         return __builtin_llrintf(x);
     }
-    inline long long llrintl(long double x)
+    inline long long Llrintl(long double x)
     {
         return __builtin_llrintl(x);
     }
-    inline long long llround(double x)
+    inline long long Llround(double x)
     {
         return __builtin_llround(x);
     }
-    inline long long llroundf(float x)
+    inline long long Llroundf(float x)
     {
         return __builtin_llroundf(x);
     }
-    inline long long llroundl(long double x)
+    inline long long Llroundl(long double x)
     {
         return __builtin_llroundl(x);
     }
-    inline double log(double x)
+    inline double Log(double x)
     {
         return __builtin_log(x);
     }
-    inline float logf(float x)
+    inline float Logf(float x)
     {
         return __builtin_logf(x);
     }
-    inline long double logl(long double x)
+    inline long double Logl(long double x)
     {
         return __builtin_logl(x);
     }
-    inline double log10(double x)
+    inline double Log10(double x)
     {
         return __builtin_log10(x);
     }
-    inline float log10f(float x)
+    inline float Log10f(float x)
     {
         return __builtin_log10f(x);
     }
-    inline long double log10l(long double x)
+    inline long double Log10l(long double x)
     {
         return __builtin_log10l(x);
     }
-    inline double log1p(double x)
+    inline double Log1p(double x)
     {
         return __builtin_log1p(x);
     }
-    inline float log1pf(float x)
+    inline float Log1pf(float x)
     {
         return __builtin_log1pf(x);
     }
-    inline long double log1pl(long double x)
+    inline long double Log1pl(long double x)
     {
         return __builtin_log1pl(x);
     }
-    inline double log2(double x)
+    inline double Log2(double x)
     {
         return __builtin_log2(x);
     }
-    inline float log2f(float x)
+    inline float Log2f(float x)
     {
         return __builtin_log2f(x);
     }
-    inline long double log2l(long double x)
+    inline long double Log2l(long double x)
     {
         return __builtin_log2l(x);
     }
-    inline double logb(double x)
+    inline double Logb(double x)
     {
         return __builtin_logb(x);
     }
-    inline float logbf(float x)
+    inline float Logbf(float x)
     {
         return __builtin_logbf(x);
     }
-    inline long double logbl(long double x)
+    inline long double Logbl(long double x)
     {
         return __builtin_logbl(x);
     }
-    inline long lrint(double x)
+    inline long Lrint(double x)
     {
         return __builtin_lrint(x);
     }
-    inline long int lrintf(float x)
+    inline long int Lrintf(float x)
     {
         return __builtin_lrintf(x);
     }
-    inline long double lrintl(long double x)
+    inline long double Lrintl(long double x)
     {
         return __builtin_lrintl(x);
     }
-    inline long lround(double x)
+    inline long Lround(double x)
     {
         return __builtin_lround(x);
     }
-    inline long lroundf(float x)
+    inline long Lroundf(float x)
     {
         return __builtin_lroundf(x);
     }
-    inline long lroundl(long double x)
+    inline long Lroundl(long double x)
     {
         return __builtin_lroundl(x);
     }
-    inline double modf(double x, double* y)
+    inline double Modf(double x, double* y)
     {
         return __builtin_modf(x, y);
     }
-    inline float modff(float x, float* y)
+    inline float Modff(float x, float* y)
     {
         return __builtin_modff(x, y);
     }
-    inline long double modfl(long double x, long double* y)
+    inline long double Modfl(long double x, long double* y)
     {
         return __builtin_modfl(x, y);
     }
-    inline double nan(const char* s)
+    inline double Nan(const char* s)
     {
         return __builtin_nan(s);
     }
-    inline float nanf(const char* s)
+    inline float Nanf(const char* s)
     {
         return __builtin_nanf(s);
     }
-    inline long double nanl(const char* s)
+    inline long double Nanl(const char* s)
     {
         return __builtin_nanl(s);
     }
-    inline double nearbyint(double x)
+    inline double Nearbyint(double x)
     {
         return __builtin_nearbyint(x);
     }
-    inline float nearbyintf(float x)
+    inline float Nearbyintf(float x)
     {
         return __builtin_nearbyintf(x);
     }
-    inline long double nearbyintl(long double x)
+    inline long double Nearbyintl(long double x)
     {
         return __builtin_nearbyintl(x);
     }
-    inline double nextafter(double x, double y)
+    inline double Nextafter(double x, double y)
     {
         return __builtin_nextafter(x, y);
     }
-    inline float nextafterf(float x, float y)
+    inline float Nextafterf(float x, float y)
     {
         return __builtin_nextafterf(x, y);
     }
-    inline long double nextafterl(long double x, long double y)
+    inline long double Nextafterl(long double x, long double y)
     {
         return __builtin_nextafterl(x, y);
     }
-    inline double nexttoward(double x, long double y)
+    inline double Nexttoward(double x, long double y)
     {
         return __builtin_nexttoward(x, y);
     }
-    inline float nexttowardf(float x, long double y)
+    inline float Nexttowardf(float x, long double y)
     {
         return __builtin_nexttowardf(x, y);
     }
-    inline long double nexttowardl(long double x, long double y)
+    inline long double Nexttowardl(long double x, long double y)
     {
         return __builtin_nexttowardl(x, y);
     }
-    inline double pow(double x, double y)
+    inline double Pow(double x, double y)
     {
         return __builtin_pow(x, y);
     }
-    inline float powf(float x, float y)
+    inline float Powf(float x, float y)
     {
         return __builtin_powf(x, y);
     }
-    inline double powi(double x, int y)
+    inline double Powi(double x, int y)
     {
         return __builtin_powi(x, y);
     }
-    inline long double powl(long double x, long double y)
+    inline long double Powl(long double x, long double y)
     {
         return __builtin_powl(x, y);
     }
-    inline double remainder(double x, double y)
+    inline double Remainder(double x, double y)
     {
         return __builtin_remainder(x, y);
     }
-    inline float remainderf(float x, float y)
+    inline float Remainderf(float x, float y)
     {
         return __builtin_remainderf(x, y);
     }
-    inline long double remainderl(long double x, long double y)
+    inline long double Remainderl(long double x, long double y)
     {
         return __builtin_remainderl(x, y);
     }
-    inline double remquo(double x, double y, int* q)
+    inline double Remquo(double x, double y, int* q)
     {
         return __builtin_remquo(x, y, q);
     }
-    inline float remquof(float x, float y, int* q)
+    inline float Remquof(float x, float y, int* q)
     {
         return __builtin_remquof(x, y, q);
     }
-    inline long double remquol(long double x, long double y, int* q)
+    inline long double Remquol(long double x, long double y, int* q)
     {
         return __builtin_remquol(x, y, q);
     }
-    inline double rint(double x)
+    inline double Rint(double x)
     {
         return __builtin_rint(x);
     }
-    inline float rintf(float x)
+    inline float Rintf(float x)
     {
         return __builtin_rintf(x);
     }
-    inline long double rintl(long double x)
+    inline long double Rintl(long double x)
     {
         return __builtin_rintl(x);
     }
-    inline double round(double x)
+    inline double Round(double x)
     {
         return __builtin_round(x);
     }
-    inline float roundf(float x)
+    inline float Roundf(float x)
     {
         return __builtin_roundf(x);
     }
-    inline long double roundl(long double x)
+    inline long double Roundl(long double x)
     {
         return __builtin_roundl(x);
     }
-    inline double scalbln(double x, int y)
+    inline double Scalbln(double x, int y)
     {
         return __builtin_scalbln(x, y);
     }
-    inline float scalblnf(float x, int y)
+    inline float Scalblnf(float x, int y)
     {
         return __builtin_scalblnf(x, y);
     }
-    inline long double scalblnl(long double x, int y)
+    inline long double Scalblnl(long double x, int y)
     {
         return __builtin_scalblnl(x, y);
     }
-    inline double scalbn(double x, int y)
+    inline double Scalbn(double x, int y)
     {
         return __builtin_scalbn(x, y);
     }
-    inline float scalbnf(float x, int y)
+    inline float Scalbnf(float x, int y)
     {
         return __builtin_scalbnf(x, y);
     }
-    inline long double scalbnf(long double x, int y)
+    inline long double Scalbnf(long double x, int y)
     {
         return __builtin_scalbnf(x, y);
     }
-    inline bool signbit(double x)
+    inline bool Signbit(double x)
     {
         return __builtin_signbit(x) != 0;
     }
-    inline bool signbitf(float x)
+    inline bool Signbitf(float x)
     {
         return __builtin_signbitf(x) != 0;
     }
-    inline bool signbitl(long double x)
+    inline bool Signbitl(long double x)
     {
         return __builtin_signbitl(x) != 0;
     }
-    inline double sin(double x)
+    inline double Sin(double x)
     {
         return __builtin_sin(x);
     }
-    inline float sinf(float x)
+    inline float Sinf(float x)
     {
         return __builtin_sinf(x);
     }
-    inline double sinh(double x)
+    inline double Sinh(double x)
     {
         return __builtin_sinh(x);
     }
-    inline float sinhf(float x)
+    inline float Sinhf(float x)
     {
         return __builtin_sinhf(x);
     }
-    inline long double sinhl(long double x)
+    inline long double Sinhl(long double x)
     {
         return __builtin_sinhl(x);
     }
-    inline long double sinl(long double x)
+    inline long double Sinl(long double x)
     {
         return __builtin_sinl(x);
     }
-    inline double sqrt(double x)
+    inline double Sqrt(double x)
     {
         return __builtin_sqrt(x);
     }
-    inline float sqrtf(float x)
+    inline float Sqrtf(float x)
     {
         return __builtin_sqrtf(x);
     }
-    inline long double sqrtl(long double x)
+    inline long double Sqrtl(long double x)
     {
         return __builtin_sqrtl(x);
     }
-    inline double tan(double x)
+    inline double Tan(double x)
     {
         return __builtin_tan(x);
     }
-    inline float tanf(float x)
+    inline float Tanf(float x)
     {
         return __builtin_tanf(x);
     }
-    inline double tanh(double x)
+    inline double Tanh(double x)
     {
         return __builtin_tanh(x);
     }
-    inline float tanhf(float x)
+    inline float Tanhf(float x)
     {
         return __builtin_tanhf(x);
     }
-    inline long double tanhl(long double x)
+    inline long double Tanhl(long double x)
     {
         return __builtin_tanhl(x);
     }
-    inline long double tanl(long double x)
+    inline long double Tanl(long double x)
     {
         return __builtin_tanl(x);
     }
-    inline double tgamma(double x)
+    inline double Tgamma(double x)
     {
         return __builtin_tgamma(x);
     }
-    inline float tgammaf(float x)
+    inline float Tgammaf(float x)
     {
         return __builtin_tgammaf(x);
     }
-    inline long double tgammal(long double x)
+    inline long double Tgammal(long double x)
     {
         return __builtin_tgammal(x);
     }
-    inline double trunc(double x)
+    inline double Trunc(double x)
     {
         return __builtin_trunc(x);
     }
-    inline float truncf(float x)
+    inline float Truncf(float x)
     {
         return __builtin_truncf(x);
     }
-    inline long double truncl(long double x)
+    inline long double Truncl(long double x)
     {
         return __builtin_truncl(x);
     }
     template<typename T>
-    inline auto abs(T a)
+    inline auto Abs(T a)
     {
-        return __builtin_elementwise_abs(a);
+        return T(__builtin_elementwise_abs(a));
     }
     template<typename T>
-    inline auto ceil(T a)
+    inline auto Ceil(T a)
     {
-        return __builtin_elementwise_ceil(a);
+        return T(__builtin_elementwise_ceil(a));
     }
     template<typename T>
-    inline auto floor(T a)
+    inline auto Floor(T a)
     {
-        return __builtin_elementwise_floor(a);
+        return T(__builtin_elementwise_floor(a));
     }
     template<typename T>
     inline auto Round(T a)
     {
-        return __builtin_elementwise_round(a);
+        return T(__builtin_elementwise_round(a));
     }
     template<typename T>
-    inline auto trunc(T a)
+    inline auto Trunc(T a)
     {
-        return __builtin_elementwise_trunc(a);
+        return T(__builtin_elementwise_trunc(a));
     }
     template<typename T>
-    inline auto rint(T a)
+    inline auto Rint(T a)
     {
-        return __builtin_elementwise_rint(a);
+        return T(__builtin_elementwise_rint(a));
     }
     template<typename T>
-    inline auto nearbyint(T a)
+    inline auto Nearbyint(T a)
     {
-        return __builtin_elementwise_nearbyint(a);
+        return T(__builtin_elementwise_nearbyint(a));
     }
     template<typename T, typename U>
-    inline auto copysign(T a, U b)
+    inline auto Copysign(T a, U b)
     {
-        return __builtin_elementwise_copysign(a, b);
+        return T(__builtin_elementwise_copysign(a, b));
     }
     template<typename T>
-    inline auto sin(T a)
+    inline auto Sin(T a)
     {
-        return __builtin_elementwise_sin(a);
+        return T(__builtin_elementwise_sin(a));
     }
     template<typename T>
-    inline auto cos(T a)
+    inline auto Cos(T a)
     {
-        return __builtin_elementwise_cos(a);
+        return T(__builtin_elementwise_cos(a));
     }
     template<typename T>
-    inline auto add_sat(T a, T b)
+    inline auto AddSat(T a, T b)
     {
-        return __builtin_elementwise_add_sat(a, b);
+        return T(__builtin_elementwise_add_sat(a, b));
     }
     template<typename T>
-    inline auto sub_sat(T a, T b)
+    inline auto SubSat(T a, T b)
     {
-        return __builtin_elementwise_sub_sat(a, b);
+        return T(__builtin_elementwise_sub_sat(a, b));
     }
     template<typename T, typename U>
-    inline auto max(T a, U b)
+    inline auto Max(T a, U b)
     {
-        return __builtin_elementwise_max(a, b);
+        return T(__builtin_elementwise_max(a, b));
     }
     template<typename T, typename U>
-    inline auto min(T a, U b)
+    inline auto Min(T a, U b)
     {
-        return __builtin_elementwise_min(a, b);
+        return T(__builtin_elementwise_min(a, b));
     }
     template<typename T>
-    inline auto sqrt(T a)
+    inline auto Sqrt(T a)
     {
-        return __builtin_elementwise_sqrt(a);
+        return T(__builtin_sqrt(f64(a)));
     }
     template<typename T>
-    inline auto log(T a)
+    inline auto Log(T a)
     {
-        return __builtin_elementwise_log(a);
+        return T(__builtin_elementwise_log(a));
     }
     template<typename T>
-    inline auto log2(T a)
+    inline auto Log2(T a)
     {
-        return __builtin_elementwise_log2(a);
+        return T(__builtin_elementwise_log2(a));
     }
     template<typename T>
-    inline auto log10(T a)
+    inline auto Log10(T a)
     {
-        return __builtin_elementwise_log10(a);
+        return T(__builtin_elementwise_log10(a));
     }
     template<typename T>
-    inline auto exp(T a)
+    inline auto Exp(T a)
     {
-        return __builtin_elementwise_exp(a);
+        return T(__builtin_elementwise_exp(a));
     }
     template<typename T>
-    inline auto exp2(T a)
+    inline auto Exp2(T a)
     {
-        return __builtin_elementwise_exp2(a);
+        return T(__builtin_elementwise_exp2(a));
     }
     template<typename T, typename U>
-    inline auto pow(T a, U b)
+    inline auto Pow(T a, U b)
     {
-        return __builtin_elementwise_pow(a, b);
+        return T(__builtin_elementwise_pow(a, b));
     }
 #endif // NO_BUILTIN
     using ID = u64;
     template<typename T>
-    inline auto isnum(const T _a) -> bool
+    inline auto Isnum(const T _a) -> bool
     {
         return !(bool(isnan(_a))) && !(bool(isinf(_a)));
     }
@@ -1009,7 +1019,7 @@ namespace origin
     template<typename T>
     inline constexpr auto Floor(const T _a) -> T
     {
-        return __builtin_elementwise_floor(_a);
+        return T(__builtin_elementwise_floor(_a));
     }
     template<typename T>
     inline constexpr auto Ceil(const T _a) -> T
@@ -1019,7 +1029,7 @@ namespace origin
     template<typename T>
     inline constexpr auto Hypot(T _a, T _b) -> T
     {
-        return T(hypot(f64(_a), f64(_b)));
+        return T(Hypot(f64(_a), f64(_b)));
     }
     template<typename T>
     inline constexpr auto Square(const T _a) -> T
@@ -1029,27 +1039,27 @@ namespace origin
     template<typename T>
     inline constexpr auto Madd(const T _a, T _b, const T _c) -> T
     {
-        return T(_a * _b + _c);
+        return T(__builtin_elementwise_add_sat((_a * _b), _c));
     }
     template<typename T>
     inline constexpr auto Sqrt(const T _a) noexcept -> T
     {
-        return __builtin_sqrt(_a);
+        return T(__builtin_sqrt(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Min(const T _a, const T _b) -> T
     {
-        return __builtin_elementwise_min(_a, _b);
+        return T(__builtin_elementwise_min(_a, _b));
     }
     template<typename T>
     inline constexpr auto Max(const T _a, const T _b) -> T
     {
-        return __builtin_elementwise_max(_a, _b);
+        return T(__builtin_elementwise_max(_a, _b));
     }
     template<typename T>
     inline constexpr auto Abs(const T _a) -> T
     {
-        return ABS(_a);
+        return T(__builtin_elementwise_abs(_a));
     }
     template<typename T>
     inline constexpr auto Sign(const T _a) -> T
@@ -1064,12 +1074,12 @@ namespace origin
     template<typename T>
     inline constexpr auto Fract(const T _a) -> T
     {
-        return T(_a - Floor(_a));
+        return T(Sub(_a, Floor(_a)));
     }
     template<typename T>
     inline constexpr auto Lerp(const T _a, const T _b, const T _t) -> T
     {
-        return T(_a + (_b - _a) * _t);
+        return T(Add(_a, Sub(_b - _a)) * _t);
     }
     template<typename T>
     inline constexpr auto SmoothStep(const T _a, const T _b, const T _t) -> T
@@ -1089,12 +1099,12 @@ namespace origin
     template<typename T>
     inline constexpr auto Round(const T _a) -> T
     {
-        return __builtin_elementwise_round(_a);
+        return T(__builtin_elementwise_round(_a));
     }
     template<typename T>
     inline constexpr auto Trunc(const T _a) noexcept -> T
     {
-        return __builtin_elementwise_trunc(_a);
+        return T(__builtin_elementwise_trunc(_a));
     }
     template<typename T>
     inline constexpr auto Dot(const T _a, const T _b) -> T
@@ -1104,7 +1114,7 @@ namespace origin
     template<typename T>
     inline constexpr auto Length(T _a, T _b) -> T
     {
-        return T(Sqrt((_a * _a) + (_b * _b)));
+        return T(Sqrt(AddSat((_a * _a), (_b * _b))));
     }
     template<typename T, u64 N>
     inline constexpr auto Normalize(const T _a[N]) -> T*
@@ -1120,17 +1130,17 @@ namespace origin
     template<typename T>
     inline constexpr auto Neg(const T _a) -> T
     {
-        return -_a;
+        return SubSat(0, _a);
     }
     template<typename T>
     inline constexpr auto Sub(const T _a, const T _b) -> T
     {
-        return __builtin_elementwise_sub_sat(_a, _b);
+        return T(__builtin_elementwise_sub_sat(_a, _b));
     }
     template<typename T>
     inline constexpr auto Add(const T _a, const T _b) -> T
     {
-        return __builtin_elementwise_add_sat(_a, _b);
+        return T(__builtin_elementwise_add_sat(_a, _b));
     }
     template<typename T>
     inline constexpr auto Mul(const T _a, const T _b) -> T
@@ -1150,32 +1160,32 @@ namespace origin
     template<typename T>
     inline constexpr auto Sin(T _a) noexcept -> T
     {
-        return __builtin_elementwise_sin(_a);
+        return T(__builtin_elementwise_sin(_a));
     }
     template<typename T>
     inline constexpr auto Cos(T _a) noexcept -> T
     {
-        return __builtin_elementwise_cos(_a);
+        return T(__builtin_elementwise_cos(_a));
     }
     template<typename T>
     inline constexpr auto Tan(T _a) noexcept -> T
     {
-        return T(tan(f64(_a)));
+        return T(Tan(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Asin(T _a) noexcept -> T
     {
-        return T(asin(f64(_a)));
+        return T(Asin(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Acos(T _a) noexcept -> T
     {
-        return T(acos(f64(_a)));
+        return T(Acos(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Atan(T _a) noexcept -> T
     {
-        return T(atan(f64(_a)));
+        return T(Atan(f64(_a)));
     }
     template<typename T>
     inline constexpr auto Atan2(T _a, T _b) noexcept -> T
@@ -1185,75 +1195,75 @@ namespace origin
     template<typename T>
     inline auto Log(T _a) noexcept -> T
     {
-        return __builtin_elementwise_log(_a);
+        return T(__builtin_elementwise_log(_a));
     }
     template<typename T>
     inline auto Log2(T _x) noexcept -> T
     {
-        return __builtin_elementwise_log2(_x);
+        return T(__builtin_elementwise_log2(_x));
     }
     template<typename T>
     inline auto Log10(T _a) noexcept -> T
     {
-        return __builtin_elementwise_log10(_a);
+        return T(__builtin_elementwise_log10(_a));
     }
 
     struct Complex
     {
         union
         {
-            __m128d v;
+            __m128d V{};
             struct
             {
-                f64 real = 0;
-                f64 imag = 0;
-            };
+                f64 Real;
+                f64 Imag;
+            } __attribute__((aligned(16)));
         };
         Complex() = default;
         Complex(f64 _real, f64 _imag) :
-            real(_real), imag(_imag) {}
+            Real(_real), Imag(_imag) {}
         static auto Zero() -> Complex { return Complex(0, 0); }
 
         static auto Add(const Complex A, const Complex B) noexcept -> Complex
         {
-            return { A.real + B.real, A.imag + B.imag };
+            return { A.Real + B.Real, A.Imag + B.Imag };
         }
         static auto Sub(const Complex A, const Complex B) noexcept -> Complex
         {
-            return { A.real - B.real, A.imag - B.imag };
+            return { A.Real - B.Real, A.Imag - B.Imag };
         }
 
         auto Mul(const Complex b) const -> Complex
         {
-            return { real * b.real - imag * b.imag, real * b.imag + imag * b.real };
+            return { Real * b.Real - Imag * b.Imag, Real * b.Imag + Imag * b.Real };
         }
         auto Mul(f64* aPtr) const noexcept -> f64*
         {
             __m256d a = _mm256_loadu_pd(aPtr);
-            __m256d b = _mm256_setr_pd(real, imag, aPtr[2], aPtr[3]);
+            __m256d b = _mm256_setr_pd(Real, Imag, aPtr[2], aPtr[3]);
             _mm256_storeu_pd(aPtr, _mm256_mul_pd(a, b));
             return aPtr;
         }
 
         static auto Div(Complex a, Complex b) noexcept -> Complex
         {
-            __m128d num = _mm_setr_pd(a.real, a.imag);
-            __m128d den = _mm_setr_pd(b.real, b.imag);
+            __m128d num = _mm_setr_pd(a.Real, a.Imag);
+            __m128d den = _mm_setr_pd(b.Real, b.Imag);
             return { _mm_cvtsd_f64(_mm_div_pd(num, den)), _mm_cvtsd_f64(_mm_div_pd(den, num)) };
         }
         static auto FFT(const Complex* input, u64 size) -> Complex*
         {
-            Complex* out = new Complex[size];
+            auto* out = new Complex[size];
             u64 half_size = size >> 1;
             const __m256d wn = _mm256_setr_pd(-2 * M_PI / size, M_PI / size, -2 * M_PI / size, M_PI / size);
 
             // Divide input into even and odd parts
             for (u64 i = 0; i < size; i += 4)
             {
-                __m256d a = _mm256_loadu_pd(&input[i].real);
-                __m256d b = _mm256_loadu_pd(&input[i + half_size].real);
-                _mm256_storeu_pd(&out[i].real, _mm256_add_pd(a, b));
-                _mm256_storeu_pd(&out[i + half_size].real, _mm256_sub_pd(a, b));
+                __m256d a = _mm256_loadu_pd(&input[i].Real);
+                __m256d b = _mm256_loadu_pd(&input[i + half_size].Real);
+                _mm256_storeu_pd(&out[i].Real, _mm256_add_pd(a, b));
+                _mm256_storeu_pd(&out[i + half_size].Real, _mm256_sub_pd(a, b));
             }
 
             for (u64 n = 4, m = 2; n <= size; n <<= 2, m = n >> 1)
@@ -1263,11 +1273,11 @@ namespace origin
                 {
                     for (u64 j = i; j < i + m; j += 4)
                     {
-                        __m256d a = _mm256_loadu_pd(&out[j].real);
-                        __m256d b = _mm256_loadu_pd(&out[j + m].real);
+                        __m256d a = _mm256_loadu_pd(&out[j].Real);
+                        __m256d b = _mm256_loadu_pd(&out[j + m].Real);
                         __m256d t = _mm256_add_pd(_mm256_sub_pd(a, b), _mm256_mul_pd(_mm256_sub_pd(_mm256_mul_pd(a, w), _mm256_mul_pd(b, w)), _mm256_setr_pd(j, j + 1, j + 2, j + 3)));
-                        _mm256_storeu_pd(&out[j].real, _mm256_add_pd(a, b));
-                        _mm256_storeu_pd(&out[j + m].real, t);
+                        _mm256_storeu_pd(&out[j].Real, _mm256_add_pd(a, b));
+                        _mm256_storeu_pd(&out[j + m].Real, t);
                     }
                 }
             }
@@ -1293,14 +1303,24 @@ namespace origin
             const __m256d norm = _mm256_set1_pd(1.0 / size);
             for (u64 i = 0; i < size; i += 4)
             {
-                __m256d v = _mm256_loadu_pd(&out[i].real);
-                _mm256_storeu_pd(&out[i].real, _mm256_mul_pd(v, norm));
+                __m256d v = _mm256_loadu_pd(&out[i].Real);
+                _mm256_storeu_pd(&out[i].Real, _mm256_mul_pd(v, norm));
             }
             return out;
         }
-        static Complex* FFT2(Complex* _C1, const u64 N)
+        static Complex* Conjugate(Complex* C1, const u64 N)
         {
-            auto* C = reinterpret_cast<Complex*>(_C1);
+            auto* c = C1;
+            for (u64 i = 0; i < N; i++)
+            {
+                c[i].Imag = -c[i].Imag;
+            }
+            return c;
+        }
+
+        static Complex* FFT2(Complex* C1, const u64 N)
+        {
+            auto* c = reinterpret_cast<Complex*>(C1);
 
             // Cooley–Tukey FFT (in-place)
             for (u64 s = 1, s_half = 1; s < N; s <<= 2, s_half = s >> 1)
@@ -1314,9 +1334,9 @@ namespace origin
                     {
                         const u64 j = p + i;
                         const u64 k = j + s_half;
-                        const __m256d t = _mm256_add_pd(_mm256_sub_pd(_mm256_loadu_pd(&C[j].real), _mm256_loadu_pd(&C[k].real)), _mm256_mul_pd(_mm256_sub_pd(_mm256_mul_pd(_mm256_loadu_pd(&C[j].real), w), _mm256_mul_pd(_mm256_loadu_pd(&C[k].real), w)), _mm256_setr_pd(j, j + 1, j + 2, j + 3)));
-                        _mm256_storeu_pd(&C[j].real, _mm256_add_pd(_mm256_loadu_pd(&C[j].real), _mm256_loadu_pd(&C[k].real)));
-                        _mm256_storeu_pd(&C[k].real, t);
+                        const __m256d t = _mm256_add_pd(_mm256_sub_pd(_mm256_loadu_pd(&c[j].Real), _mm256_loadu_pd(&c[k].Real)), _mm256_mul_pd(_mm256_sub_pd(_mm256_mul_pd(_mm256_loadu_pd(&c[j].Real), w), _mm256_mul_pd(_mm256_loadu_pd(&c[k].Real), w)), _mm256_setr_pd(j, j + 1, j + 2, j + 3)));
+                        _mm256_storeu_pd(&c[j].Real, _mm256_add_pd(_mm256_loadu_pd(&c[j].Real), _mm256_loadu_pd(&c[k].Real)));
+                        _mm256_storeu_pd(&c[k].Real, t);
                     }
                 }
             }
@@ -1329,9 +1349,9 @@ namespace origin
                 }
                 if (i < j)
                 {
-                    const __m256d temp = _mm256_loadu_pd(&C[i].real);
-                    _mm256_storeu_pd(&C[i].real, _mm256_loadu_pd(&C[j].real));
-                    _mm256_storeu_pd(&C[j].real, temp);
+                    const __m256d temp = _mm256_loadu_pd(&c[i].Real);
+                    _mm256_storeu_pd(&c[i].Real, _mm256_loadu_pd(&c[j].Real));
+                    _mm256_storeu_pd(&c[j].Real, temp);
                 }
             }
 
@@ -1339,10 +1359,19 @@ namespace origin
             const __m256d norm = _mm256_set1_pd(1.0 / N);
             for (u64 i = 0; i < N; i += 4)
             {
-                __m256d v = _mm256_loadu_pd(&C[i].real);
-                _mm256_storeu_pd(&C[i].real, _mm256_mul_pd(v, norm));
+                __m256d v = _mm256_loadu_pd(&c[i].Real);
+                _mm256_storeu_pd(&c[i].Real, _mm256_mul_pd(v, norm));
             }
-            return C;
+            return c;
+        }
+
+        static Complex* IFFT(Complex C1[], const u64 N)
+        {
+            auto* c = C1;
+            c = Conjugate(c, N);
+            FFT2(c, N);
+            c = Conjugate(c, N);
+            return c;
         }
     };
     struct Mem
@@ -1359,48 +1388,48 @@ namespace origin
         };
 
     private:
-        Unit unit = Unit::BYTE;
+        Unit Unit = Unit::BYTE;
 
     public:
-        f64 size = 0.0;
-        f64 used = 0.0;
-        f64 free = 0.0;
-        f64 total = 0.0;
+        f64 MemSize = 0.0;
+        f64 MemUsed = 0.0;
+        f64 MemFree = 0.0;
+        f64 MemTotal = 0.0;
         explicit Mem(enum Unit _unit) :
-            unit(_unit)
+            Unit(_unit)
         {
-            size = used = free = total = 0.0;
+            MemSize = MemUsed = MemFree = MemTotal = 0.0;
         }
-        explicit Mem(f64 _size = 0.0, f64 _used = 0.0, f64 _free = 0.0, f64 _total = 0.0, Unit _unit = Unit::BYTE) :
-            size(_size), used(_used), free(_free), total(_total), unit(_unit) {}
+        explicit Mem(f64 _size = 0.0, f64 _used = 0.0, f64 _free = 0.0, f64 _total = 0.0, enum Unit _unit = Unit::BYTE) :
+            MemSize(_size), MemUsed(_used), MemFree(_free), MemTotal(_total), Unit(_unit) {}
 
-        constexpr auto Convert(const Unit _unit) const -> f64
+        constexpr auto Convert(const enum Unit _unit) const -> f64
         {
             const u8 one = 1;
-            const u8 unit0 = static_cast<u8>(unit) * 10;
+            const u8 unit0 = static_cast<u8>(Unit) * 10;
             const u8 unit1 = static_cast<u8>(_unit) * 10;
             f64 ratio = one << unit0;
             ratio /= one << unit1;
-            return size * ratio;
+            return MemSize * ratio;
         }
         auto Convert(const Mem _mem) const -> Mem
         {
             const u8 one = 1;
-            const u8 unit0 = static_cast<u8>(unit) * 10;
-            const u8 unit1 = static_cast<u8>(_mem.unit) * 10;
+            const u8 unit0 = static_cast<u8>(Unit) * 10;
+            const u8 unit1 = static_cast<u8>(_mem.Unit) * 10;
             f64 ratio = one << unit0;
             ratio /= one << unit1;
-            return Mem{ size * ratio, used * ratio, free * ratio, total * ratio, _mem.unit };
+            return Mem{ MemSize * ratio, MemUsed * ratio, MemFree * ratio, MemTotal * ratio, _mem.Unit };
         }
-        auto operator[](Unit _unit) const -> f64 { return Convert(_unit); }
+        auto operator[](enum Unit _unit) const -> f64 { return Convert(_unit); }
         auto operator=(const Mem& _rhs) -> Mem& = default;
 
-        auto Total() const -> f64 { return used + free; }
-        auto Available() const -> f64 { return free; }
-        auto Used() const -> f64 { return used; }
-        auto Percentage() const -> f64 { return ((used) / static_cast<f64>(Total())) * 100.0; }
-        auto PercentageUsed() const -> f64 { return ((used) / (size)) * 100.0; }
-        auto PercentageFree() const -> f64 { return ((free) / (size)) * 100.0; }
-    };
+        auto Total() const -> f64 { return MemUsed + MemFree; }
+        auto Available() const -> f64 { return MemFree; }
+        auto Used() const -> f64 { return MemUsed; }
+        auto Percentage() const -> f64 { return ((MemUsed) / static_cast<f64>(Total())) * 100.0; }
+        auto PercentageUsed() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
+        auto PercentageFree() const -> f64 { return ((MemFree) / (MemSize)) * 100.0; }
+    } __attribute__((aligned(64))) __attribute__((packed));
 
 } // namespace origin
