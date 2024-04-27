@@ -9,5 +9,6 @@
     "cmake.copyCompileCommands": "/home/matt/origin/compile-commands.json",
     "cmake.enabledOutputParsers": [
         "cmake"
-    ]
+    ],
+    "remote.autoForwardPortsFallback": 0
 }

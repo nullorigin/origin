@@ -2,15 +2,15 @@
 namespace origin
 {
 
-    auto Cross(Vec3f const& _lhs, Vec3f const& _rhs) -> Vec3f
+    auto Cross(Vec3f const& _lhs, Vec3f const& rhs) -> Vec3f
     {
-        return Vec3f(_lhs.y * _rhs.z - _lhs.z * _rhs.y,
-                     _lhs.z * _rhs.x - _lhs.x * _rhs.z,
-                     _lhs.x * _rhs.y - _lhs.y * _rhs.x);
+        return { _lhs.y * rhs.z - _lhs.z * rhs.y,
+                 _lhs.z * rhs.x - _lhs.x * rhs.z,
+                 _lhs.x * rhs.y - _lhs.y * rhs.x };
     }
-    auto Cross(Vec2f const& _lhs, Vec2f const& _rhs) -> Vec2f
+    auto Cross(Vec2f const& _lhs, Vec2f const& rhs) -> Vec2f
     {
-        return Vec2f(_lhs.y * _rhs.x - _lhs.x * _rhs.y,
-                     _lhs.x * _rhs.y - _lhs.y * _rhs.x);
+        return { _lhs.y * rhs.x - _lhs.x * rhs.y,
+                 _lhs.x * rhs.y - _lhs.y * rhs.x };
     }
 } // namespace origin

@@ -1,5 +1,5 @@
 ---
-Checks: 'bugprone-*,cert-*,-cert-err60-cpp,cppcoreguidelines-*,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-readability-identifier-length,-fuchsia-*,clang-analyzer-*,hicpp-*,-hicpp-avoid-c-arrays, misc-*,modernize-*,mpi-*,performance-*,portability-*,readability-*'
+Checks: '*,bugprone-*,cert-*,-cert-err60-cpp,cppcoreguidelines-*,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-readability-identifier-length,-fuchsia-*,clang-analyzer-*,hicpp-*,-hicpp-avoid-c-arrays, misc-*,modernize-*,mpi-*,performance-*,portability-*,readability-*'
 HeaderFilterRegex: '*.hpp'
 CheckOptions:
   - key:             bugprone-argument-comment.StrictMode
@@ -9,7 +9,7 @@ CheckOptions:
   - key:             bugprone-assert-side-effect.CheckFunctionCalls
     value:           '0'
   - key:             bugprone-dangling-handle.HandleClasses
-    value:           'std::basic_string_view;std::experimental::basic_string_view'
+    value:           'std::basic_string;std::experimental::basic_string'
   - key:             bugprone-string-constructor.LargeLengthThreshold
     value:           '8388608'
   - key:             bugprone-string-constructor.WarnOnLargeLength

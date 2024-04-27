@@ -63,13 +63,13 @@ namespace origin
     void Biquad::CalcBiquad()
     {
         f64 norm = NAN;
-        const f64 v = Powi(Abs(PeakGain) / 20.0, 10);
-        const f64 k = Tan(PI * Fc);
+        const f64 v = powi(abs(PeakGain) / 20.0, 10);
+        const f64 k = tan(PI * Fc);
         const f64 v2 = v * 2;
         const f64 kk = k * k;
         const f64 kkk = kk * k;
         const f64 sqrt2 = 1.4142135623730950488016887242097;
-        const f64 sqrt_v2 = Sqrt(v2);
+        const f64 sqrt_v2 = sqrt(v2);
         switch (this->Type)
         {
         case Lowpass:

@@ -20,6 +20,7 @@
 #define Biquad_h
 #include "Basic.hpp"
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 namespace origin
 {
@@ -70,26 +71,24 @@ namespace origin
     struct IIR
     {
         static_assert(N >= 2, "invalid number of filter coefficients");
-        using vector_type = V;
-        using real_type = typename vector_type::value_type;
 
         IIR();
         template<class Rc>
-        void Coefs(const Rc* bcf, const Rc* acf);
-        void Reset();
-        real_type Tick(real_type in);
+        auto Coefs(const Rc* bcf, const Rc* acf);
+        auto Reset();
+        auto Tick(i32 in);
 
         IIR(IIR&&) = default;
         IIR& operator=(IIR&&) = default;
 
     private:
         unsigned i_ = {};
-        std::unique_ptr<real_type[]> X, Y;
-        real_type B0 = 1, A0 = 1;
-        std::unique_ptr<real_type[], real_type> B, A;
+        std::unique_ptr<i32[]> X, Y;
+        i32 B0 = 1, A0 = 1;
+        std::unique_ptr<i32[], i32> B, A;
 
     public:
-        real_type Scalar(real_type in);
+        auto Scalar(i32 in) -> i32;
     };
 
     //------------------------------------------------------------------------------
@@ -98,14 +97,11 @@ namespace origin
     template<class V>
     struct IIRg
     {
-        using vector_type = V;
-        using real_type = int;
-
         explicit IIRg(unsigned n);
         template<class Rc>
-        void Coefs(const Rc* bcf, const Rc* acf);
-        void Reset();
-        real_type Tick(real_type in);
+        auto Coefs(const Rc* bcf, const Rc* acf);
+        auto Reset();
+        i32 Tick(i32 in);
 
         IIRg(IIRg&&) = default;
         IIRg& operator=(IIRg&&) = default;
@@ -113,25 +109,26 @@ namespace origin
     private:
         const unsigned n_{};
         unsigned i_ = {};
-        std::unique_ptr<real_type[]> X, Y;
-        real_type B0 = 1, A0 = 1;
-        std::unique_ptr<real_type[], real_type> B, A;
+        std::unique_ptr<i32[]> X, Y;
+        i32 B0 = 1, A0 = 1;
+        std::unique_ptr<i32[], i32> B, A;
 
     public:
-        real_type Scalar(real_type in);
+        auto Scalar(i32 in);
     };
     template<unsigned N, class V>
     IIR<N, V>::IIR()
     {
-        constexpr unsigned v = sizeof(V) / sizeof(real_type);
+        constexpr unsigned v = sizeof(V) / sizeof(i32);
         constexpr unsigned nn = (N + v - 2) & ~(v - 1);
-        X.reset(new real_type[2 * nn]());
-        Y.reset(new real_type[2 * nn]());
+        const i32 rst[2 * nn]{};
+        X.reset(rst);
+        Y.reset(rst);
     }
 
     template<unsigned N, class V>
     template<class Rc>
-    void IIR<N, V>::Coefs(const Rc* b, const Rc* a)
+    auto IIR<N, V>::Coefs(const Rc* b, const Rc* a)
     {
         B0 = b[0];
         A0 = a[0];
@@ -140,9 +137,9 @@ namespace origin
     }
 
     template<unsigned N, class V>
-    void IIR<N, V>::Reset()
+    auto IIR<N, V>::Reset()
     {
-        constexpr unsigned vlen = sizeof(V) / sizeof(real_type);
+        constexpr unsigned vlen = sizeof(V) / sizeof(i32);
         constexpr unsigned n = (N + vlen - 2) & ~(vlen - 1);
 
         std::fill_n(X.get(), 2 * n, 0);
@@ -150,17 +147,17 @@ namespace origin
     }
 
     template<unsigned N, class V>
-    auto IIR<N, V>::Scalar(real_type in) -> real_type
+    auto IIR<N, V>::Scalar(i32 in) -> i32
     {
-        constexpr unsigned vn = N + (sizeof(V) / sizeof(real_type)) - 2;
-        constexpr unsigned nn = vn & ~(sizeof(V) / sizeof(real_type) - 1);
+        constexpr unsigned vn = N + (sizeof(V) / sizeof(i32)) - 2;
+        constexpr unsigned nn = vn & ~(sizeof(V) / sizeof(i32) - 1);
 
-        real_type* x = X.get();
-        real_type* y = Y.get();
-        const real_type* b = B.get();
-        const real_type* a = A.get();
+        i32* x = X.get();
+        i32* y = Y.get();
+        const i32* b = B.get();
+        const i32* a = A.get();
 
-        real_type r = in * b[0];
+        i32 r = in * b[0];
         unsigned i = (i_ + nn) % nn;
         x[i] = x[i + nn] = in;
 

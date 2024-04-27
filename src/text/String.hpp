@@ -12,16 +12,18 @@ namespace origin
     template<typename X, typename Y>
     class KeyVal
     {
-    public:
+    private:
         std::valarray<X> Key = std::valarray<X>();
         std::valarray<Y> Val = std::valarray<Y>();
+
+    public:
         KeyVal<X, Y>& operator=(KeyVal<X, Y>&& other) noexcept
         {
             Key = std::move(other.Key);
             Val = std::move(other.Val);
             return *this;
         }
-        KeyVal<X, Y>& operator=(const KeyVal<X, Y>& other) noexcept
+        auto& operator=(const KeyVal<X, Y>& other)
         {
             Key = other.Key;
             Val = other.Val;
@@ -140,7 +142,7 @@ namespace origin
         bool success = false;
         u32 retries_count = retries;
         std::fstream file(file_name, std::fstream::in | std::fstream::out | std::fstream::trunc);
-        while (!success && retries > 0)
+        while (!success && retries_count > 0)
         {
             file.open(file_name, std::fstream::in | std::fstream::out | std::fstream::trunc);
             if (file.is_open())
@@ -219,7 +221,7 @@ namespace origin
         return out;
     }
 
-    static void Copy(i8p __restrict dest, const i8p __restrict src)
+    static void Copy(i8p dest, const i8* src)
     {
         memcpy(dest, src, strlen(src) + 1);
     }
@@ -270,13 +272,16 @@ namespace origin
         return ret;
     }
 
-    inline auto ToString(f128 num) -> string
+    inline auto ToString(f128 num, u32 precision = 0) -> string
     {
         string buffer(38, '\0');
         string digits(38, '\0');
-        f128 factor = pow(10, NumDigits(num, digits));
+        if (precision == 0 || precision > 38)
+        {
+            precision = static_cast<u32>(NumDigits(num, digits));
+        }
         std::stringstream ss;
-        ss.precision(9);
+        ss.precision(precision);
         ss.flags(std::ios_base::dec | std::ios_base::fixed);
         ss << (num / 1000000000.0);
         ss >> buffer;
