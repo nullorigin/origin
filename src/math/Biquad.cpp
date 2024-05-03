@@ -17,8 +17,7 @@
 //
 
 #include "Biquad.hpp"
-#include <cmath>
-namespace origin
+namespace Origin
 {
     Biquad::Biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB)
     {
@@ -62,7 +61,7 @@ namespace origin
 
     void Biquad::CalcBiquad()
     {
-        f64 norm = NAN;
+        f64 norm = 0.0;
         const f64 v = powi(abs(PeakGain) / 20.0, 10);
         const f64 k = tan(PI * Fc);
         const f64 v2 = v * 2;
@@ -170,4 +169,4 @@ namespace origin
             break;
         }
     }
-} // namespace origin
+} // namespace Origin

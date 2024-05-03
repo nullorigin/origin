@@ -1,22 +1,74 @@
+#ifndef HOME_MATT_ORIGIN_SRC_MATH_BASIC_HPP
+#define HOME_MATT_ORIGIN_SRC_MATH_BASIC_HPP
+
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+
+#include <functional>
+#include <initializer_list>
+#include <iterator>
+
+#include <memory>
+#include <numeric>
+#include <type_traits>
+#include <valarray>
+#include <vector>
 #pragma once
+#include <algorithm>
+
+#include <chrono>
 
 #include <cstddef>
 
-#include <cstdlib>
-
 #include <cstring>
 
-#include <emmintrin.h>
-
 #include <immintrin.h>
+
+#include <random>
 
 #include <string>
 
 #include <utility>
 
-#include <xmmintrin.h>
-
-namespace origin
+/*
+namespace Origin
+{
+    static size_t memory = 0;
+    static size_t max_memory = 1024 * 1024 * 1024;
+} // namespace Origin
+using namespace Origin;
+struct PlacementTag
+{
+};
+template<typename T>
+inline auto operator new(unsigned long size, void* ptr, PlacementTag) noexcept -> void*
+{
+    Origin::memory += sizeof(T) * size;
+    if (Origin::memory > Origin::max_memory)
+    {
+        std::printf("Memory leak detected.\n Memory used: %zu", Origin::memory);
+        return nullptr;
+    }
+    ptr = __builtin_operator_new(size);
+    return ptr;
+}
+template<typename T>
+inline void operator delete(void* ptr, unsigned long size, PlacementTag) noexcept
+{
+    if (ptr == nullptr)
+    {
+        return;
+    }
+    Origin::memory -= sizeof(T) * size;
+    if (Origin::memory < 0)
+    {
+        std::printf("Memory leak detected.\n Memory used: %zu", Origin::memory);
+        return;
+    }
+    __builtin_operator_delete(ptr);
+} */
+namespace Origin
 {
     using std::string;
     using i8 = char;
@@ -47,9 +99,9 @@ namespace origin
     using i32p = int*;
     using i64p = long long*;
     using i128p = __int128_t*;
-    using f32p = float*;
-    using f64p = double*;
-    using f128p = long double*;
+    using f32p = f32*;
+    using f64p = f64*;
+    using f128p = f128*;
 #define vattr16 __attribute__((__vector_size__(16), __aligned__(16)))
 #define vattr32 __attribute__((__vector_size__(32), __aligned__(32)))
 #define vattr64 __attribute__((__vector_size__(64), __aligned__(64)))
@@ -84,990 +136,1013 @@ namespace origin
     using f128x2 = long double vattr32;
     using f128x4 = long double vattr64;
 #if WORDSIZE == 64
-    typedef unsigned long SIZE_T;
+    using SIZE_T = unsigned long;
 #else
-    using size_t = unsigned long long;
+    using SIZE_T = unsigned long long;
 #endif
     static const u32 C8 = 0xff, C16 = 0xffff, C32 = 0xffffff, C64 = 0xffffffff;
     constexpr f64 PI = 3.14159265358979323846535897932384;
-#define i8_C(c) c
-#define u8_C(c) c
-#define s8_C(c) c
-#define i16_C(c) c
-#define u16_C(c) c
-#define s16_C(c) c
-#define i32_C(c) c
-#define u32_C(c) c##U
-#define s32_C(c) c
-#if WORDSIZE == 64
-#define i64_C(c) c##L
-#define s64_C(c) c##L
-#define u64_C(c) c##UL
-#else
-#define i64_C(c) c##LL
-#define u64_C(c) c##ULL
-#define s64_C(c) c##LL
-#endif
-#define f32_C(c) c##f
-#define f64_C(c) c
-#define f128_C(c) c##d
-#define u64_C2(h, l) ((static_cast<u64>(h) << 32) | static_cast<u64>(l))
-#define imax8 I8_C(127)
-#define imax16 I16_C(32767)
-#define imax32 I32_C(2147483647)
-#define imax64 I64_C(9223372036854775807)
-#define umax8 U8_C(255)
-#define umax16 U16_C(65535)
-#define umax32 U32_C(4294967295)
-#define umax64 U64_C(18446744073709551615)
-#define smax8 S8_C(127)
-#define smax16 S16_C(32767)
-#define smax32 S32_C(2147483647)
-#define smax64 S64_C(9223372036854775807)
-#define fmax32 F32_C(3.40282346638528859811704183484516925440e+38f)
-#define fmax64 F64_C(1.797693134862315708145274237317043567981e+308)
-#define fmax128 F128_C(1.18973149535723176508575932662800702e+4932)
-#define imin8 I8_C(-128)
-#define imin16 I16_C(-32768)
-#define imin32 I32_C(-2147483648)
-#define umin8 U8_C(0)
-#define umin16 U16_C(0)
-#define umin32 U32_C(0)
-#define umin64 U64_C(0)
-#define smin8 S8_C(-128)
-#define smin16 S16_C(-32768)
-#define smin16 S16_C(-32768)
-#define smin32 S32_C(-2147483648)
-#define smin64 S64_C(-9223372036854775808)
-#define fmin32 F32_C(-3.40282346638528859811704183484516925440e+38f)
-#define fmin64 F64_C(-1.797693134862315708145274237317043567981e+308)
-#define fmin128 F128_C(-1.18973149535723176508575932662800702e+4932)
-#define fe32 F32_C(1.1920928955078125e-07f)
-#define fe64 F64_C(2.220446049250313080847263336181640625e-16)
-#define fe128 F128_C(1.9259299443872358530559779425849159658203125e-34)
+    template<typename T>
+    constexpr auto Cast(T c) -> T
+    {
+        return (c);
+    }
+    template<typename T>
+    constexpr auto Cast(T c, T d) -> T
+    {
+        return (c << (sizeof(T) * 4) | d);
+    }
+#define imax8 Cast<i8>(127)
+#define imax16 Cast<i16>(32767)
+#define imax32 Cast<i32>(2147483647)
+#define imax64 Cast<i64>(9223372036854775807)
+#define umax8 Cast<u8>(255)
+#define umax16 Cast<u16>(65535)
+#define umax32 Cast<u32>(4294967295)
+#define umax64 Cast<u64>(18446744073709551615)
+#define smax8 Cast<s8>(127)
+#define smax16 Cast<s16>(32767)
+#define smax32 Cast<s32>(2147483647)
+#define smax64 Cast<s64>(9223372036854775807)
+#define fmax32 Cast<f32>(3.40282346638528859811704183484516925440e+38f)
+#define fmax64 Cast<f64>(1.797693134862315708145274237317043567981e+308)
+#define fmax128 Cast<f128>(1.18973149535723176508575932662800702e+4932)
+#define imin8 Cast<i8>(-128)
+#define imin16 Cast<i16>(-32768)
+#define imin32 Cast<i32>(-2147483648)
+#define umin8 Cast<u8>(0)
+#define umin16 Cast<u16>(0)
+#define umin32 Cast<u32>(0)
+#define umin64 Cast<u64>(0)
+#define smin8 Cast<s8>(-128)
+#define smin16 Cast<s16>(-32768)
+#define smin16 Cast<s16>(-32768)
+#define smin32 Cast<s32>(-2147483648)
+#define smin64 Cast<s64>(-9223372036854775808)
+#define fmin32 Cast<f32>(-3.40282346638528859811704183484516925440e+38f)
+#define fmin64 Cast<f64>(-1.797693134862315708145274237317043567981e+308)
+#define fmin128 Cast<f128>(-1.18973149535723176508575932662800702e+4932)
+#define fe32 Cast<f32>(1.1920928955078125e-07f)
+#define fe64 Cast<f64>(2.220446049250313080847263336181640625e-16)
+#define fie64 Cast<f64>(22204460492503130)
+#define fe128 Cast<f128>(1.9259299443872358530559779425849159658203125e-34)
+#define fie128 Cast<f128>(192509299444872355)
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
 #define null ((void*)0)
 #ifndef NO_BUILTIN
     using V = __builtin_va_list;
-    inline double abs(double x)
+    inline auto abs(f64 x) -> f64
     {
         return __builtin_fabs(x);
     }
-    inline float abs(float x)
+    inline auto abs(f32 x) -> f32
     {
         return __builtin_fabsf(x);
     }
-    inline long double abs(long double x)
+    inline auto abs(f128 x) -> f128
     {
         return __builtin_fabsl(x);
     }
 
-    inline double acos(double x)
+    inline auto acos(f64 x) -> f64
     {
         return __builtin_acos(x);
     }
-    inline float acos(float x)
+    inline auto acos(f32 x) -> f32
     {
         return __builtin_acosf(x);
     }
-    inline long double acos(long double x)
+    inline auto acos(f128 x) -> f128
     {
         return __builtin_acosl(x);
     }
 
-    inline double acosh(double x)
+    inline auto acosh(f64 x) -> f64
     {
         return __builtin_acosh(x);
     }
-    inline float acosh(float x)
+    inline auto acosh(f32 x) -> f32
     {
         return __builtin_acoshf(x);
     }
-    inline long double acosh(long double x)
+    inline auto acosh(f128 x) -> f128
     {
         return __builtin_acoshl(x);
     }
 
-    inline double asin(double x)
+    inline auto asin(f64 x) -> f64
     {
         return __builtin_asin(x);
     }
-    inline float asin(float x)
+    inline auto asin(f32 x) -> f32
     {
         return __builtin_asinf(x);
     }
-    inline long double asin(long double x)
+    inline auto asin(f128 x) -> f128
     {
         return __builtin_asinl(x);
     }
 
-    inline double asinh(double x)
+    inline auto asinh(f64 x) -> f64
     {
         return __builtin_asinh(x);
     }
-    inline float asinh(float x)
+    inline auto asinh(f32 x) -> f32
     {
         return __builtin_asinhf(x);
     }
-    inline long double asinh(long double x)
+    inline auto asinh(f128 x) -> f128
     {
         return __builtin_asinhl(x);
     }
 
-    inline double atan(double x)
+    inline auto atan(f64 x) -> f64
     {
         return __builtin_atan(x);
     }
-    inline float atan(float x)
+    inline auto atan(f32 x) -> f32
     {
         return __builtin_atanf(x);
     }
-    inline long double atan(long double x)
+    inline auto atan(f128 x) -> f128
     {
         return __builtin_atanl(x);
     }
 
-    inline double atan2(double x, double y)
+    inline auto atan2(f64 x, f64 y) -> f64
     {
         return __builtin_atan2(x, y);
     }
-    inline float atan2(float x, float y)
+    inline auto atan2(f32 x, f32 y) -> f32
     {
         return __builtin_atan2f(x, y);
     }
-    inline long double atan2(long double x, long double y)
+    inline auto atan2(f128 x, f128 y) -> f128
     {
         return __builtin_atan2l(x, y);
     }
 
-    inline double cbrt(double x)
+    inline auto cbrt(f64 x) -> f64
     {
         return __builtin_cbrt(x);
     }
-    inline float cbrt(float x)
+    inline auto cbrt(f32 x) -> f32
     {
         return __builtin_cbrtf(x);
     }
-    inline long double cbrt(long double x)
+    inline auto cbrt(f128 x) -> f128
     {
         return __builtin_cbrtl(x);
     }
 
-    inline double ceil(double x)
+    inline auto ceil(f64 x) -> f64
     {
         return __builtin_ceil(x);
     }
-    inline float ceil(float x)
+    inline auto ceil(f32 x) -> f32
     {
         return __builtin_ceilf(x);
     }
-    inline long double ceil(long double x)
+    inline auto ceil(f128 x) -> f128
     {
         return __builtin_ceill(x);
     }
 
-    inline double copysign(double x, double y)
+    inline auto copysign(f64 x, f64 y) -> f64
     {
         return __builtin_copysign(x, y);
     }
-    inline float copysign(float x, float y)
+    inline auto copysign(f32 x, f32 y) -> f32
     {
         return __builtin_copysignf(x, y);
     }
-    inline long double copysign(long double x, long double y)
+    inline auto copysign(f128 x, f128 y) -> f128
     {
         return __builtin_copysignl(x, y);
     }
 
-    inline double cos(double x)
+    inline auto cos(f64 x) -> f64
     {
         return __builtin_cos(x);
     }
-    inline float cos(float x)
+    inline auto cos(f32 x) -> f32
     {
         return __builtin_cosf(x);
     }
-    inline long double cos(long double x)
+    inline auto cos(f128 x) -> f128
     {
         return __builtin_cosl(x);
     }
 
-    inline double cosh(double x)
+    inline auto cosh(f64 x) -> f64
     {
         return __builtin_cosh(x);
     }
-    inline float cosh(float x)
+    inline auto cosh(f32 x) -> f32
     {
         return __builtin_coshf(x);
     }
-    inline long double cosh(long double x)
+    inline auto cosh(f128 x) -> f128
     {
         return __builtin_coshl(x);
     }
 
-    inline double erf(double x)
+    inline auto erf(f64 x) -> f64
     {
         return __builtin_erf(x);
     }
-    inline float erf(float x)
+    inline auto erf(f32 x) -> f32
     {
         return __builtin_erff(x);
     }
-    inline long double erf(long double x)
+    inline auto erf(f128 x) -> f128
     {
         return __builtin_erfl(x);
     }
 
-    inline double erfc(double x)
+    inline auto erfc(f64 x) -> f64
     {
         return __builtin_erfc(x);
     }
-    inline float erfc(float x)
+    inline auto erfc(f32 x) -> f32
     {
         return __builtin_erfcf(x);
     }
-    inline long double erfc(long double x)
+    inline auto erfc(f128 x) -> f128
     {
         return __builtin_erfcl(x);
     }
 
-    inline double exp(double x)
+    inline auto exp(f64 x) -> f64
     {
         return __builtin_exp(x);
     }
-    inline float exp(float x)
+    inline auto exp(f32 x) -> f32
     {
         return __builtin_expf(x);
     }
-    inline long double exp(long double x)
+    inline auto exp(f128 x) -> f128
     {
         return __builtin_expl(x);
     }
 
-    inline double exp2(double x)
+    inline auto exp2(f64 x) -> f64
     {
         return __builtin_exp2(x);
     }
-    inline float exp2(float x)
+    inline auto exp2(f32 x) -> f32
     {
         return __builtin_exp2f(x);
     }
-    inline long double exp2(long double x)
+    inline auto exp2(f128 x) -> f128
     {
         return __builtin_exp2l(x);
     }
 
-    inline double fdim(double x, double y)
+    inline auto fdim(f64 x, f64 y) -> f64
     {
         return __builtin_fdim(x, y);
     }
-    inline float fdim(float x, float y)
+    inline auto fdim(f32 x, f32 y) -> f32
     {
         return __builtin_fdimf(x, y);
     }
-    inline long double fdim(long double x, long double y)
+    inline auto fdim(f128 x, f128 y) -> f128
     {
         return __builtin_fdiml(x, y);
     }
 
-    inline double floor(double x)
+    inline auto floor(f64 x) -> f64
     {
         return __builtin_floor(x);
     }
-    inline float floor(float x)
+    inline auto floor(f32 x) -> f32
     {
         return __builtin_floorf(x);
     }
-    inline long double floor(long double x)
+    inline auto floor(f128 x) -> f128
     {
         return __builtin_floorl(x);
     }
 
-    inline double fma(double x, double y, double z)
+    inline auto fma(f64 x, f64 y, f64 z) -> f64
     {
         return __builtin_fma(x, y, z);
     }
-    inline float fma(float x, float y, float z)
+    inline auto fma(f32 x, f32 y, f32 z) -> f32
     {
         return __builtin_fmaf(x, y, z);
     }
-    inline long double fma(long double x, long double y, long double z)
+    inline auto fma(f128 x, f128 y, f128 z) -> f128
     {
         return __builtin_fmal(x, y, z);
     }
 
-    inline double fmax(double x, double y)
+    inline auto fmax(f64 x, f64 y) -> f64
     {
         return __builtin_fmax(x, y);
     }
-    inline float fmax(float x, float y)
+    inline auto fmax(f32 x, f32 y) -> f32
     {
         return __builtin_fmaxf(x, y);
     }
-    inline long double fmax(long double x, long double y)
+    inline auto fmax(f128 x, f128 y) -> f128
     {
         return __builtin_fmaxl(x, y);
     }
 
-    inline double fmin(double x, double y)
+    inline auto fmin(f64 x, f64 y) -> f64
     {
         return __builtin_fmin(x, y);
     }
-    inline float fmin(float x, float y)
+    inline auto fmin(f32 x, f32 y) -> f32
     {
         return __builtin_fminf(x, y);
     }
-    inline long double fmin(long double x, long double y)
+    inline auto fmin(f128 x, f128 y) -> f128
     {
         return __builtin_fminl(x, y);
     }
 
-    inline double fmod(double x, double y)
+    inline auto fmod(f64 x, f64 y) -> f64
     {
         return __builtin_fmod(x, y);
     }
-    inline float fmod(float x, float y)
+    inline auto fmod(f32 x, f32 y) -> f32
     {
         return __builtin_fmodf(x, y);
     }
-    inline long double fmod(long double x, long double y)
+    inline auto fmod(f128 x, f128 y) -> f128
     {
         return __builtin_fmodl(x, y);
     }
 
-    inline int fpclassify(int a, int b, int c, int d, int e, float f)
+    inline auto fpclassify(i32 a, i32 b, i32 c, i32 d, i32 e, f32 f) -> i32
     {
         return __builtin_fpclassify(a, b, c, d, e, f);
     }
 
-    inline double hypot(double x, double y)
+    inline auto hypot(f64 x, f64 y) -> f64
     {
         return __builtin_hypot(x, y);
     }
-    inline float hypot(float x, float y)
+    inline auto hypot(f32 x, f32 y) -> f32
     {
         return __builtin_hypotf(x, y);
     }
-    inline long double hypot(long double x, long double y)
+    inline auto hypot(f128 x, f128 y) -> f128
     {
         return __builtin_hypotl(x, y);
     }
 
-    inline int ilogb(double x)
+    inline auto ilogb(f64 x) -> i32
     {
         return __builtin_ilogb(x);
     }
-    inline int ilogb(float x)
+    inline auto ilogb(f32 x) -> i32
     {
         return __builtin_ilogbf(x);
     }
-    inline int ilogb(long double x)
+    inline auto ilogb(f128 x) -> i32
     {
         return __builtin_ilogbl(x);
     }
 
-    inline bool isfinite(double x)
+    inline auto isfinite(f64 x) -> bool
     {
         return __builtin_isfinite(x) != 0;
     }
-    inline bool isfinite(float x)
+    inline auto isfinite(f32 x) -> bool
     {
         return __builtin_isfinite(x) != 0;
     }
-    inline bool isfinite(long double x)
+    inline auto isfinite(f128 x) -> bool
     {
         return __builtin_isfinite(x) != 0;
     }
 
-    inline bool isgreater(double x, double y)
+    inline auto isgreater(f64 x, f64 y) -> bool
     {
         return __builtin_isgreater(x, y) != 0;
     }
-    inline bool isgreater(float x, float y)
+    inline auto isgreater(f32 x, f32 y) -> bool
     {
         return __builtin_isgreater(x, y) != 0;
     }
-    inline bool isgreater(long double x, long double y)
+    inline auto isgreater(f128 x, f128 y) -> bool
     {
         return __builtin_isgreater(x, y) != 0;
     }
 
-    inline bool isgreaterequal(double x, double y)
+    inline auto isgreaterequal(f64 x, f64 y) -> bool
     {
         return __builtin_isgreaterequal(x, y) != 0;
     }
-    inline bool isgreaterequal(float x, float y)
+    inline auto isgreaterequal(f32 x, f32 y) -> bool
     {
         return __builtin_isgreaterequal(x, y) != 0;
     }
-    inline bool isgreaterequal(long double x, long double y)
+    inline auto isgreaterequal(f128 x, f128 y) -> bool
     {
         return __builtin_isgreaterequal(x, y) != 0;
     }
-    inline long double lgammal(long double x)
+    inline auto lgammal(f128 x) -> f128
     {
         return __builtin_lgammal(x);
     }
-    inline long long llrint(double x)
+    inline auto llrint(f64 x) -> i64
     {
         return __builtin_llrint(x);
     }
-    inline long long llrintf(float x)
+    inline auto llrintf(f32 x) -> i64
     {
         return __builtin_llrintf(x);
     }
-    inline long long llrintl(long double x)
+    inline auto llrintl(f128 x) -> i64
     {
         return __builtin_llrintl(x);
     }
-    inline long long llround(double x)
+    inline auto llround(f64 x) -> i64
     {
         return __builtin_llround(x);
     }
-    inline long long llroundf(float x)
+    inline auto llroundf(f32 x) -> i64
     {
         return __builtin_llroundf(x);
     }
-    inline long long llroundl(long double x)
+    inline auto llroundl(f128 x) -> i64
     {
         return __builtin_llroundl(x);
     }
-    inline double log(double x)
+    inline auto log(f64 x) -> f64
     {
         return __builtin_log(x);
     }
-    inline float logf(float x)
+    inline auto logf(f32 x) -> f32
     {
         return __builtin_logf(x);
     }
-    inline long double logl(long double x)
+    inline auto logl(f128 x) -> f128
     {
         return __builtin_logl(x);
     }
-    inline double log10(double x)
+    inline auto log10(f64 x) -> f64
     {
         return __builtin_log10(x);
     }
-    inline float log10f(float x)
+    inline auto log10f(f32 x) -> f32
     {
         return __builtin_log10f(x);
     }
-    inline long double log10l(long double x)
+    inline auto log10l(f128 x) -> f128
     {
         return __builtin_log10l(x);
     }
-    inline double log1p(double x)
+    inline auto log1p(f64 x) -> f64
     {
         return __builtin_log1p(x);
     }
-    inline float log1pf(float x)
+    inline auto log1pf(f32 x) -> f32
     {
         return __builtin_log1pf(x);
     }
-    inline long double log1pl(long double x)
+    inline auto log1pl(f128 x) -> f128
     {
         return __builtin_log1pl(x);
     }
-    inline double log2(double x)
+    inline auto log2(f64 x) -> f64
     {
         return __builtin_log2(x);
     }
-    inline float log2f(float x)
+    inline auto log2f(f32 x) -> f32
     {
         return __builtin_log2f(x);
     }
-    inline long double log2l(long double x)
+    inline auto log2l(f128 x) -> f128
     {
         return __builtin_log2l(x);
     }
-    inline double logb(double x)
+    inline auto logb(f64 x) -> f64
     {
         return __builtin_logb(x);
     }
-    inline float logbf(float x)
+    inline auto logbf(f32 x) -> f32
     {
         return __builtin_logbf(x);
     }
-    inline long double logbl(long double x)
+    inline auto logbl(f128 x) -> f128
     {
         return __builtin_logbl(x);
     }
-    inline long lrint(double x)
+    inline auto lrint(f64 x) -> i32
     {
         return __builtin_lrint(x);
     }
-    inline long int lrintf(float x)
+    inline auto lrintf(f32 x) -> i32
     {
         return __builtin_lrintf(x);
     }
-    inline long double lrintl(long double x)
+    inline auto lrintl(f128 x) -> f128
     {
         return __builtin_lrintl(x);
     }
-    inline long lround(double x)
+    inline auto lround(f64 x) -> i32
     {
         return __builtin_lround(x);
     }
-    inline long lroundf(float x)
+    inline auto lroundf(f32 x) -> i32
     {
         return __builtin_lroundf(x);
     }
-    inline long lroundl(long double x)
+    inline auto lroundl(f128 x) -> i32
     {
         return __builtin_lroundl(x);
     }
-    inline double modf(double x, double* y)
+    inline auto modf(f64 x, f64* y) -> f64
     {
         return __builtin_modf(x, y);
     }
-    inline float modff(float x, float* y)
+    inline auto modff(f32 x, f32* y) -> f32
     {
         return __builtin_modff(x, y);
     }
-    inline long double modfl(long double x, long double* y)
+    inline auto modfl(f128 x, f128* y) -> f128
     {
         return __builtin_modfl(x, y);
     }
-    inline double nan(const char* s)
+    inline auto nan(const i8* s) -> f64
     {
         return __builtin_nan(s);
     }
-    inline float nanf(const char* s)
+    inline auto nanf(const i8* s) -> f32
     {
         return __builtin_nanf(s);
     }
-    inline long double nanl(const char* s)
+    inline auto nanl(const i8* s) -> f128
     {
         return __builtin_nanl(s);
     }
-    inline double nearbyint(double x)
+    inline auto nearbyint(f64 x) -> f64
     {
         return __builtin_nearbyint(x);
     }
-    inline float nearbyintf(float x)
+    inline auto nearbyintf(f32 x) -> f32
     {
         return __builtin_nearbyintf(x);
     }
-    inline long double nearbyintl(long double x)
+    inline auto nearbyintl(f128 x) -> f128
     {
         return __builtin_nearbyintl(x);
     }
-    inline double nextafter(double x, double y)
+    inline auto nextafter(f64 x, f64 y) -> f64
     {
         return __builtin_nextafter(x, y);
     }
-    inline float nextafterf(float x, float y)
+    inline auto nextafterf(f32 x, f32 y) -> f32
     {
         return __builtin_nextafterf(x, y);
     }
-    inline long double nextafterl(long double x, long double y)
+    inline auto nextafterl(f128 x, f128 y) -> f128
     {
         return __builtin_nextafterl(x, y);
     }
-    inline double nexttoward(double x, long double y)
+    inline auto nexttoward(f64 x, f128 y) -> f64
     {
         return __builtin_nexttoward(x, y);
     }
-    inline float nexttowardf(float x, long double y)
+    inline auto nexttowardf(f32 x, f128 y) -> f32
     {
         return __builtin_nexttowardf(x, y);
     }
-    inline long double nexttowardl(long double x, long double y)
+    inline auto nexttowardl(f128 x, f128 y) -> f128
     {
         return __builtin_nexttowardl(x, y);
     }
-    inline double pow(double x, double y)
+    inline auto pow(f64 x, f64 y) -> f64
     {
         return __builtin_pow(x, y);
     }
-    inline float powf(float x, float y)
+    inline auto powf(f32 x, f32 y) -> f32
     {
         return __builtin_powf(x, y);
     }
-    inline double powi(double x, int y)
+    inline auto powi(f64 x, i32 y) -> f64
     {
         return __builtin_powi(x, y);
     }
-    inline long double powl(long double x, long double y)
+    inline auto powl(f128 x, f128 y) -> f128
     {
         return __builtin_powl(x, y);
     }
-    inline double remainder(double x, double y)
+    inline auto remainder(f64 x, f64 y) -> f64
     {
         return __builtin_remainder(x, y);
     }
-    inline float remainderf(float x, float y)
+    inline auto remainderf(f32 x, f32 y) -> f32
     {
         return __builtin_remainderf(x, y);
     }
-    inline long double remainderl(long double x, long double y)
+    inline auto remainderl(f128 x, f128 y) -> f128
     {
         return __builtin_remainderl(x, y);
     }
-    inline double remquo(double x, double y, int* q)
+    inline auto remquo(f64 x, f64 y, i32* q) -> f64
     {
         return __builtin_remquo(x, y, q);
     }
-    inline float remquof(float x, float y, int* q)
+    inline auto remquof(f32 x, f32 y, i32* q) -> f32
     {
         return __builtin_remquof(x, y, q);
     }
-    inline long double remquol(long double x, long double y, int* q)
+    inline auto remquol(f128 x, f128 y, i32* q) -> f128
     {
         return __builtin_remquol(x, y, q);
     }
-    inline double rint(double x)
+    inline auto rint(f64 x) -> f64
     {
         return __builtin_rint(x);
     }
-    inline float rintf(float x)
+    inline auto rintf(f32 x) -> f32
     {
         return __builtin_rintf(x);
     }
-    inline long double rintl(long double x)
+    inline auto rintl(f128 x) -> f128
     {
         return __builtin_rintl(x);
     }
-    inline double round(double x)
+    inline auto round(f64 x) -> f64
     {
         return __builtin_round(x);
     }
-    inline float roundf(float x)
+    inline auto roundf(f32 x) -> f32
     {
         return __builtin_roundf(x);
     }
-    inline long double roundl(long double x)
+    inline auto roundl(f128 x) -> f128
     {
         return __builtin_roundl(x);
     }
-    inline double scalbln(double x, int y)
+    inline auto scalbln(f64 x, i32 y) -> f64
     {
         return __builtin_scalbln(x, y);
     }
-    inline float scalblnf(float x, int y)
+    inline auto scalblnf(f32 x, i32 y) -> f32
     {
         return __builtin_scalblnf(x, y);
     }
-    inline long double scalblnl(long double x, int y)
+    inline auto scalblnl(f128 x, i32 y) -> f128
     {
         return __builtin_scalblnl(x, y);
     }
-    inline double scalbn(double x, int y)
+    inline auto scalbn(f64 x, i32 y) -> f64
     {
         return __builtin_scalbn(x, y);
     }
-    inline float scalbnf(float x, int y)
+    inline auto scalbnf(f32 x, i32 y) -> f32
     {
         return __builtin_scalbnf(x, y);
     }
-    inline long double scalbnf(long double x, int y)
+    inline auto scalbnf(f128 x, i32 y) -> f128
     {
         return __builtin_scalbnf(x, y);
     }
-    inline bool signbit(double x)
+    inline auto signbit(f64 x) -> bool
     {
         return __builtin_signbit(x) != 0;
     }
-    inline bool signbitf(float x)
+    inline auto signbitf(f32 x) -> bool
     {
         return __builtin_signbitf(x) != 0;
     }
-    inline bool signbitl(long double x)
+    inline auto signbitl(f128 x) -> bool
     {
         return __builtin_signbitl(x) != 0;
     }
-    inline double sin(double x)
+    inline auto sin(f64 x) -> f64
     {
         return __builtin_sin(x);
     }
-    inline float sinf(float x)
+    inline auto sinf(f32 x) -> f32
     {
         return __builtin_sinf(x);
     }
-    inline double sinh(double x)
+    inline auto sinh(f64 x) -> f64
     {
         return __builtin_sinh(x);
     }
-    inline float sinhf(float x)
+    inline auto sinhf(f32 x) -> f32
     {
         return __builtin_sinhf(x);
     }
-    inline long double sinhl(long double x)
+    inline auto sinhl(f128 x) -> f128
     {
         return __builtin_sinhl(x);
     }
-    inline long double sinl(long double x)
+    inline auto sinl(f128 x) -> f128
     {
         return __builtin_sinl(x);
     }
-    inline double sqrt(double x)
+    inline auto sqrt(f64 x) -> f64
     {
         return __builtin_sqrt(x);
     }
-    inline float sqrtf(float x)
+    inline auto sqrtf(f32 x) -> f32
     {
         return __builtin_sqrtf(x);
     }
-    inline long double sqrtl(long double x)
+    inline auto sqrtl(f128 x) -> f128
     {
         return __builtin_sqrtl(x);
     }
-    inline double tan(double x)
+    inline auto tan(f64 x) -> f64
     {
         return __builtin_tan(x);
     }
-    inline float tanf(float x)
+    inline auto tanf(f32 x) -> f32
     {
         return __builtin_tanf(x);
     }
-    inline double tanh(double x)
+    inline auto tanh(f64 x) -> f64
     {
         return __builtin_tanh(x);
     }
-    inline float tanhf(float x)
+    inline auto tanhf(f32 x) -> f32
     {
         return __builtin_tanhf(x);
     }
-    inline long double tanhl(long double x)
+    inline auto tanhl(f128 x) -> f128
     {
         return __builtin_tanhl(x);
     }
-    inline long double tanl(long double x)
+    inline auto tanl(f128 x) -> f128
     {
         return __builtin_tanl(x);
     }
-    inline double tgamma(double x)
+    inline auto tgamma(f64 x) -> f64
     {
         return __builtin_tgamma(x);
     }
-    inline float tgammaf(float x)
+    inline auto tgammaf(f32 x) -> f32
     {
         return __builtin_tgammaf(x);
     }
-    inline long double tgammal(long double x)
+    inline auto tgammal(f128 x) -> f128
     {
         return __builtin_tgammal(x);
     }
-    inline double trunc(double x)
+    inline auto trunc(f64 x) -> f64
     {
         return __builtin_trunc(x);
     }
-    inline float truncf(float x)
+    inline auto truncf(f32 x) -> f32
     {
         return __builtin_truncf(x);
     }
-    inline long double truncl(long double x)
+    inline auto truncl(f128 x) -> f128
     {
         return __builtin_truncl(x);
     }
     template<typename T>
-    inline constexpr auto abs(T a)
+    constexpr auto abs(T a)
     {
-        return __builtin_elementwise_abs(a);
+        return Cast<T>(__builtin_elementwise_abs(a));
     }
     template<typename T>
-    inline constexpr auto ceil(T a)
+    constexpr auto ceil(T a)
     {
-        return __builtin_elementwise_ceil(a);
+        return Cast<T>(__builtin_elementwise_ceil(a));
     }
     template<typename T>
-    inline constexpr auto floor(T a)
+    constexpr auto floor(T a)
     {
-        return __builtin_elementwise_floor(a);
+        return Cast<T>(__builtin_elementwise_floor(a));
     }
     template<typename T>
-    inline constexpr auto round(T a)
+    constexpr auto round(T a)
     {
-        return __builtin_elementwise_round(a);
+        return Cast<T>(__builtin_elementwise_round(a));
     }
     template<typename T>
-    inline constexpr auto trunc(T a)
+    constexpr auto trunc(T a)
     {
-        return __builtin_elementwise_trunc(a);
+        return Cast<T>(__builtin_elementwise_trunc(a));
     }
     template<typename T>
-    inline constexpr auto rint(T a)
+    constexpr auto rint(T a)
     {
-        return __builtin_elementwise_rint(a);
+        return Cast<T>(__builtin_elementwise_rint(a));
     }
     template<typename T>
-    inline constexpr auto nearbyint(T a)
+    constexpr auto nearbyint(T a)
     {
-        return __builtin_elementwise_nearbyint(a);
+        return Cast<T>(__builtin_elementwise_nearbyint(a));
     }
     template<typename T, typename U>
-    inline constexpr auto copysign(T a, U b)
+    constexpr auto copysign(T a, U b)
     {
-        return __builtin_elementwise_copysign(a, b);
+        return Cast<T>(__builtin_elementwise_copysign(a, b));
     }
     template<typename T>
-    inline constexpr auto sin(T a)
+    constexpr auto sin(T a)
     {
-        return __builtin_elementwise_sin(a);
+        return Cast<T>(__builtin_elementwise_sin(a));
     }
     template<typename T>
-    inline constexpr auto cos(T a)
+    constexpr auto cos(T a)
     {
-        return __builtin_elementwise_cos(a);
+        return Cast<T>(__builtin_elementwise_cos(a));
     }
     template<typename T>
-    inline constexpr auto addsat(T a, T b)
+    constexpr auto addsat(T a, T b)
     {
-        return __builtin_elementwise_add_sat(a, b);
+        return Cast<T>(__builtin_elementwise_add_sat(a, b));
     }
     template<typename T>
-    inline constexpr auto subsat(T a, T b)
+    constexpr auto subsat(T a, T b)
     {
-        return __builtin_elementwise_sub_sat(a, b);
-    }
-    template<typename T, typename U>
-    inline constexpr auto max(T a, U b)
-    {
-        return __builtin_elementwise_max(a, b);
-    }
-    template<typename T, typename U>
-    inline constexpr auto min(T a, U b)
-    {
-        return __builtin_elementwise_min(a, b);
+        return Cast<T>(__builtin_elementwise_sub_sat(a, b));
     }
     template<typename T>
-    inline constexpr auto sqrt(T a)
+    constexpr auto max(T a, T b)
     {
-        return __builtin_sqrt(a);
+        return Cast<T>(__builtin_elementwise_max(a, b));
     }
     template<typename T>
-    inline constexpr auto log(T a)
+    constexpr auto min(T a, T b)
     {
-        return __builtin_elementwise_log(a);
+        return Cast<T>(__builtin_elementwise_min(a, b));
     }
     template<typename T>
-    inline constexpr auto log2(T a)
+    constexpr auto sqrt(T a)
     {
-        return __builtin_elementwise_log2(a);
+        return Cast<T>(__builtin_sqrt(a));
     }
     template<typename T>
-    inline constexpr auto log10(T a)
+    constexpr auto log(T a)
     {
-        return __builtin_elementwise_log10(a);
+        return Cast<T>(__builtin_elementwise_log(a));
     }
     template<typename T>
-    inline constexpr auto exp(T a)
+    constexpr auto log2(T a)
     {
-        return __builtin_elementwise_exp(a);
+        return Cast<T>(__builtin_elementwise_log2(a));
+    }
+    template<typename T>
+    constexpr auto log10(T a)
+    {
+        return Cast<T>(__builtin_elementwise_log10(a));
+    }
+    template<typename T>
+    constexpr auto exp(T a)
+    {
+        return Cast<T>(__builtin_elementwise_exp(a));
     }
     template<typename T>
     inline auto exp2(T a)
     {
-        return __builtin_elementwise_exp2(a);
+        return Cast<T>(__builtin_elementwise_exp2(a));
     }
     template<typename T, typename U>
-    inline constexpr auto pow(T a, U b)
+    constexpr auto pow(T a, U b)
     {
-        return __builtin_elementwise_pow(a, b);
+        return Cast<T>(__builtin_elementwise_pow(a, b));
     }
 #endif // NO_BUILTIN
     using ID = u64;
     template<typename T>
-    inline constexpr auto isnum(const T _a)
+    constexpr auto isnum(const T _a)
     {
-        return !(bool(__builtin_isnan(_a))) && !(bool(__builtin_isinf(_a)));
+        return !(Cast<bool>(__builtin_isnan(_a))) && !(Cast<bool>(__builtin_isinf(_a)));
     }
     template<typename T>
-    inline constexpr auto isnan(const T _a)
+    constexpr auto isnan(const T _a)
     {
-        return bool(__builtin_isnan(_a));
+        return Cast<bool>(__builtin_isnan(f64(_a)));
     }
     template<typename T>
-    inline constexpr auto isinf(const T _a)
+    constexpr auto isinf(const T _a)
     {
-        return bool(__builtin_isinf(_a));
+        return Cast<bool>(__builtin_isinf(_a));
     }
-    template<typename T, u64 N>
-    inline constexpr auto cross(const T a[N], const T b[N], const T c[N]) noexcept
-        -> T*
+    template<typename T>
+    constexpr auto isnormal(const T _a)
     {
-        T vec[3][N];
+        return Cast<bool>(__builtin_isnormal(_a));
+    }
+    template<typename T>
+    constexpr auto isfinite(const T _a)
+    {
+        return Cast<bool>(__builtin_isfinite(_a));
+    }
+
+    template<typename T>
+    auto memmove(T* _a, const T* _b, const size_t _c)
+    {
+        return (__builtin_memmove(_a, _b, _c));
+    }
+    template<typename T>
+    auto memcpy(T* _a, const T* _b, size_t _c)
+    {
+        return (__builtin_memcpy(_a, _b, _c));
+    }
+    template<typename T>
+    auto memcmp(T* _a, const T* _b, size_t _c)
+    {
+        return (__builtin_memcmp(_a, _b, _c));
+    }
+    template<typename T>
+    auto memset(T* _a, const T* _b, size_t _c)
+    {
+        return (__builtin_memset(_a, _b, _c));
+    }
+    template<typename T>
+    constexpr auto cross(const T a[3], const T b[3], const T c[3]) noexcept
+    {
+        T vec[3][3];
         T dot;
-        T result[N];
-        for (u32 i = 0; i < N; i += 3)
+        T result[3];
+        vec[0][0] = a[1] * b[2] - a[2] * b[1];
+        vec[0][1] = a[2] * b[0] - a[0] * b[2];
+        vec[0][2] = a[0] * b[1] - a[1] * b[0];
+        vec[1][0] = a[2] * c[1] - a[1] * c[2];
+        vec[1][1] = a[0] * c[2] - a[2] * c[0];
+        vec[1][2] = a[1] * c[0] - a[0] * c[1];
+        vec[2][0] = a[1] * b[2] - a[2] * b[1];
+        vec[2][1] = a[2] * b[0] - a[0] * b[2];
+        vec[2][2] = a[0] * b[1] - a[1];
+    }
+    template<typename T>
+    constexpr auto reverse(T _a)
+    {
+        T result = 0;
+        for (u32 i = 0; i < sizeof(T); i++)
         {
-            vec[0][i] = a[i];
-            vec[1][i] = b[i];
-            vec[2][i] = c[i];
-            vec[0][i + 1] = a[i + 1];
-            vec[1][i + 1] = b[i + 1];
-            vec[2][i + 1] = c[i + 1];
-            vec[0][i + 2] = a[i + 2];
-            vec[1][i + 2] = b[i + 2];
-            vec[2][i + 2] = c[i + 2];
-            vec[1][i] =
-                (vec[2][i + 1] * vec[0][i + 2]) - (vec[0][i + 1] * vec[2][i + 2]);
-            vec[2][i] =
-                -(vec[1][i + 1] * vec[0][i + 2]) + (vec[0][i + 1] * vec[1][i + 2]);
-            vec[0][i] =
-                (vec[1][i + 1] * vec[2][i + 2]) - (vec[2][i + 1] * vec[1][i + 2]);
-            dot = vec[1][0] * vec[2][1] + vec[1][1] * vec[2][2] + vec[1][2] * vec[2][0];
-            result[i] = vec[0][0] * dot;
-            result[i + 1] = vec[0][1] * dot;
-            result[i + 2] = vec[0][2] * dot;
+            result = (result << 1) | (_a & 1);
+            _a >>= 1;
         }
         return result;
     }
     template<typename T>
-    inline constexpr auto hypot(T _a, T _b)
+    constexpr auto bitset(T _a)
     {
-        return hypot(_a, _b);
+        T result = 0;
+        for (u32 i = 0; i < sizeof(T); i++)
+        {
+            result = (result << 1) | ((_a >> i) & 1);
+        }
+        return result;
+    }
+
+    template<typename T>
+    constexpr auto hypot(T _a, T _b)
+    {
+        return Cast<T>(__builtin_hypot(_a, _b));
     }
     template<typename T>
-    inline constexpr auto square(const T _a)
+    constexpr auto square(const T _a)
     {
-        return T(_a * _a);
+        return Cast<T>(_a * _a);
     }
     template<typename T>
-    inline constexpr auto madd(const T _a, T _b, const T _c)
+    constexpr auto madd(const T _a, T _b, const T _c)
     {
-        return __builtin_elementwise_add_sat((_a * _b), _c);
+        return Cast<T>(__builtin_elementwise_add_sat((_a * _b), _c));
     }
     template<typename T>
-    inline constexpr auto min(const T _a, const T _b)
+    constexpr auto sign(const T _a)
     {
-        return T(__builtin_elementwise_min(_a, _b));
+        return Cast<T>(__builtin_copysign(_a));
     }
     template<typename T>
-    inline constexpr auto max(const T _a, const T _b)
+    constexpr auto clamp(const T _a, const T _b, const T _c)
     {
-        return __builtin_elementwise_max(_a, _b);
+        return min(max(_a, _b), _c);
     }
     template<typename T>
-    inline constexpr auto sign(const T _a)
+    constexpr auto step(const T _a, const T _b)
     {
-        return _a < 0 ? -1 : 1;
+        return clamp(_b - _a, 0.0, 1.0);
     }
     template<typename T>
-    inline constexpr auto step(const T _a, const T _b)
-    {
-        return _b < _a ? 0 : 1;
-    }
-    template<typename T>
-    inline constexpr auto fract(const T _a)
+    constexpr auto fract(const T _a)
     {
         return _a - __builtin_floor(_a);
     }
     template<typename T>
-    inline constexpr auto lerp(const T _a, const T _b, const T _t)
+    constexpr auto lerp(const T _a, const T _b, const T _t)
     {
         return _a + (_b - _a) * _t;
     }
     template<typename T>
-    inline constexpr auto smoothstep(const T _a, const T _b, const T _t)
+    constexpr auto smoothstep(const T _a, const T _b, const T _t)
     {
         auto t = clamp(_t - _a / _b - _a, 0.0, 1.0);
         return t * t * 3.0 - 2.0 * t;
     }
     template<typename T>
-    inline constexpr auto rsqrt(const T _a)
+    constexpr auto rsqrt(const T _a)
     {
         if (isnan(_a))
         {
@@ -1076,82 +1151,507 @@ namespace origin
         return 1.0 / sqrt(_a);
     }
     template<typename T>
-    inline constexpr auto dot(const T _a, const T _b)
+    constexpr auto dot(const T _a, const T _b)
     {
         return _a * _b;
     }
     template<typename T>
-    inline constexpr auto length(T _a, T _b)
+    constexpr auto length(T _a, T _b)
     {
         return sqrt(_a * _a + _b * _b);
     }
     template<typename T, u64 N>
-    inline constexpr auto normalize(const T _a[N])
+    constexpr auto normalize(T const (&arr)[N])
     {
-        u32 i = 0;
-        auto* ret = new T[N];
-        for (i = 0; i < N; i++)
+        T out[N];
+        for (u64 i = 0; i < N; ++i)
         {
-            *ret[i] = _a[i] / length(_a[i], _a[i + 1]);
+            out[i] = arr[i] / sqrt(arr[i] * arr[i] + (i + 1 < N ? arr[i + 1] * arr[i + 1] : 0));
         }
-        return *ret;
+        return out;
     }
     template<typename T>
-    inline constexpr auto neg(const T _a)
+    auto mul(const T _a, const T _b)
     {
-        return (0 - _a);
+        try
+        {
+            return (_a * _b);
+        }
+        catch (...)
+        {
+            return Cast<T>(0);
+        };
     }
     template<typename T>
-    inline constexpr auto sub(const T _a, const T _b)
+    auto neg(const T _a)
     {
-        return __builtin_elementwise_sub_sat(_a, _b);
+        try
+        {
+            mul(_a, -1);
+        }
+        catch (...)
+        {
+            return 0;
+        };
     }
+
     template<typename T>
-    inline constexpr auto add(const T _a, const T _b)
+    constexpr auto random(T _min, T _max)
     {
-        return __builtin_elementwise_add_sat(_a, _b);
+        return rand() % u64(_max - _min) + _min;
     }
     template<typename T>
-    inline constexpr auto mul(const T _a, const T _b)
-    {
-        return _a * _b;
-    }
-    template<typename T>
-    inline constexpr auto clamp(const T _a, const T _b, const T _c)
-    {
-        return min(max(_a, _b), _c);
-    }
-    template<typename T>
-    inline constexpr auto rand(T _min, T _max, u32 _seed = 0)
-    {
-        return srand(_seed) % (_max - _min) + _min;
-    }
-    template<typename T>
-    inline constexpr auto tan(T _a)
+    constexpr auto tan(T _a)
     {
         return __builtin_tan(_a);
     }
     template<typename T>
-    inline constexpr auto asin(T _a)
+    constexpr auto asin(T _a)
     {
         return __builtin_asin(_a);
     }
     template<typename T>
-    inline constexpr auto acos(T _a)
+    constexpr auto acos(T _a)
     {
         return __builtin_acos(_a);
     }
     template<typename T>
-    inline constexpr auto atan(T _a)
+    constexpr auto atan(T _a)
     {
         return __builtin_atan(_a);
     }
     template<typename T>
-    inline constexpr auto atan2(T _a, T _b)
+    constexpr auto atan2(T _a, T _b)
     {
         return __builtin_atan2(_a, _b);
     }
 
+    template<typename T>
+    class Vector;
+    template<typename T>
+    class Iterator : public std::vector<T>::iterator
+    {
+    public:
+        friend class Vector<T>;
+        using iterator = Iterator<T>;
+        using value_type = typename std::vector<T>::value_type;
+        using pointer = typename std::vector<T>::pointer;
+        using reference = typename std::vector<T>::reference;
+        using difference_type = typename std::vector<T>::difference_type;
+        using size_type = typename std::vector<T>::size_type;
+        explicit Iterator(pointer p) noexcept :
+            std::vector<T>::iterator(p)
+        {
+            *P = p;
+        }
+        Iterator() = default;
+        Iterator(const Iterator&) = default;
+        Iterator& operator=(const Iterator&) = default;
+        Iterator(Iterator&&) = default;
+        Iterator& operator=(Iterator&&) = default;
+        ~Iterator() = default;
+
+        reference operator*() const noexcept
+        {
+            return *P;
+        }
+
+        pointer operator->() const noexcept
+        {
+            return P;
+        }
+
+        reference operator[](difference_type n) const noexcept
+        {
+            return *(P + n);
+        }
+
+        Iterator& operator++()
+        {
+            ++P;
+            return *this;
+        }
+
+        Iterator& operator--()
+        {
+            --P;
+            return *this;
+        }
+        Iterator operator!=(const Iterator& other) const
+        {
+            std::transform(this->P, this->P + 1, other.P, this->P, std::not_equal_to<value_type>());
+            return *this;
+        }
+        const Iterator operator++(int)
+        {
+            auto tmp = *this;
+            ++P;
+            return tmp;
+        }
+
+        Iterator operator--(int)
+        {
+            auto tmp = *this;
+            --P;
+            return tmp;
+        }
+
+        Iterator operator+(difference_type n) const
+        {
+            return { P + n };
+        }
+
+        Iterator& operator+=(difference_type n)
+        {
+            P += n;
+            return *this;
+        }
+
+        Iterator operator-(difference_type n) const
+        {
+            return Iterator(P - n);
+        }
+
+        Iterator& operator-=(difference_type n)
+        {
+            P -= n;
+            return *this;
+        }
+
+        difference_type operator-(Iterator other) const
+        {
+            return P - other.P;
+        }
+
+    private:
+        pointer P = nullptr;
+    };
+
+    template<typename T>
+    class Vector : public std::vector<T>
+    {
+    public:
+        using vector = Vector<T>;
+        using iterator = typename std::vector<T>::iterator;
+        using value_type = typename std::vector<T>::value_type;
+        using pointer = typename std::vector<T>::pointer;
+        using reference = typename std::vector<T>::reference;
+        using allocator_type = typename std::vector<T>::allocator_type;
+        using size_type = typename std::vector<T>::size_type;
+        using difference_type = typename std::vector<T>::difference_type;
+        using const_reference = typename std::vector<T>::const_reference;
+        using const_pointer = typename std::vector<T>::const_pointer;
+        using const_iterator = typename std::vector<T>::const_iterator;
+        using reverse_iterator = typename std::vector<T>::reverse_iterator;
+        using const_reverse_iterator = typename std::vector<T>::const_reverse_iterator;
+        friend class Iterator<T>;
+        auto ToString() const
+        {
+            string out = "Vector(";
+            for (u64 i = 0; i < size(); ++i)
+            {
+                out = out.append(std::to_string(this->at(i)));
+                if (i != size() - 1)
+                {
+                    out = out.append(", ");
+                }
+            }
+            out = out.append(")");
+            return out;
+        }
+        Vector() = default;
+        Vector(const Vector& rhs) :
+            std::vector<T>(rhs)
+        {
+            std::copy(rhs.begin(), rhs.end(), this->begin());
+        }
+        Vector& operator=(const Vector& rhs) noexcept
+        {
+            std::copy(rhs.begin(), rhs.end(), this->begin());
+            return *this;
+        }
+        Vector(Vector&& rhs) noexcept :
+            std::vector<T>(std::move(rhs))
+        {
+            *this = std::move(rhs);
+        }
+        Vector& operator=(Vector&& rhs) noexcept
+        {
+            std::vector<T>::operator=(std::move(rhs));
+            return *this;
+        };
+        ~Vector() = default;
+        Vector(std::initializer_list<T> list) :
+            std::vector<T>(list) {}
+        explicit Vector(size_type size) :
+            std::vector<T>(size)
+        {
+            if (size > 0)
+            {
+                reserve(size);
+                fill(this->begin(), this->end(), 0);
+            }
+        }
+        explicit Vector(size_type size, const_reference value) :
+            std::vector<T>(size, value)
+        {
+            if (size > 0)
+            {
+                reserve(size);
+                fill(this->begin(), this->end(), value);
+            }
+        }
+        Vector(size_type size, value_type value) :
+            std::vector<T>(size, value) {}
+        Vector(size_type size, pointer values) :
+            std::vector<T>(size, *values) {}
+        Vector(size_type size, value_type value, allocator_type alloc) :
+            std::vector<T>(size, value, alloc) {}
+        Vector(size_type size, pointer values, allocator_type alloc) :
+            std::vector<T>(size, *values, alloc) {}
+        Vector(iterator it, size_type size) :
+            std::vector<T>(size, *it)
+        {
+            this->assign(it, it + vector::size());
+        }
+
+        typename std::vector<T>::iterator begin() noexcept { return std::vector<T>::begin(); }
+        typename std::vector<T>::iterator end() noexcept { return std::vector<T>::end(); }
+        template<typename U>
+        constexpr auto cast(U c) -> U
+        {
+            return (c);
+        }
+        void push_back(value_type value) { std::vector<T>::push_back(value); }
+
+        void pop_back()
+        {
+            std::vector<T>::pop_back();
+        }
+        auto data() { return std::vector<T>::data(); }
+        void clear() { std::vector<T>::clear(); }
+        bool empty() const { return std::vector<T>::empty(); }
+        size_type size() const { return std::vector<T>::size(); }
+        size_type max_size() const { return std::vector<T>::max_size(); }
+        size_type capacity() const { return std::vector<T>::capacity(); }
+        void resize(size_type size) { std::vector<T>::resize(size); }
+
+        void resize(size_type size, value_type value) { std::vector<T>::resize(size, value); }
+
+        void assign(size_type size, value_type value) { std::vector<T>::assign(size, value); }
+
+        void assign(size_type size, pointer values)
+        {
+            for (size_type i = 0; i < size; ++i)
+            {
+                this->push_back(values[i]);
+            }
+        }
+
+        void assign(size_type size, pointer values, size_type offset)
+        {
+            for (size_type i = 0; i < size; ++i)
+            {
+                this->push_back(values[i + offset]);
+            }
+        }
+        const_iterator begin() const noexcept { return std::vector<T>::begin(); }
+        const_iterator end() const noexcept { return std::vector<T>::end(); }
+        const_iterator cbegin() const noexcept { return std::vector<T>::cbegin(); }
+        const_iterator cend() const noexcept { return std::vector<T>::cend(); }
+        const_reverse_iterator crbegin() const noexcept { return std::vector<T>::crbegin(); }
+        const_reverse_iterator crend() const noexcept { return std::vector<T>::crend(); }
+        reverse_iterator rbegin() { return std::vector<T>::rbegin(); }
+        reverse_iterator rend() { return std::vector<T>::rend(); }
+        typename std::vector<T>::iterator append(Vector other)
+        {
+            this->reserve(this->size() + other.size());
+            for (auto it = other.begin(); it != other.end(); ++it)
+            {
+                push_back(*it);
+            }
+            return begin();
+        }
+        typename std::vector<T>::iterator prepend(Vector other)
+        {
+            this->reserve(this->size() + other.size());
+            for (auto it = other.rbegin(); it != other.rend(); ++it)
+            {
+                insert(begin(), *it);
+            }
+            return begin();
+        }
+        void swap(Vector& other) { std::vector<T>::swap(other); }
+        value_type emplace_back(value_type&& args...) { return std::vector<T>::emplace_back(args); }
+        typename std::vector<T>::iterator emplace(const_iterator pos, value_type&& args...) { return std::vector<T>::emplace(pos, args); }
+        typename std::vector<T>::iterator insert(const_iterator pos, value_type value) { return std::vector<T>::insert(pos, value); }
+        void reserve(size_type size) { std::vector<T>::reserve(size); }
+        void shrink_to_fit() { std::vector<T>::shrink_to_fit(); }
+        void sort() { std::sort(this->begin(), this->end()); }
+        void reverse() { std::reverse(this->begin(), this->end()); }
+        void fill(value_type value) { std::fill(this->begin(), this->end(), value); }
+        void fill(size_type size, value_type value) { std::fill(this->begin(), this->begin() + size, value); }
+        auto operator+(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret += other;
+            return ret;
+        }
+
+        auto operator-(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret -= other;
+            return ret;
+        }
+
+        auto operator*(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret *= other;
+            return ret;
+        }
+
+        auto operator/(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret /= other;
+            return ret;
+        }
+        auto operator%(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret %= other;
+            return ret;
+        }
+        auto operator&(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret &= other;
+            return ret;
+        }
+        auto operator|(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret |= other;
+            return ret;
+        }
+        auto operator^(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret ^= other;
+            return ret;
+        }
+        auto operator=(value_type value) -> Vector&
+        {
+            std::fill(this->begin(), this->end(), value);
+            return *this;
+        }
+        auto operator=(Vector other) noexcept -> Vector&
+        {
+            std::move(this->begin(), this->end(), other.begin());
+            swap(other);
+            return *this;
+        }
+        auto operator+=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::plus<value_type>());
+            return *this;
+        }
+        auto operator-=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::minus<value_type>());
+            return *this;
+        }
+        auto operator*=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::multiplies<value_type>());
+            return *this;
+        }
+        auto operator/=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::divides<value_type>());
+            return *this;
+        }
+        template<typename U>
+        auto operator%=(Vector<U>& other) -> Vector&
+        {
+            Vector<T>* ret = *this;
+            std::transform(ret->begin(), ret->end(), other.begin(), ret->begin(), std::modulus<U>());
+            return *this = *ret;
+        }
+        template<typename U>
+        auto operator&=(Vector<U>& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_and<U>());
+            return *this;
+        }
+        template<typename U>
+        auto operator|=(Vector<U>& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_or<U>());
+            return *this;
+        }
+        template<typename U>
+        auto operator^=(Vector<U>& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_xor<U>());
+            return *this;
+        }
+
+        auto operator-() -> Vector
+        {
+            Vector ret(*this);
+            std::transform(ret->begin(), ret.end(), ret.begin(), std::negate<value_type>());
+            return ret;
+        }
+        auto operator!() -> Vector
+        {
+            Vector ret(*this);
+            std::transform(ret->begin(), ret.end(), ret.begin(), std::logical_not<value_type>());
+            return ret;
+        }
+        auto operator++() -> Vector&
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::plus<value_type>());
+            return *this;
+        }
+        auto operator--() -> Vector&
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::minus<value_type>());
+            return *this;
+        }
+        auto operator++(int) -> Vector
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::plus<value_type>());
+            return *this;
+        }
+        auto operator--(int) -> Vector
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::minus<value_type>());
+            return *this;
+        }
+        bool operator==(Vector& other) { return std::equal(this->begin(), this->end(), other.begin()); }
+        bool operator!=(Vector& other) { return !std::equal(this->begin(), this->end(), other.begin()); }
+        bool operator<(Vector& other) { return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end()); }
+        bool operator>(Vector& other) { return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>()); }
+        bool operator<=(Vector& other) { return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>()); }
+        bool operator>=(Vector& other) { return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end()); }
+        bool operator&&(Vector& other) { return std::inner_product(this->begin(), this->end(), other.begin(), (Cast<value_type>(0))); }
+        bool operator||(Vector& other) { return std::inner_product(this->begin(), this->end(), other.begin(), (Cast<value_type>(0))); }
+        Vector& operator=(std::initializer_list<T> list)
+        {
+            assign(*list.begin(), list.size());
+            return *this;
+        }
+        auto operator[](size_type index) -> T& { return *data() + index; }
+
+        explicit operator pointer() const { return data(); }
+
+        explicit operator size_type() const { return size(); }
+
+        explicit operator size_type() { return size(); }
+    };
     template<u64 N>
     struct Complex
     {
@@ -1165,7 +1665,7 @@ namespace origin
                 f128 Imag[N];
             };
         } C;
-        Complex(f64 real = 0, f64 imag = 0)
+        explicit Complex(f64 real = 0, f64 imag = 0)
         {
             C.Real = real;
             C.Imag = imag;
@@ -1186,76 +1686,100 @@ namespace origin
         }
         auto Mul(f64* out, const f64* in) const noexcept
         {
-            const auto a = _mm256_loadu_pd(in);
-            const auto b = _mm256_setr_pd(C.Real, C.Imag, in[2], in[3]);
-            _mm256_storeu_pd(out, _mm256_mul_pd(a, b));
-            return out;
+            auto* ret = out;
+            for (u64 i = 0; i < N; i++)
+            {
+                ret[i] = C.Real[i] * in[i] - C.Imag[i] * in[i + N];
+                ret[i + N] = C.Real[i] * in[i + N] + C.Imag[i] * in[i];
+            }
+            return ret;
         }
 
         static auto Div(Complex a, Complex b) noexcept -> Complex
         {
-            const auto numerator = _mm_setr_pd(a.Real, a.Imag);
-            const auto denominator = _mm_setr_pd(b.Real, b.Imag);
-            return { _mm_cvtsd_f64(_mm_div_pd(numerator, denominator)), _mm_cvtsd_f64(_mm_div_pd(denominator, numerator)) };
+            return { (a.Real * b.Real + a.Imag * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag),
+                     (a.Imag * b.Real - a.Real * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag) };
         }
-        static auto FFT(const Complex* input, u64 size) -> Complex*
+        static auto FFT(const Complex* input, u64 n) -> Complex*
         {
-            auto* out = new Complex[size];
-            const auto half_size = size >> 1;
-            const auto wn = _mm256_setr_pd(-2 * PI / size, PI / size, -2 * PI / size, PI / size);
+            auto output = new Complex[n];
+            f64 wn = -2 * PI / n;
 
             // Divide input into even and odd parts
-            for (u64 i = 0; i < size; i += 4)
+            for (u64 i = 0; i < n; i += 4)
             {
-                const auto a = _mm256_loadu_pd(&input[i].Real);
-                const auto b = _mm256_loadu_pd(&input[i + half_size].Real);
-                _mm256_storeu_pd(&out[i].Real, _mm256_add_pd(a, b));
-                _mm256_storeu_pd(&out[i + half_size].Real, _mm256_sub_pd(a, b));
+                const auto a = input[i].real;
+                const auto b = input[i + 1].real;
+                const auto c = input[i + 2].real;
+                const auto d = input[i + 3].real;
+                output[i].real = a + c;
+                output[i + 1].real = a - c;
+                output[i + 2].real = b + d;
+                output[i + 3].real = b - d;
             }
 
-            for (u64 n = 4, m = 2; n <= size; n <<= 2, m = n >> 1)
+            for (u64 size = 4, half_size = n >> 1U; size <= n; size <<= 2U, half_size >>= 1U)
             {
-                const auto w = _mm256_mul_pd(wn, _mm256_set1_pd(static_cast<double>(m)));
-                for (u64 i = 0; i < size; i += n)
+                const auto w = wn;
+                for (u64 i = 0; i < n; i += size)
                 {
-                    for (u64 j = i; j < i + m; j += 4)
+                    for (u64 j = i; j < i + half_size; j += 4)
                     {
-                        const auto a = _mm256_loadu_pd(&out[j].Real);
-                        const auto b = _mm256_loadu_pd(&out[j + m].Real);
-                        const auto t = _mm256_add_pd(_mm256_sub_pd(a, b), _mm256_mul_pd(_mm256_sub_pd(_mm256_mul_pd(a, w), _mm256_mul_pd(b, w)), _mm256_setr_pd(j, j + 1, j + 2, j + 3)));
-                        _mm256_storeu_pd(&out[j].Real, _mm256_add_pd(a, b));
-                        _mm256_storeu_pd(&out[j + m].Real, t);
+                        const auto a = output[j].real;
+                        const auto b = output[j].imag;
+                        const auto c = output[j + 2].real;
+                        const auto d = output[j + 2].imag;
+                        const auto e = output[j + 1].real;
+                        const auto f = output[j + 1].imag;
+                        const auto g = output[j + 3].real;
+                        const auto h = output[j + 3].imag;
+                        output[j].real = a + c;
+                        output[j].imag = b + d;
+                        output[j + 1].real = e + g;
+                        output[j + 1].imag = f + h;
+                        output[j + 2].real = a - c;
+                        output[j + 2].imag = b - d;
+                        output[j + 3].real = e - g;
+                        output[j + 3].imag = f - h;
+                        wn = w * wn;
                     }
                 }
             }
 
             // Bit reverse
-            for (u64 i = 1, j = 0; i < size; ++i)
+            for (u64 i = 1, j = 0; i < n; ++i)
             {
                 u64 x = i;
-                u64 k = size >> 1;
+                u64 k = n >> 1U;
                 while (j >= k)
                 {
-                    x = (x ^ (j & ~k)) & (size - 1);
+                    x = (x ^ (j & ~k)) & (n - 1);
                     j &= k;
-                    k >>= 1;
+                    k >>= 1U;
                 }
                 if (i < (j | k))
                 {
-                    std::swap(out[i], out[j]);
+                    std::swap(output[i], output[j | k]);
                 }
             }
 
             // Normalize
-            const auto norm = _mm256_set1_pd(1.0 / size);
-            for (u64 i = 0; i < size; i += 4)
+            const auto norm = 1.0 / sqrt(n);
+            for (u64 i = 0; i < n; i += 4)
             {
-                const auto v = _mm256_loadu_pd(&out[i].Real);
-                _mm256_storeu_pd(&out[i].Real, _mm256_mul_pd(v, norm));
+                output[i].real *= norm;
+                output[i + 1].real *= norm;
+                output[i + 2].real *= norm;
+                output[i + 3].real *= norm;
+                output[i].imag *= norm;
+                output[i + 1].imag *= norm;
+                output[i + 2].imag *= norm;
+                output[i + 3].imag *= norm;
             }
-            return out;
+            return output;
         }
-        static Complex* Conjugate(Complex* C1)
+
+        static auto Conjugate(Complex* C1) -> Complex*
         {
             auto* c = C1;
             for (u64 i = 0; i < N; i++)
@@ -1265,54 +1789,61 @@ namespace origin
             return c;
         }
 
-        static Complex* FFT2(Complex* C1)
+        static auto FFT2(Complex* input) -> Complex*
         {
-            auto* c = reinterpret_cast<Complex*>(C1);
+            auto* c = input;
 
             // Cooley–Tukey FFT (in-place)
-            for (u64 s = 1, s_half = 1; s < N; s <<= 2, s_half = s >> 1)
+            for (size_t size = 1, half_size = 1; size < N; size <<= 1U, half_size = size >> 1U)
             {
-                const auto wn = _mm256_setr_pd(-2 * PI / s, PI / s, -2 * PI / s, PI / s);
-
-                for (u64 p = 0; p < N; p += s)
+                const double phase = -2 * PI / size;
+                for (size_t first_index = 0; first_index < N; first_index += size)
                 {
-                    const auto w = _mm256_mul_pd(wn, _mm256_set1_pd(static_cast<double>(s_half)));
-                    for (u64 i = 0; i < s_half; i++)
+                    for (size_t index = 0; index < half_size; ++index)
                     {
-                        const u64 j = p + i;
-                        const u64 k = j + s_half;
-                        const auto t = _mm256_add_pd(_mm256_sub_pd(_mm256_loadu_pd(&c[j].Real), _mm256_loadu_pd(&c[k].Real)), _mm256_mul_pd(_mm256_sub_pd(_mm256_mul_pd(_mm256_loadu_pd(&c[j].Real), w), _mm256_mul_pd(_mm256_loadu_pd(&c[k].Real), w)), _mm256_setr_pd(j, j + 1, j + 2, j + 3)));
-                        _mm256_storeu_pd(&c[j].Real, _mm256_add_pd(_mm256_loadu_pd(&c[j].Real), _mm256_loadu_pd(&c[k].Real)));
-                        _mm256_storeu_pd(&c[k].Real, t);
+                        const size_t i = first_index + index;
+                        const size_t j = i + half_size;
+                        const auto a = c[i];
+                        const auto b = c[j];
+                        c[i] = a + b;
+                        c[j] = a - b;
+                        c[j].Imag += phase * c[i].Imag;
+                        c[i].Imag -= phase * c[j].Imag;
                     }
                 }
             }
 
             // Bit reverse
-            for (u64 i = 1, j = 0; i < N; i++)
+            for (size_t i = 1, j = 0; i < N; ++i)
             {
-                for (u64 k = N >> 1; (j ^= k) < k; k >>= 1)
+                size_t k = N >> 1U;
+                while ((j ^= k) < k)
                 {
+                    k >>= 1U;
                 }
                 if (i < j)
                 {
-                    const auto temp = _mm256_loadu_pd(&c[i].Real);
-                    _mm256_storeu_pd(&c[i].Real, _mm256_loadu_pd(&c[j].Real));
-                    _mm256_storeu_pd(&c[j].Real, temp);
+                    std::swap(c[i], c[j]);
                 }
             }
 
             // Normalize
-            const auto norm = _mm256_set1_pd(1.0 / N);
-            for (u64 i = 0; i < N; i += 4)
+            const double norm = 1.0 / sqrt(N);
+            for (size_t i = 0; i < N; i += 4)
             {
-                const auto v = _mm256_loadu_pd(&c[i].Real);
-                _mm256_storeu_pd(&c[i].Real, _mm256_mul_pd(v, norm));
+                c[i].Real *= norm;
+                c[i + 1].Real *= norm;
+                c[i + 2].Real *= norm;
+                c[i + 3].Real *= norm;
+                c[i].Imag *= norm;
+                c[i + 1].Imag *= norm;
+                c[i + 2].Imag *= norm;
+                c[i + 3].Imag *= norm;
             }
             return c;
         }
 
-        static Complex* IFFT(Complex C1[])
+        static auto IFFT(Complex C1[]) -> Complex*
         {
             auto* c = C1;
             c = Conjugate(c, N);
@@ -1345,10 +1876,8 @@ namespace origin
             MemSize = MemUsed = 0.0;
         }
         explicit Mem(f64 size, f64 used = 0.0, enum Unit unit = Unit::BYTE) :
-            MemUnit(unit)
+            MemSize(size), MemUsed(used < size ? used : size), MemUnit(unit)
         {
-            MemSize = size;
-            MemUsed = used < size ? used : size;
         }
         Mem(const Mem& rhs) { *this = rhs; }
         Mem(Mem&& rhs) noexcept { *this = std::move(rhs); }
@@ -1357,7 +1886,7 @@ namespace origin
             MemSize = MemUsed = 0.0;
             MemUnit = Unit::BYTE;
         }
-        auto Convert(const enum Unit unit) const -> Mem
+        [[nodiscard]] auto Convert(const enum Unit unit) const -> Mem
         {
             const u8 one = 1;
             const u8 unit0 = static_cast<u8>(MemUnit) * 10;
@@ -1366,7 +1895,7 @@ namespace origin
             ratio /= one << unit1;
             return Mem(MemSize * ratio, MemUsed * ratio, unit);
         }
-        auto Convert(const Mem& mem) const -> Mem
+        [[nodiscard]] auto Convert(const Mem& mem) const -> Mem
         {
             const u8 one = 1;
             if (mem.MemUnit == Unit::NONE)
@@ -1380,23 +1909,16 @@ namespace origin
             return Mem{ mem.MemSize * ratio, mem.MemUsed * ratio, mem.MemUnit };
         }
         auto operator[](enum Unit unit) const { return Convert(unit); }
-        auto operator=(const Mem& rhs) -> Mem&
-        {
-            MemSize = rhs.MemSize;
-            MemUsed = rhs.MemUsed;
-            MemUnit = rhs.MemUnit;
-            MemMax = rhs.MemMax;
-            return *this;
-        }
+        auto operator=(const Mem& rhs) -> Mem& = default;
         auto operator=(Mem&& rhs) noexcept -> Mem& { return *this = rhs; }
-        constexpr auto Size() const -> f64 { return MemSize; }
-        constexpr auto Total() const -> f64 { return Size(); }
-        constexpr auto Available() const -> f64 { return MemSize - MemUsed; }
-        constexpr auto Used() const -> f64 { return MemUsed; }
-        constexpr auto Free() const -> f64 { return MemSize - MemUsed; }
-        constexpr auto Percentage() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
-        constexpr auto PercentageUsed() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
-        constexpr auto PercentageFree() const -> f64 { return ((MemSize) / (MemUsed)) * 100.0; }
+        [[nodiscard]] constexpr auto Size() const -> f64 { return MemSize; }
+        [[nodiscard]] constexpr auto Total() const -> f64 { return Size(); }
+        [[nodiscard]] constexpr auto Available() const -> f64 { return MemSize - MemUsed; }
+        [[nodiscard]] constexpr auto Used() const -> f64 { return MemUsed; }
+        [[nodiscard]] constexpr auto Free() const -> f64 { return MemSize - MemUsed; }
+        [[nodiscard]] constexpr auto Percentage() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
+        [[nodiscard]] constexpr auto PercentageUsed() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
+        [[nodiscard]] constexpr auto PercentageFree() const -> f64 { return ((MemSize) / (MemUsed)) * 100.0; }
         constexpr auto Set(const f64 size = -1, const f64 used = -1, enum Unit unit = Unit::NONE) -> Mem&
         {
             if (unit != Unit::NONE)
@@ -1418,4 +1940,5 @@ namespace origin
         }
     } __attribute__((aligned(32))) __attribute__((packed));
 
-} // namespace origin
+} // namespace Origin
+#endif

@@ -1,5 +1,5 @@
 #include "Exec.hpp"
-namespace origin
+namespace Origin
 {
     auto Run::Loop(f128 runtime) -> i32
     {

@@ -7,7 +7,7 @@
 #include <string>
 #include <utility>
 #include <valarray>
-namespace origin
+namespace Origin
 {
     template<typename X, typename Y>
     class KeyVal
@@ -176,7 +176,7 @@ namespace origin
     static auto Clean(string str, u32 flags)
     {
         auto dst = str.begin();
-        for (char& src : str)
+        for (i8& src : str)
         {
             if ((src >= '\0' && src <= '\n') ||
                 (flags == 1 && (src >= '0' && src <= '9')))
@@ -223,7 +223,7 @@ namespace origin
 
     static void Copy(i8p dest, const i8* src)
     {
-        memcpy(dest, src, strlen(src) + 1);
+        std::memcpy(dest, src, strlen(src) + 1);
     }
 
     static auto Concatenate(const string& first, const string& second) -> string
@@ -272,7 +272,7 @@ namespace origin
         return ret;
     }
 
-    inline auto ToString(f128 num, u32 precision = 0) -> string
+    inline auto ToString(f128 num, u32 precision = 9) -> string
     {
         string buffer(38, '\0');
         string digits(38, '\0');
@@ -287,4 +287,4 @@ namespace origin
         ss >> buffer;
         return buffer;
     }
-} // namespace origin
+} // namespace Origin

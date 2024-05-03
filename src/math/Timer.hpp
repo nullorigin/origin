@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace origin
+namespace Origin
 {
 
     static ID timer_id = 0;
@@ -210,5 +210,5 @@ namespace origin
             return std::to_string(time_point[id]) + "ns";
         }
     };
-} // namespace origin
+} // namespace Origin
 #endif // TIMER_HPP

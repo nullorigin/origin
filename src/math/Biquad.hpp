@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <memory>
-namespace origin
+namespace Origin
 {
     enum : const u8
     {
@@ -82,7 +82,7 @@ namespace origin
         IIR& operator=(IIR&&) = default;
 
     private:
-        unsigned i_ = {};
+        unsigned I = {};
         std::unique_ptr<i32[]> X, Y;
         i32 B0 = 1, A0 = 1;
         std::unique_ptr<i32[], i32> B, A;
@@ -107,8 +107,8 @@ namespace origin
         IIRg& operator=(IIRg&&) = default;
 
     private:
-        const unsigned n_{};
-        unsigned i_ = {};
+        const unsigned N{};
+        unsigned I = {};
         std::unique_ptr<i32[]> X, Y;
         i32 B0 = 1, A0 = 1;
         std::unique_ptr<i32[], i32> B, A;
@@ -158,16 +158,18 @@ namespace origin
         const i32* a = A.get();
 
         i32 r = in * b[0];
-        unsigned i = (i_ + nn) % nn;
+        unsigned i = (I + nn) % nn;
         x[i] = x[i + nn] = in;
 
         for (unsigned j = 1; j < N; ++j)
+        {
             r += x[i + j] * b[j] - y[i + j] * a[j];
+        }
 
         r /= a[0];
         y[i] = y[i + nn] = r;
-        i_ = i;
+        I = i;
         return r;
     }
-} // namespace origin
+} // namespace Origin
 #endif // Biquad_h

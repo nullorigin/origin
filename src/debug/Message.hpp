@@ -3,7 +3,7 @@
 #define MESSAGE_HPP
 #include "Basic.hpp"
 #include <string>
-namespace origin
+namespace Origin
 {
     using ExCode = enum ExLevel : i32 {
         ANY = 0,
@@ -19,7 +19,7 @@ namespace origin
     static ExLevel MsgLevel = NONE;
     static std::string MsgHeader;
     static std::string MsgInfo = " ";
-    auto ToString(const char* str) -> std::string;
+    auto ToString(const i8* str) -> std::string;
     auto GetStringEnd(const std::string& begin, i8 padding, i8 ending) -> std::string;
     auto GetHeader() -> std::string;
     inline auto GetCode() -> ExCode

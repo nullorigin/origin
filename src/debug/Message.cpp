@@ -1,6 +1,6 @@
 #include <Message.hpp>
 #include <sstream>
-namespace origin
+namespace Origin
 {
 
     auto GetHeader() -> std::string
@@ -36,7 +36,7 @@ namespace origin
         MsgCode = code;
         return code;
     }
-    auto ToString(const char* str) -> std::string
+    auto ToString(const i8* str) -> std::string
     {
         std::stringstream ss = std::stringstream(str);
         return ss.str();
@@ -73,4 +73,4 @@ namespace origin
         MsgOffset = offset;
         return offset;
     }
-} // namespace origin
+} // namespace Origin

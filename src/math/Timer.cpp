@@ -1,6 +1,6 @@
 
 #include "Timer.hpp"
-namespace origin
+namespace Origin
 {
     Timer::Timer() :
         Limit(100000000000), Id(timer_id++)
@@ -96,7 +96,7 @@ namespace origin
         std::stringstream ss = std::stringstream();
         ss.precision(9);
         ss << std::fixed;
-        ss << (this->Nanoseconds() / (f128(tu)));
+        ss << (this->Nanoseconds() / (1000000000.0 / static_cast<f128>(tu)));
         return ss.str();
     }
     Duration::operator i128() const
@@ -361,6 +361,6 @@ namespace origin
     auto Timer::operator=(Timer** rhs) noexcept -> Timer&
     {
         this->Ptr = *rhs;
-        return *this->Ptr;
+        return *this;
     }
-}; // namespace origin
+} // namespace Origin

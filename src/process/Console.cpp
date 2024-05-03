@@ -1,11 +1,11 @@
 #include "Console.hpp"
 #include "Basic.hpp"
+#include "Message.hpp"
 #include <cstdio>
 #include <iostream>
-#include <string>
 #include <sys/ioctl.h>
 #include <unistd.h>
-namespace origin
+namespace Origin
 {
     Console::Console() :
         Height(25), Width(80)
@@ -117,10 +117,10 @@ namespace origin
 
         write(STDOUT_FILENO, seq, seq_len);
 
-        char buf[256];
+        i8 buf[256];
         ssize_t len = read(STDIN_FILENO, buf, sizeof(buf));
 
-        if (len <= seq_len || memcmp(buf, seq, seq_len) != 0)
+        if (len <= seq_len || std::memcmp(buf, seq, seq_len) != 0)
         {
             return 0;
         }
@@ -133,7 +133,7 @@ namespace origin
         }
 
         i32 ly = 0;
-        for (char* q = p; q < end_p; ++q)
+        for (i8* q = p; q < end_p; ++q)
         {
             if (*q == ';')
             {
@@ -184,7 +184,7 @@ namespace origin
      */
     auto Console::KeyHit() -> i32
     {
-        constexpr i32 ICANON_ECHO = (ICANON | ECHO);
+        constexpr i32 icanon_echo = (ICANON | ECHO);
         i32 available = 0;
 
         if (ioctl(0, FIONREAD, &available) == -1)
@@ -207,7 +207,7 @@ namespace origin
             }
 
             new_t = old_t;
-            new_t.c_lflag |= ICANON_ECHO;
+            new_t.c_lflag |= icanon_echo;
 
             if (tcsetattr(0, TCSANOW, &new_t) == -1)
             {
@@ -228,7 +228,7 @@ namespace origin
      *
      * @throws None
      */
-    auto Console::PrintChar(const char c) -> char
+    auto Console::PrintChar(const i8 c) -> i8
     {
         printf("%c", c);
         return c;
@@ -284,7 +284,7 @@ namespace origin
      *
      * @throws None
      */
-    auto Console::PrintCStr(const char* str) -> i32
+    auto Console::PrintCStr(const i8* str) -> i32
     {
         printf("%s", str);
         return 0;
@@ -295,13 +295,12 @@ namespace origin
     }
     auto Console::GetCwd() -> string
     {
-        char cwd[1024];
-        return getcwd(cwd, sizeof(cwd));
+        i8 cwd[1024];
+        return ToString(getcwd(cwd, sizeof(cwd)));
     }
     auto Console::GetUser() -> string
     {
-        string ss = cuserid(nullptr);
-        return ss;
+        return ToString(cuserid(nullptr));
     }
     /**
      * Get the hostname of the system.
@@ -310,7 +309,7 @@ namespace origin
      */
     auto Console::GetHostname() -> string
     {
-        char hostname[1024];
+        i8 hostname[1024];
         gethostname(hostname, sizeof(hostname));
         return hostname;
     }
@@ -336,7 +335,7 @@ namespace origin
     }
     auto Console::GetEnv(const string& name) -> string
     {
-        return getenv(name.c_str());
+        return ToString(getenv(name.c_str()));
     }
     auto Console::ReadText(i32 l, i32 t, i32 r, i32 b, void* destination)
         -> size_t
@@ -357,4 +356,4 @@ namespace origin
         };
         return fwrite(source, 1, static_cast<size_t>(l * t) * r, stdout);
     }
-} // namespace origin
+} // namespace Origin

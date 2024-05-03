@@ -6,7 +6,7 @@
 #include "Message.hpp"
 #include "Timer.hpp"
 
-namespace origin
+namespace Origin
 {
     class Run
     {
@@ -76,8 +76,8 @@ switch. Uses the constants above as specifiers for the equivalent index. */
 
     public:
         Run() = default;
-        static auto GetCode() -> ExCode { return origin::GetCode(); }
-        static auto SetCode(ExCode code) -> void { origin::SetCode(code); }
+        static auto GetCode() -> ExCode { return Origin::GetCode(); }
+        static auto SetCode(ExCode code) -> void { Origin::SetCode(code); }
         Run(i32 argc, i8** argv) :
             MaxCycles(1000000000) { SetState(UNINITIALIZED); }
         ~Run() = default;
@@ -166,5 +166,5 @@ switch. Uses the constants above as specifiers for the equivalent index. */
         static auto Parse(const i8p cmd) -> string { return { cmd }; }
         auto Parse(const string& cmd) -> string;
     };
-} // namespace origin
+} // namespace Origin
 #endif
