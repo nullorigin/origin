@@ -1,4 +1,6 @@
 #pragma once
+#ifndef STRING_HPP
+#define STRING_HPP
 #include "Basic.hpp"
 #include <algorithm>
 #include <cstring>
@@ -49,24 +51,24 @@ namespace Origin
         }
         ~KeyVal<X, Y>() = default;
     };
-    static auto ToLower(const string& str) -> string
+    static auto to_lower(const string& str) -> string
     {
         string ret = str;
         std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
         return ret;
     }
 
-    static auto ToUpper(const string& str) -> string
+    static auto to_upper(const string& str) -> string
     {
         string ret = str;
         std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
         return ret;
     }
-    static auto Trim(const string& str) -> string
+    static auto trim(const string& str) -> string
     {
         return str.substr(0, str.length() - 1);
     }
-    static auto Trim(const string& begin, const string& end, const string& str) -> string
+    static auto trim(const string& begin, const string& end, const string& str) -> string
     {
         size_t start = str.find_first_not_of(begin);
         size_t end_it = str.find(end) - 1;
@@ -79,11 +81,11 @@ namespace Origin
         return str.substr(start, end_it - start + 1);
     }
 
-    static auto Trim(const size_t n, const string& str) -> string
+    static auto trim(const size_t n, const string& str) -> string
     {
-        return Trim(str.substr(n, str.length() - n - 1));
+        return trim(str.substr(n, str.length() - n - 1));
     }
-    static auto Trim(const size_t start, const string& end, const string& str) -> string
+    static auto trim(const size_t start, const string& end, const string& str) -> string
     {
         if (start == string::npos || end.length() > str.length())
         {
@@ -100,9 +102,9 @@ namespace Origin
             ++end_it;
         }
 
-        return Trim(str.substr(start, end_it - start));
+        return trim(str.substr(start, end_it - start));
     }
-    static auto Trim(const string& start, const size_t end, const string& str) -> string
+    static auto trim(const string& start, const size_t end, const string& str) -> string
     {
         if (end == string::npos || start.length() > str.length())
         {
@@ -118,9 +120,9 @@ namespace Origin
         {
             --start_it;
         }
-        return Trim(str.substr(start_it, end - start_it));
+        return trim(str.substr(start_it, end - start_it));
     }
-    static auto Replace(const string& from_str, const string& to_str, const string& str) -> string
+    static auto replace(const string& from_str, const string& to_str, const string& str) -> string
     {
         string result;
         result.reserve(str.length());
@@ -136,7 +138,7 @@ namespace Origin
         result += str.substr(prev_pos);
         return result;
     }
-    static auto Replace(const string& search, const string& repl, const string& file_name, u32 retries) -> string
+    static auto replace(const string& search, const string& repl, const string& file_name, u32 retries) -> string
     {
         string result;
         bool success = false;
@@ -151,7 +153,7 @@ namespace Origin
                 {
                     (file.seekp(0, std::ios::end));
                     result.resize(file.tellp());
-                    file << Replace(search, repl, result);
+                    file << replace(search, repl, result);
                     file.seekp(0, std::ios::beg);
                     file << result;
                     success = true;
@@ -173,7 +175,7 @@ namespace Origin
         }
         return result;
     }
-    static auto Clean(string str, u32 flags)
+    static auto clean(string str, u32 flags)
     {
         auto dst = str.begin();
         for (i8& src : str)
@@ -192,11 +194,11 @@ namespace Origin
         return str;
     }
 
-    static auto Length(const string& str) -> u64
+    static auto length(const string& str) -> u64
     {
         return str.size();
     }
-    static auto Format(const string& str, u32 flags) -> string
+    static auto format(const string& str, u32 flags) -> string
     {
         u64 len = str.size();
         string out;
@@ -221,12 +223,12 @@ namespace Origin
         return out;
     }
 
-    static void Copy(i8p dest, const i8* src)
+    static void copy(i8p dest, const i8* src)
     {
         std::memcpy(dest, src, strlen(src) + 1);
     }
 
-    static auto Concatenate(const string& first, const string& second) -> string
+    static auto concatenate(const string& first, const string& second) -> string
     {
         const auto first_len = first.size();
         const auto second_len = second.size();
@@ -237,7 +239,7 @@ namespace Origin
         return result;
     }
 
-    static auto Concatenate(const string& first, const string& second, const string& third) -> string
+    static auto concatenate(const string& first, const string& second, const string& third) -> string
     {
         const auto first_len = first.size();
         const auto second_len = second.size();
@@ -249,11 +251,11 @@ namespace Origin
         result.append(third);
         return result;
     }
-    static auto Erase(string& str, const string& toErase) -> string&
+    static auto erase(string& str, const string& toErase) -> string&
     {
         return str.erase(0, str.find(toErase) + toErase.length());
     }
-    static auto EraseAll(string& str, const string& toErase) -> string&
+    static auto erase_all(string& str, const string& toErase) -> string&
     {
         auto last_pos = str.find_first_not_of(toErase);
         auto pos = str.find_first_of(toErase, last_pos);
@@ -265,20 +267,20 @@ namespace Origin
         }
         return str;
     }
-    inline auto NumDigits(f128 num, string& buf) -> f128
+    inline auto num_digits(f128 num, string& buf) -> f128
     {
         f128 ret = floor(log10(num) + 1);
         buf = std::to_string(static_cast<u64>(ret));
         return ret;
     }
 
-    inline auto ToString(f128 num, u32 precision = 9) -> string
+    inline auto num_to_string(f128 num, u32 precision = 9) -> string
     {
         string buffer(38, '\0');
         string digits(38, '\0');
         if (precision == 0 || precision > 38)
         {
-            precision = static_cast<u32>(NumDigits(num, digits));
+            precision = static_cast<u32>(num_digits(num, digits));
         }
         std::stringstream ss;
         ss.precision(precision);
@@ -288,3 +290,5 @@ namespace Origin
         return buffer;
     }
 } // namespace Origin
+
+#endif // STRING_HPP

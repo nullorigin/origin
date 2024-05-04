@@ -1,10 +1,11 @@
-#ifndef HOME_MATT_ORIGIN_SRC_MATH_GEOMETRY_HPP
-#define HOME_MATT_ORIGIN_SRC_MATH_GEOMETRY_HPP
+#ifndef GEOMETRY_HPP
+#define GEOMETRY_HPP
 
 #pragma once
 #include "Basic.hpp"
-#include "Message.hpp"
-#include <iostream>
+
+#include "Vector.hpp"
+
 #include <string>
 
 namespace Origin
@@ -79,7 +80,7 @@ namespace Origin
             Data(rhs.Data) { rhs.Data = nullptr; }
         ~Vec() { delete[] this; }
 
-        [[nodiscard]] auto GetData() const -> f64* { return this->Data; }
+        [[nodiscard]] auto get_data() const -> f64* { return this->Data; }
 
         auto operator=(Vec const& rhs) -> Vec& = default;
         auto operator=(f64 const* ap) -> Vec&
@@ -104,7 +105,7 @@ namespace Origin
     public:
         union
         {
-            f64* data = new f64[2];
+            f64* Data = new f64[2];
             struct
             {
                 f64 X;
@@ -121,14 +122,14 @@ namespace Origin
         {
             X = rhs.X;
             Y = rhs.Y;
-            rhs.data = nullptr;
+            rhs.Data = nullptr;
         }
         Vec2(f64 x, f64 y)
         {
             X = x;
             Y = y;
         }
-        ~Vec2() { delete[] this->data; }
+        ~Vec2() { delete[] this->Data; }
     };
 
     class Vec3
@@ -276,7 +277,7 @@ namespace Origin
 
         ~Quaternion() = default;
 
-        static auto Rotate(const Quaternion& q, const Vec3& v) noexcept -> Vec3
+        static auto rotate(const Quaternion& q, const Vec3& v) noexcept -> Vec3
         {
             const f64 xx{ q.X0 * v.X };
             const f64 yy{ q.Y0 * v.Y };
@@ -296,7 +297,7 @@ namespace Origin
         {
             return { X0 / rhs.X, X1 / rhs.Y, X2 / rhs.Z };
         }
-        static auto Inverse(Quaternion& q) -> Quaternion
+        static auto inverse(Quaternion& q) -> Quaternion
         {
             Quaternion ret = q;
             ret.W0 = -ret.W0;
@@ -319,7 +320,7 @@ namespace Origin
             return ret;
         }
 
-        static auto Transform(const Quaternion& q, const Vec3& v)
+        static auto transform(const Quaternion& q, const Vec3& v)
         {
             const f64 x0 = q.X0 * v.X + q.Y0 * v.Z - q.Z0 * v.Y;
             const f64 y0 = q.Y0 * v.X + q.Z0 * v.Y + q.X0 * v.Z;
@@ -338,7 +339,7 @@ namespace Origin
                 x0, x1, x2, x3, y0, y1, y2, y3, z0, z1, z2, z3, 0.0, 0.0, 0.0, 1.0);
         }
 
-        static auto SetPosition(const Quaternion& q, const Vec3& v) -> Quaternion
+        static auto set_position(const Quaternion& q, const Vec3& v) -> Quaternion
         {
             Quaternion ret = q;
             ret.W0 = v.X;
@@ -346,7 +347,7 @@ namespace Origin
             ret.W2 = v.Z;
             return ret;
         }
-        static auto SetRotation(const Quaternion& q, const Vec3& v) -> Quaternion
+        static auto set_rotation(const Quaternion& q, const Vec3& v) -> Quaternion
         {
             Quaternion ret = q;
             ret.X0 = v.X;
@@ -354,7 +355,7 @@ namespace Origin
             ret.X2 = v.Z;
             return ret;
         }
-        static auto SetScale(const Quaternion& q, const Vec3& v) -> Quaternion
+        static auto set_scale(const Quaternion& q, const Vec3& v) -> Quaternion
         {
             Quaternion ret = q;
             ret.X0 = v.X;
@@ -362,19 +363,19 @@ namespace Origin
             ret.Z2 = v.Z;
             return ret;
         }
-        static auto GetPosition(const Quaternion& q)
+        static auto get_position(const Quaternion& q)
         {
             return new f64[3]{ q.W0, q.W1, q.W2 };
         }
-        static auto GetRotation(const Quaternion& q)
+        static auto get_rotation(const Quaternion& q)
         {
             return new f64[3]{ q.X0, q.X1, q.X2 };
         }
-        static auto GetScale(const Quaternion& q)
+        static auto get_scale(const Quaternion& q)
         {
             return new f64[3]{ q.X0, q.Y1, q.Z2 };
         }
-        static auto Rotate(const Quaternion& q, const Vec3& vec, f64 angle)
+        static auto rotate(const Quaternion& q, const Vec3& vec, f64 angle)
         {
             Quaternion ret = q;
             ret.X0 = sin(angle / 2.0F) * vec.X;
@@ -384,7 +385,7 @@ namespace Origin
             return ret;
         }
 
-        static auto Rotate(const Quaternion& q, Vec3& axis, Face face)
+        static auto rotate(const Quaternion& q, Vec3& axis, Face face)
         {
             f64 const a = acos(q.X0) + PI * 2 * ((axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]) * 2.0 - 1.0);
             Vec3 dv;
@@ -414,16 +415,16 @@ namespace Origin
             }
             auto ret = Quaternion(&axis.X, &axis.Y, &axis.Z);
             ret = ret * Quaternion(&dv.X, &dv.Y, &dv.Z);
-            return Transform(ret, axis);
+            return transform(ret, axis);
         }
-        [[nodiscard]] auto Dot(const Quaternion& rhs, const Vec3& t) const
+        [[nodiscard]] auto dot(const Quaternion& rhs, const Vec3& t) const
         {
             return X0 * rhs.X0 + Y0 * rhs.Y0 + Z0 * rhs.Z0 + W0 * rhs.W0 + t.X * rhs.X0 + t.Y * rhs.Y0 + t.Z * rhs.Z0 + t.X * rhs.X0 + t.Y * rhs.Y0 + t.Z * rhs.Z0;
         }
-        [[nodiscard]] auto LengthSquared() const -> f64 { return Dot(*this, Vec3(X0, Y0, Z0)); }
+        [[nodiscard]] auto length_squared() const -> f64 { return dot(*this, Vec3(X0, Y0, Z0)); }
 
-        [[nodiscard]] auto Length() const -> f64 { return sqrt(LengthSquared()); }
-        static auto Translate(const Quaternion& q, const Vec3& t)
+        [[nodiscard]] auto length() const -> f64 { return sqrt(length_squared()); }
+        static auto translate(const Quaternion& q, const Vec3& t)
         {
             Quaternion ret = q;
             ret.W0 += t.X;
@@ -745,6 +746,6 @@ namespace Origin
         {
             return !(*this == rhs);
         }
-    }; // namespace origin
+    };
 } // namespace Origin
-#endif
+#endif // GEOMETRY_HPP

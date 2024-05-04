@@ -1,60 +1,36 @@
-#ifndef HOME_MATT_ORIGIN_SRC_ORIGIN_HPP
-#define HOME_MATT_ORIGIN_SRC_ORIGIN_HPP
+#ifndef ORIGIN_HPP
+#define ORIGIN_HPP
 
-#include <algorithm>
-#include <functional>
-#include <utility>
 #pragma once
 #include "Basic.hpp"
 #include "math/Basic.hpp"
 #include "math/Geometry.hpp"
 #include <immintrin.h>
+#include <cstddef>
+#include <utility>
 
 namespace Origin
 {
 
     using ID = u64;
-    struct ColorData
+    struct Color
     {
     public:
-        friend class Color;
-        union
-        {
-            f64* data = new f64[4];
-            struct
-            {
-                f64 R;
-                f64 G;
-                f64 B;
-                f64 A;
-            } __attribute__((aligned(32)));
-        } __attribute__((aligned(16)));
-
-        ColorData() { R = 0, G = 0, B = 0, A = 0; }
-        ColorData(const f64 r, const f64 g, const f64 b, const f64 a) :
-            R(r), G(g), B(b), A(a)
-        {
-            R = r;
-            G = g;
-            B = b;
-            A = a;
-        }
-    };
-    class Color : public ColorData
-    {
-    public:
-        friend struct ColorData;
+        f64 R;
+        f64 G;
+        f64 B;
+        f64 A;
         Color(const f64 r, const f64 g, const f64 b, const f64 a) noexcept :
-            ColorData(r, g, b, a) {}
+            R(r), G(g), B(b), A(a) {}
         Color()
         {
             R = 0, G = 0, B = 0, A = 0;
         }
         Color(const Color& /*unused*/) = default;
         Color(Color&& /*unused*/) = default;
-
-        [[nodiscard]] auto Scale() const -> f64 { return sqrt(R * R + G * G + B * B + A * A); }
-        auto Normalize() -> Color&
+        ~Color() = default;
+        [[nodiscard]] auto scale() const -> f64 { return sqrt(R * R + G * G + B * B + A * A); }
+        auto normalize() -> Color&
         {
             f64 const inv_length = 1.0 / sqrt(R * R + G * G + B * B + A * A);
             R *= inv_length;
@@ -63,37 +39,57 @@ namespace Origin
             A *= inv_length;
             return *this;
         }
-        auto Clamp(const Color& mn, const Color& mx) -> Color
+        auto clamp(const Color& mn, const Color& mx) -> Color
         {
             Color ret = *this;
-            for (u64 i = 0; i < 4; i++)
-            {
-                ret.data[i] = mx.data[i] > ret.data[i] ? mx.data[i] : ret.data[i];
-                ret.data[i] = mn.data[i] < ret.data[i] ? mn.data[i] : ret.data[i];
-            }
+            ret.R = mx.R > ret.R ? mx.R : ret.R;
+            ret.G = mx.G > ret.G ? mx.G : ret.G;
+            ret.B = mx.B > ret.B ? mx.B : ret.B;
+            ret.A = mx.A > ret.A ? mx.A : ret.A;
+            ret.R = mn.R < ret.R ? mn.R : ret.R;
+            ret.G = mn.G < ret.G ? mn.G : ret.G;
+            ret.B = mn.B < ret.B ? mn.B : ret.B;
+            ret.A = mn.A < ret.A ? mn.A : ret.A;
             return ret;
         }
-        ~Color() = default;
-        auto operator=(Color&&) -> Color& = default;
-        auto operator=(const Color&) -> Color& = default;
-        auto operator=(ColorData other) noexcept -> Color&
+        auto operator=(Color&& other) noexcept -> Color&
         {
-            this->R = other.R;
-            this->G = other.G;
-            this->B = other.B;
-            this->A = other.A;
+            R = other.R;
+            G = other.G;
+            B = other.B;
+            A = other.A;
             return *this;
         }
-        auto operator*(const f64& rhs) const -> Color
+        auto operator=(const Color& other) noexcept -> Color&
         {
-            return { R * rhs, G * rhs, B * rhs, A * rhs };
+            R = other.R;
+            G = other.G;
+            B = other.B;
+            A = other.A;
+            return *this;
         }
-        auto operator[](u64 index) -> f64& { return data[index]; }
-    };
+        auto operator+(const Color& rhs) const -> Color
+        {
+            return { R + rhs.R, G + rhs.G, B + rhs.B, A + rhs.A };
+        }
+        auto operator-(const Color& rhs) const -> Color
+        {
+            return { R - rhs.R, G - rhs.G, B - rhs.B, A - rhs.A };
+        }
+        auto operator*(const Color& rhs) const -> Color
+        {
+            return { R * rhs.R, G * rhs.G, B * rhs.B, A * rhs.A };
+        }
+        auto operator/(const Color& rhs) const -> Color { return { R / rhs.R, G / rhs.G, B / rhs.B, A / rhs.A }; }
+    } __attribute__((aligned(32)));
     struct VertexData
     {
         friend class Vertex;
 
+    private:
+    } __attribute__((aligned(128)));
+    class Vertex
+    {
     private:
         Vec3 Position;
         Vec3 Normal;
@@ -102,23 +98,16 @@ namespace Origin
         ID* Owners{ nullptr };
 
     public:
-        VertexData() :
+        Vertex() :
             Col(Color(0, 0, 0, 0))
         {
             Position = Vec3(0, 0, 0);
             Normal = Vec3(0, 0, 0);
         }
-        VertexData(Vec3 pos, Vec3 norm, Color col, u64 idx, ID* own) :
+        Vertex(Vec3 pos, Vec3 norm, Color col, u64 idx, ID* own) :
             Position(std::move(pos)), Normal(std::move(norm)), Col(col), Index(idx), Owners(own) {
 
             };
-
-    } __attribute__((aligned(128)));
-    class Vertex : public VertexData
-    {
-    public:
-        friend struct VertexData;
-        Vertex() = default;
         ~Vertex()
         {
             Position = Vec3(0, 0, 0);
@@ -127,98 +116,81 @@ namespace Origin
             Index = 0;
             Owners = nullptr;
         }
-        Vertex(const Vec3& coords, const Vec3& norm, const Color& col, u32 idx = 0, ID* own = nullptr)
+        Vertex(const Vec3& coords, const Vec3& norm, const Color& col, u32 idx = 0, ID* own = nullptr) :
+            Index(idx), Owners(own)
         {
-            SetPosition(coords);
-            SetNormal(norm);
-            SetColor(col);
-            Index = idx;
-            Owners = own;
+            set_position(coords);
+            set_normal(norm);
+            set_color(col);
         }
-        Vertex(const Vertex& rhs) noexcept
-            :
-            VertexData(rhs)
-        {
-            this->Position = rhs.Position;
-            this->Normal = rhs.Normal;
-            this->Col = rhs.Col;
-            this->Index = rhs.Index;
-            this->Owners = rhs.Owners;
-        }
-        explicit Vertex(const VertexData&& rhs) noexcept
-        {
-            this->Position = rhs.Position;
-            this->Normal = rhs.Normal;
-            this->Col = rhs.Col;
-            this->Index = rhs.Index;
-            this->Owners = rhs.Owners;
-        }
-        auto ClampPosition(Vec3& mn, Vec3& mx) noexcept -> Vertex
+        Vertex(const Vertex& rhs) noexcept = default;
+        Vertex(Vertex&& rhs) noexcept = default;
+        auto clamp_position(Vec3& mn, Vec3& mx) noexcept -> Vertex
         {
             Vertex ret = *this;
-            Vec3 const pos = this->GetPosition();
+            Vec3 const pos = this->get_position();
             for (u64 i = 0; i < 3; i++)
             {
                 pos[i] = mx[i] > pos[i] ? mx[i] : pos[i];
                 pos[i] = mn[i] < pos[i] ? mn[i] : pos[i];
             }
-            ret.SetPosition(pos);
+            ret.set_position(pos);
             return ret;
         }
-        auto ClampColor(const Color& mn, const Color& mx) -> Vertex
+        auto clamp_color(const Color& mn, const Color& mx) -> Vertex
         {
             Vertex ret = *this;
-            ret.SetColor(this->GetColor().Clamp(mn, mx));
+            ret.set_color(this->get_color().clamp(mn, mx));
             return ret;
         }
-        auto ClampNormal(Vec3& mn, Vec3& mx) const -> Vertex
+        auto clamp_normal(Vec3& mn, Vec3& mx) const -> Vertex
         {
             Vertex ret = *this;
-            Vec3 const norm = this->GetNormal();
+            Vec3 const norm = this->get_normal();
             for (u64 i = 0; i < 3; i++)
             {
                 norm[i] = mx[i] > norm[i] ? mx[i] : norm[i];
                 norm[i] = mn[i] < norm[i] ? mn[i] : norm[i];
             }
-            ret.SetNormal(norm);
+            ret.set_normal(norm);
             return ret;
         }
-        auto ClampDistance(const f64 mn, const f64 mx) -> Vertex
+        auto clamp_distance(const f64 mn, const f64 mx) -> Vertex
         {
             Vertex ret = *this;
-            Vec3 const pos = this->GetPosition();
+            Vec3 const pos = this->get_position();
             for (u64 i = 0; i < 3; i++)
             {
                 pos[i] = mx > pos[i] ? mx : pos[i];
                 pos[i] = mn < pos[i] ? mn : pos[i];
             }
-            ret.SetPosition(pos);
+            ret.set_position(pos);
             return ret;
         };
 
-        [[nodiscard]] auto GetDistance(const Vertex& rhs) const -> f64
+        [[nodiscard]] auto get_distance(const Vertex& rhs) const -> f64
         {
             Vertex const ret = *this;
-            Vec3 const dist = ret.GetPosition() - rhs.GetPosition();
-            return sqrt(dist.X * dist.X + dist.Y * dist.Y + dist.Z * dist.Z);
+            Vec3 const dist = ret.get_position() - rhs.get_position();
+            return Origin::sqrt(dist.X * dist.X + dist.Y * dist.Y + dist.Z * dist.Z);
         }
-        [[nodiscard]] auto GetDistanceSquared(const Vertex& rhs) const -> f64
+        [[nodiscard]] auto get_distance_squared(const Vertex& rhs) const -> f64
         {
             Vertex const ret = *this;
-            Vec3 const dist = ret.GetPosition() - rhs.GetPosition();
+            Vec3 const dist = ret.get_position() - rhs.get_position();
             return dist.X * dist.X + dist.Y * dist.Y + dist.Z * dist.Z;
         }
-        static auto GetDistance(Vertex* rhs) -> f64
+        static auto get_distance(Vertex* rhs) -> f64
         {
             f64 dist = 0.0;
             u64 const size = sizeof(*rhs) / sizeof(rhs[0]); // size
             for (u64 i = 0; i < size - 1; i++)
             {
-                dist += rhs[i].GetDistance(rhs[i + 1]);
+                dist += rhs[i].get_distance(rhs[i + 1]);
             }
             return dist;
         }
-        static auto Sort(Vertex* rhs) -> Vertex*
+        static auto sort(Vertex* rhs) -> Vertex*
         {
             u64 const size = sizeof(*rhs) / sizeof(rhs[0]);
             u64* idx = (new u64[size]);
@@ -238,58 +210,58 @@ namespace Origin
             idx = nullptr;
             return ret;
         }
-        auto Set(const Vec3& rhs, const Vec3& norm, const Color& col) -> void
+        auto set(const Vec3& rhs, const Vec3& norm, const Color& col) -> void
         {
-            SetPosition(rhs);
-            SetNormal(norm);
-            SetColor(col);
+            set_position(rhs);
+            set_normal(norm);
+            set_color(col);
         }
-        auto SetPosition(const Vec3& rhs) -> void
+        auto set_position(const Vec3& rhs) -> void
         {
             this->Position = rhs;
         }
-        auto SetNormal(const Vec3& rhs) -> void
+        auto set_normal(const Vec3& rhs) -> void
         {
             this->Normal = rhs;
         }
-        auto SetColor(const Color& rhs) -> void
+        auto set_color(const Color& rhs) -> void
         {
             this->Col = rhs;
         }
-        auto SetIndex(u32 idx) -> void { Index = idx; }
-        auto SetOwners(ID* own) -> void { Owners = own; }
-        [[nodiscard]] auto GetLength() const -> f64
+        auto set_index(u32 idx) -> void { Index = idx; }
+        auto set_owners(ID* own) -> void { Owners = own; }
+        [[nodiscard]] auto get_length() const -> f64
         {
-            Vec3 const ret = GetPosition();
-            return sqrt(ret.X * ret.X + ret.Y * ret.Y + ret.Z * ret.Z);
+            Vec3 const ret = get_position();
+            return Origin::sqrt(ret.X * ret.X + ret.Y * ret.Y + ret.Z * ret.Z);
         }
-        [[nodiscard]] auto GetPosition() const -> Vec3 { return this->Position; }
-        [[nodiscard]] auto GetNormal() const -> Vec3
+        [[nodiscard]] auto get_position() const -> Vec3 { return this->Position; }
+        [[nodiscard]] auto get_normal() const -> Vec3
         {
             return this->Normal;
         }
-        [[nodiscard]] auto GetColor() const -> Color
+        [[nodiscard]] auto get_color() const -> Color
         {
             return this->Col;
         }
-        [[nodiscard]] auto GetIndex() const -> u64 { return Index; }
-        [[nodiscard]] auto GetOwners() const -> ID* { return Owners; }
-        auto Sqrt()
+        [[nodiscard]] auto get_index() const -> u64 { return Index; }
+        [[nodiscard]] auto get_owners() const -> ID* { return Owners; }
+        auto sqrt()
         {
             Vertex ret = *this;
             Vec3 const pos = this->Position;
             Vec3 const norm = this->Normal;
             for (u64 i = 0; i < 3; i++)
             {
-                pos[i] = sqrt(pos[i]);
-                norm[i] = sqrt(norm[i]);
+                pos[i] = Origin::sqrt(pos[i]);
+                norm[i] = Origin::sqrt(norm[i]);
             }
-            ret.SetPosition(pos);
-            ret.SetNormal(norm);
+            ret.set_position(pos);
+            ret.set_normal(norm);
             return ret;
         }
 
-        auto Normalize()
+        auto normalize()
         {
             Vertex* ret = this;
             Vec3 const pos = this->Position;
@@ -297,15 +269,15 @@ namespace Origin
             f64 const lengthsquared = pos.X * pos.X + pos.Y * pos.Y + pos.Z * pos.Z;
             if (lengthsquared > 0.0)
             {
-                f64 const length = sqrt(lengthsquared);
+                f64 const length = Origin::sqrt(lengthsquared);
                 for (u64 i = 0; i < 3; i++)
                 {
                     pos[i] /= length;
                     norm[i] /= length;
                 }
             }
-            ret->SetPosition(pos);
-            ret->SetNormal(norm);
+            ret->set_position(pos);
+            ret->set_normal(norm);
             return *ret;
         }
         Vertex& operator=(Vertex&& rhs) = default;
@@ -320,22 +292,22 @@ namespace Origin
                 pos[i] *= rhs;
                 norm[i] *= rhs;
             }
-            ret.SetPosition(pos);
-            ret.SetNormal(norm);
+            ret.set_position(pos);
+            ret.set_normal(norm);
             return ret;
         }
         auto operator+(const Vertex& rhs) const -> Vertex
         {
             Vertex ret = *this;
-            ret.SetPosition(ret.Position + rhs.Position);
-            ret.SetNormal(ret.Normal + rhs.Normal);
+            ret.set_position(ret.Position + rhs.Position);
+            ret.set_normal(ret.Normal + rhs.Normal);
             return ret;
         }
         auto operator-(const Vertex& rhs) const -> Vertex
         {
             Vertex ret = *this;
-            ret.SetPosition(ret.Position - rhs.Position);
-            ret.SetNormal(ret.Normal - rhs.Normal);
+            ret.set_position(ret.Position - rhs.Position);
+            ret.set_normal(ret.Normal - rhs.Normal);
             return ret;
         }
         auto operator+=(const Vertex& rhs) -> Vertex&
@@ -352,7 +324,7 @@ namespace Origin
     public:
         union
         {
-            Vertex* data = new Vertex[3]();
+            Vertex* Data = new Vertex[3]();
             struct
             {
                 Vertex A;
@@ -368,8 +340,8 @@ namespace Origin
             C = c;
         }
         ~Triangle() = delete;
-        auto Get() const -> Vertex* { return this->data; }
-        auto Get(u32 idx) const -> Vertex& { return data[idx]; }
+        auto get() const -> Vertex* { return this->Data; }
+        auto get(u32 idx) const -> Vertex& { return Data[idx]; }
     };
 } // namespace Origin
-#endif
+#endif // ORIGIN_HPP

@@ -1,98 +1,100 @@
 #include "Exec.hpp"
+#include "Message.hpp"
+#include <iostream>
 namespace Origin
 {
-    auto Run::Loop(f128 runtime) -> i32
+    auto Run::loop(f128 runtime) -> i32
     {
         if (runtime > 0)
         {
-            Timers[0].SetLimit(runtime);
+            Timers[0].set_limit(runtime);
         }
-        while ((GetState() < EXITED) && (Timers[0].GetRemaining() > 0))
+        while ((get_state() < EXITED) && (Timers[0].get_remaining() > 0))
         {
-            ProcessCycles();
+            process_cycles();
         }
         return 0;
     }
-    auto Run::DoInit() -> bool
+    auto Run::do_init() -> bool
     {
         if (RunState == UNINITIALIZED)
         {
-            if (SetState(INITIALIZING))
+            if (set_run_state(INITIALIZING))
             {
-                return SetState(INITIALIZED);
+                return set_run_state(INITIALIZED);
             }
         }
         return false;
     }
-    auto Run::DoStart() -> bool
+    auto Run::do_start() -> bool
     {
-        if (SetState(STARTING))
+        if (set_run_state(STARTING))
         {
-            Timers[0].Start();
-            return SetState(STARTED);
+            Timers[0].start();
+            return set_run_state(STARTED);
         }
         return false;
     }
-    auto Run::DoPause() -> bool
+    auto Run::do_pause() -> bool
     {
-        if (SetState(PAUSING))
+        if (set_run_state(PAUSING))
         {
-            Timers[0].Pause();
-            return SetState(PAUSED);
+            Timers[0].pause();
+            return set_run_state(PAUSED);
         }
         return false;
     }
-    auto Run::DoResume() -> bool
+    auto Run::do_resume() -> bool
     {
-        if (SetState(RESUMING))
+        if (set_run_state(RESUMING))
         {
-            Timers[0].Resume();
-            return SetState(RESUMED);
+            Timers[0].resume();
+            return set_run_state(RESUMED);
         }
         return false;
     }
-    auto Run::DoStop() -> bool
+    auto Run::do_stop() -> bool
     {
-        if (SetState(STOPPING))
+        if (set_run_state(STOPPING))
         {
-            Timers[0].Stop();
-            ResetCycles();
-            return SetState(STOPPED);
+            Timers[0].stop();
+            reset_cycles();
+            return set_run_state(STOPPED);
         }
 
         return false;
     }
-    auto Run::DoRestart() -> bool
+    auto Run::do_restart() -> bool
     {
-        if (SetState(RESTARTING))
+        if (set_run_state(RESTARTING))
         {
-            Timers[0].Restart();
-            ResetCycles();
-            return SetState(RESTARTED);
+            Timers[0].restart();
+            reset_cycles();
+            return set_run_state(RESTARTED);
         }
         return false;
     }
-    auto Run::DoExit() -> bool
+    auto Run::do_exit() -> bool
     {
-        if (SetState(EXITING))
+        if (set_run_state(EXITING))
         {
-            if (SetState(EXITED))
+            if (set_run_state(EXITED))
             {
-                DoKill();
+                do_kill();
             }
         }
         return false;
     }
-    auto Run::DoKill() -> bool
+    auto Run::do_kill() -> bool
     {
-        if (SetState(KILLING))
+        if (set_run_state(KILLING))
         {
-            SetState(KILLED);
+            set_run_state(KILLED);
             ::exit(-1);
         }
         return false;
     }
-    auto Run::GetArg(const string& command) -> string
+    auto Run::get_arg(const string& command) -> string
     {
         for (i8 i = 0; i < 16; i++)
         {
@@ -103,7 +105,7 @@ namespace Origin
         }
         return "";
     }
-    auto Run::GetCmd(const string& command) -> i32
+    auto Run::get_cmd(const string& command) -> i32
     {
         for (i8 i = 0; i < 16; i++)
         {
@@ -114,25 +116,25 @@ namespace Origin
         }
         return -1;
     }
-    auto Run::IsRunning() const -> bool
+    auto Run::is_running() const -> bool
     {
-        i8 const state = GetState();
+        i8 const state = get_state();
         return ((state < PAUSED) && (state > UNINITIALIZED)) ||
                (state < EXITED && state >= RESUMING && state != STOPPED &&
                 state != RESTARTED);
     }
-    auto Run::IncrementCycles() -> void
+    auto Run::increment_cycles() -> void
     {
-        if (IsRunning())
+        if (is_running())
         {
             Cycles++;
         }
         if (Cycles > MaxCycles)
         {
-            DoExit();
+            do_exit();
         }
     }
-    auto Run::SetMaxCycles(u64 cycles) -> i8
+    auto Run::set_max_cycles(u64 cycles) -> i8
     {
         if (cycles <= 0)
         {
@@ -142,19 +144,15 @@ namespace Origin
         MaxCycles = cycles;
         return 0;
     }
-    auto Run::SetStatus(bool status) -> bool
-    {
-        Status = status;
-        return Status;
-    }
-    auto Run::SetState(i8 target) -> bool
+
+    auto Run::set_run_state(i8 target) -> bool
     {
         bool status = false;
-        i32 state = GetState();
+        i32 state = get_state();
         i8 i = 0;
         if (state == target)
         {
-            return SetStatus(status);
+            return set_run_status(status);
         }
         if (target >= 1 && target < 17)
         {
@@ -169,111 +167,111 @@ namespace Origin
             }
         }
         RunState = state;
-        return SetStatus(status);
+        return get_status();
     }
-    auto Run::ProcessCycles() -> i8
+    auto Run::process_cycles() -> i8
     {
-        IncrementCycles();
-        if (GetCycles() >= GetMaxCycles() && GetMaxCycles() != 0)
+        increment_cycles();
+        if (get_cycles() >= get_max_cycles() && get_max_cycles() != 0)
         {
-            DoExit();
+            do_exit();
         }
         return 0;
     }
-    auto Run::ProcessState(i8 state) -> i8
+    auto Run::process_state(i8 state) -> i8
     {
         switch (state)
         {
         case INITIALIZING:
-            if (SetStatus(DoInit()))
+            if (set_run_status(do_init()))
             {
-                DBG("Initialized", INFO);
+                debug("Initialized", Code::info);
                 return INITIALIZED;
             }
             break;
         case STARTING:
-            if (SetStatus(DoStart()))
+            if (set_run_status(do_start()))
             {
-                DBG("Started", INFO);
+                debug("Started", Code::info);
                 return STARTED;
             }
             break;
         case PAUSING:
-            if (SetStatus(DoPause()))
+            if (set_run_status(do_pause()))
             {
-                DBG("Paused", INFO);
+                debug("Paused", Code::info);
                 return PAUSED;
             }
             break;
         case RESUMING:
-            if (SetStatus(DoResume()))
+            if (set_run_status(do_resume()))
             {
-                DBG("Resumed", INFO);
+                debug("Resumed", Code::info);
                 return RESUMED;
             }
             break;
         case STOPPING:
-            if (SetStatus(DoStop()))
+            if (set_run_status(do_stop()))
             {
-                DBG("Stopped", INFO);
+                debug("Stopped", Code::info);
                 return STOPPED;
             }
             break;
         case RESTARTING:
-            if (SetStatus(DoRestart()))
+            if (set_run_status(do_restart()))
             {
-                DBG("Restarted", INFO);
+                debug("Restarted", Code::info);
                 return RESTARTED;
             }
             break;
         case EXITING:
-            if (SetStatus(DoExit()))
+            if (set_run_status(do_exit()))
             {
-                DBG("Exited", INFO);
+                debug("Exited", Code::info);
                 return EXITED;
             }
             break;
         case KILLING:
-            if (SetStatus(DoKill()))
+            if (set_run_status(do_kill()))
             {
-                DBG("Killed", INFO);
+                debug("Killed", Code::info);
                 return KILLED;
             }
             break;
         default:
-            DBG("Unknown state", ERROR);
+            debug("Unknown state", Code::error);
             break;
         }
         return -1;
     }
-    auto Run::SetMinArgs(u8 min_args) -> void
+    auto Run::set_min_args(u8 min_args) -> void
     {
         if (min_args == 0)
         {
-            DBG("Minimum number of arguments was set to 0.", INFO);
+            debug("Minimum number of arguments was set to 0.", Code::info);
         }
         MinArgs = min_args;
     }
-    auto Run::GetMinArgs() -> u8
+    auto Run::get_min_args() -> u8
     {
         if (MinArgs == 0)
         {
-            DBG("Minimum number of arguments is set to 0.", INFO);
+            debug("Minimum number of arguments is set to 0.", Code::info);
         }
         if (MinArgs < 0)
         {
-            DBG("Minimum number of arguments is less than 0.", ERROR);
+            debug("Minimum number of arguments is less than 0.", Code::error);
             MinArgs = 0;
         }
         return MinArgs;
     }
-    auto Run::Call(const string& cmd) -> string
+    auto Run::call(const string& cmd) -> string
     {
         string output;
         std::unique_ptr<FILE, decltype(&pclose)> in{ popen(cmd.c_str(), "r"), pclose };
         if (!in)
         {
-            DBG("Null pointer passed to popen().", ERROR);
+            debug("Null pointer passed to popen().", Code::error);
             return "";
         }
         i8 buffer[128];
@@ -283,20 +281,20 @@ namespace Origin
         }
         if (ferror(in.get()) != 0)
         {
-            DBG("Error while executing command.", ERROR);
+            debug("Error while executing command.", Code::error);
             return "";
         }
-        DBG("Command executed successfully.", INFO);
+        debug("Command executed successfully.", Code::info);
         return output;
     }
-    auto Run::Call(const i8p cmd) -> string
+    auto Run::call(const i8p cmd) -> string
     {
         i8 buffer[128];
         string result;
         FILE* pipe = popen(cmd, "r");
         if (pipe == nullptr)
         {
-            DBG("Null pointer passed to popen().", ERROR);
+            debug("Null pointer passed to popen().", Code::error);
         }
         try
         {
@@ -309,36 +307,48 @@ namespace Origin
         {
             pclose(pipe);
 
-            DBG("Error while executing command.", ERROR);
+            debug("Error while executing command.", Code::error);
             return "";
         }
         pclose(pipe);
-        DBG("Command executed successfully.", INFO);
+        debug("Command executed successfully.", Code::info);
         return result;
     }
-    auto Run::Exec(const i8p command, const i8p argv[]) -> void
+    auto Run::exec(const i8p command, const i8p argv[]) -> void
     {
         if (command == nullptr || argv == nullptr)
         {
-            DBG("Null pointer passed to Exec().", ERROR);
+            debug("Null pointer passed to Exec().", Code::error);
             return;
         }
-        string output = Call(string(command) + " " + string(argv[0]));
+        string output = call(string(command) + " " + string(argv[0]));
         if (output.length() <= string::npos && output.length() > 0)
         {
-            DBG("Invalid command string passed.", ERROR);
+            debug("Invalid command string passed.", Code::error);
             return;
         }
         Output = output.substr(0, output.length() - 1);
-        DBG("Command Successfully Executed.", INFO);
+        debug("Command Successfully Executed.", Code::info);
     }
-    auto Run::Parse(const string& cmd) -> string
+    auto Run::parse(const string& cmd) -> string
     {
         if (cmd.length() <= string::npos && cmd.length() > 0)
         {
-            DBG("Invalid command string passed.", ERROR);
+            debug("Invalid command string passed.", Code::error);
             return "";
         }
         return cmd;
     }
-} // namespace origin
+    auto Run::parse(const i8p cmd) -> string
+    {
+        return { cmd };
+    }
+    auto Run::process_input() -> i8
+    {
+        return 0;
+    }
+    auto Run::process_output() -> i8
+    {
+        return 0;
+    }
+} // namespace Origin

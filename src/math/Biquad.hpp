@@ -40,15 +40,15 @@ namespace Origin
     public:
         explicit Biquad(u8 type = Lowpass, f64 Fc = 0.50, f64 Q = 0.707, f64 peakGainDB = 0.0);
         ~Biquad();
-        void SetType(u8 type);
-        void SetQ(f64 Q);
-        void SetFc(f64 Fc);
-        void SetPeakGain(f64 peakGainDB);
-        void SetBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
-        auto Process(f64 in) -> f64;
+        void set_type(u8 type);
+        void set_q(f64 Q);
+        void set_fc(f64 Fc);
+        void set_peak_gain(f64 peakGainDB);
+        void set_biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
+        auto process(f64 in) -> f64;
 
     protected:
-        void CalcBiquad();
+        void calc_biquad();
 
         i32 Type;
         f64 A0, A1, A2, B1, B2;
@@ -56,7 +56,7 @@ namespace Origin
         f64 Z1, Z2;
     };
 
-    inline auto Biquad::Process(f64 in) -> f64
+    inline auto Biquad::process(f64 in) -> f64
     {
         f64 out = in * A0 + Z1;
         Z1 = in * A1 + Z2 - B1 * out;
@@ -74,9 +74,9 @@ namespace Origin
 
         IIR();
         template<class Rc>
-        auto Coefs(const Rc* bcf, const Rc* acf);
-        auto Reset();
-        auto Tick(i32 in);
+        auto coefs(const Rc* bcf, const Rc* acf);
+        auto reset();
+        auto tick(i32 in);
 
         IIR(IIR&&) = default;
         IIR& operator=(IIR&&) = default;
@@ -88,7 +88,7 @@ namespace Origin
         std::unique_ptr<i32[], i32> B, A;
 
     public:
-        auto Scalar(i32 in) -> i32;
+        auto scalar(i32 in) -> i32;
     };
 
     //------------------------------------------------------------------------------
@@ -99,9 +99,9 @@ namespace Origin
     {
         explicit IIRg(unsigned n);
         template<class Rc>
-        auto Coefs(const Rc* bcf, const Rc* acf);
-        auto Reset();
-        i32 Tick(i32 in);
+        auto coefs(const Rc* bcf, const Rc* acf);
+        auto reset();
+        i32 tick(i32 in);
 
         IIRg(IIRg&&) = default;
         IIRg& operator=(IIRg&&) = default;
@@ -114,7 +114,7 @@ namespace Origin
         std::unique_ptr<i32[], i32> B, A;
 
     public:
-        auto Scalar(i32 in);
+        auto scalar(i32 in);
     };
     template<unsigned N, class V>
     IIR<N, V>::IIR()
@@ -128,7 +128,7 @@ namespace Origin
 
     template<unsigned N, class V>
     template<class Rc>
-    auto IIR<N, V>::Coefs(const Rc* b, const Rc* a)
+    auto IIR<N, V>::coefs(const Rc* b, const Rc* a)
     {
         B0 = b[0];
         A0 = a[0];
@@ -137,7 +137,7 @@ namespace Origin
     }
 
     template<unsigned N, class V>
-    auto IIR<N, V>::Reset()
+    auto IIR<N, V>::reset()
     {
         constexpr unsigned vlen = sizeof(V) / sizeof(i32);
         constexpr unsigned n = (N + vlen - 2) & ~(vlen - 1);
@@ -147,7 +147,7 @@ namespace Origin
     }
 
     template<unsigned N, class V>
-    auto IIR<N, V>::Scalar(i32 in) -> i32
+    auto IIR<N, V>::scalar(i32 in) -> i32
     {
         constexpr unsigned vn = N + (sizeof(V) / sizeof(i32)) - 2;
         constexpr unsigned nn = vn & ~(sizeof(V) / sizeof(i32) - 1);

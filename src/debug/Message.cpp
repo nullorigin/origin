@@ -1,76 +1,92 @@
 #include <Message.hpp>
-#include <sstream>
+#include <string>
+
 namespace Origin
 {
-
-    auto GetHeader() -> std::string
+    auto get_header_txt() -> std::string
     {
         std::string header[5] = { "[--NONE--]", "[--INFO--]", "[-WARNING-]", "[--ERROR--]", "[--FATAL--]" };
-        MsgHeader = "##########################" + header[MsgStatus] +
-                    "#########################";
-        return MsgHeader;
+        msg.header = "#############################" + header[i32(msg.status)] +
+                     "#############################";
+        return msg.header;
     }
 
-    auto GetStringEnd(const std::string& begin, i8 padding, i8 ending) -> std::string
+    auto get_end_txt(std::string begin, i8 padding, std::string ending) -> std::string
     {
-        std::string end;
-        for (u64 i = begin.length(); i < MsgHeader.length() - 1; i++)
+        std::string end{};
+        for (u64 i = begin.length(); i < msg.header.length() - 1; i++)
         {
             end += padding;
         }
         end += ending;
         return end + "\n";
     }
-    void Reset()
+    auto set_code(Code code) -> Code
     {
-        MsgStatus = NONE;
-        MsgOffset = NONE;
-        MsgLevel = NONE;
-    }
-    auto SetCode(ExCode code) -> ExCode
-    {
-        if (MsgCode < ANY)
+        if (msg.code < Code::any)
         {
-            return ANY;
+            return Code::any;
         }
-        MsgCode = code;
+        msg.code = code;
         return code;
     }
-    auto ToString(const i8* str) -> std::string
+
+    auto reset() -> void
     {
-        std::stringstream ss = std::stringstream(str);
-        return ss.str();
-    };
-    auto Restart() -> void
-    {
-        MsgCode = NONE;
-        MsgStatus = INFO;
-        MsgOffset = NONE;
-        MsgLevel = NONE;
+        msg.code = Code::none;
+        msg.status = Code::info;
+        msg.offset = Code::none;
+        msg.level = Code::none;
     }
-    auto SetStatus(ExCode status) -> ExCode
+    auto set_status(Code status) -> Code
     {
-        if (status < ANY)
+        if (status < Code::any)
         {
-            MsgStatus = INFO;
-            return MsgStatus;
+            msg.status = Code::any;
+            return msg.status;
         }
-        MsgStatus = status;
+        msg.status = status;
         return status;
     }
-    auto SetLevel(ExLevel level) -> ExLevel
+    auto set_level(Code level) -> Code
     {
-        if (MsgLevel < ANY)
+        if (msg.level < Code::any)
         {
-            MsgLevel = ANY;
-            return MsgLevel;
+            msg.level = Code::any;
+            return msg.level;
         }
-        MsgLevel = level;
+        msg.level = level;
         return level;
     }
-    auto SetOffset(ExLevel offset) -> ExLevel
+    auto set_offset(Code offset) -> Code
     {
-        MsgOffset = offset;
+        msg.offset = offset;
         return offset;
     }
-} // namespace Origin
+    auto get_footer_txt() -> std::string
+    {
+        msg.footer = std::string(msg.header.length() - 1, '#');
+        return msg.footer;
+    }
+    auto get_info_txt(std::string info) -> std::string
+    {
+        std::string info_txt = "#-Info: [ " + info + " ]";
+        return info_txt + get_end_txt(info_txt, ' ', "#");
+    }
+    auto get_code() -> Code
+    {
+        return msg.code;
+    }
+    auto is(Code status) -> bool
+    {
+        return msg.status == status;
+    }
+    auto get_level() -> Code
+    {
+        return msg.level;
+    }
+    auto get_status() -> Code
+    {
+        return msg.status;
+    }
+} // namespace Origin::dbg

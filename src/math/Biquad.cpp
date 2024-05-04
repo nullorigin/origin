@@ -23,43 +23,43 @@ namespace Origin
     {
         A0 = 1.0;
         A1 = A2 = B1 = B2 = 0.0;
-        SetBiquad(type, Fc, Q, peakGainDB);
+        set_biquad(type, Fc, Q, peakGainDB);
         Z1 = Z2 = 0.0;
     }
 
-    void Biquad::SetType(u8 type)
+    void Biquad::set_type(u8 type)
     {
         this->Type = type;
-        CalcBiquad();
+        calc_biquad();
     }
 
-    void Biquad::SetQ(f64 Q)
+    void Biquad::set_q(f64 Q)
     {
         this->Q = Q;
-        CalcBiquad();
+        calc_biquad();
     }
 
-    void Biquad::SetFc(f64 Fc)
+    void Biquad::set_fc(f64 Fc)
     {
         this->Fc = Fc;
-        CalcBiquad();
+        calc_biquad();
     }
 
-    void Biquad::SetPeakGain(f64 peakGainDB)
+    void Biquad::set_peak_gain(f64 peakGainDB)
     {
         this->PeakGain = peakGainDB;
-        CalcBiquad();
+        calc_biquad();
     }
 
-    void Biquad::SetBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB)
+    void Biquad::set_biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB)
     {
         this->Type = type;
         this->Q = Q;
         this->Fc = Fc;
-        SetPeakGain(peakGainDB);
+        set_peak_gain(peakGainDB);
     }
 
-    void Biquad::CalcBiquad()
+    void Biquad::calc_biquad()
     {
         f64 norm = 0.0;
         const f64 v = powi(abs(PeakGain) / 20.0, 10);

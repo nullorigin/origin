@@ -1,6 +1,5 @@
 #include "Console.hpp"
 #include "Basic.hpp"
-#include "Message.hpp"
 #include <cstdio>
 #include <iostream>
 #include <sys/ioctl.h>
@@ -13,15 +12,15 @@ namespace Origin
         BgColor = BLACK;
         FgColor = WHITE;
     }
-    auto Console::ClearEOL() -> void
+    auto Console::clear_eol() -> void
     {
         printf("\033[2K");
     }
-    auto Console::InsertLine() -> void
+    auto Console::insert_line() -> void
     {
         printf("\033[%dA", 1);
     }
-    auto Console::GotoXY(i32 x, i32 y) -> void
+    auto Console::goto_xy(i32 x, i32 y) -> void
     {
         printf("\033[%d;%df", y, x);
     }
@@ -30,26 +29,26 @@ namespace Origin
      *
      * @return void
      */
-    auto Console::ClearScreen() const -> void
+    auto Console::clear_screen() const -> void
     {
         printf("\033[%dm\033[2J\033[1;1f", BgColor);
     }
-    auto Console::SetBgColor(i32 color) -> void
+    auto Console::set_bg_color(i32 color) -> void
     {
         BgColor = 40 + (color % 16);
     }
-    auto Console::SetFgColor(i32 color) -> void
+    auto Console::set_fg_color(i32 color) -> void
     {
         FgColor = 30 + (color % 16);
     }
-    auto Console::PrintBgColor(i32 color) const -> void
+    auto Console::print_bg_color(i32 color) const -> void
     {
         constexpr i32 offset = 30;
         constexpr i32 bright_offset = 60;
 
         printf("\033[%d;%dm", (color < 16) ? offset : bright_offset, BgColor + color % 16);
     }
-    auto Console::PrintFgColor(i32 color) const -> void
+    auto Console::print_fg_color(i32 color) const -> void
     {
         constexpr i32 offset = 30;
         constexpr i32 bright_offset = 90;
@@ -59,7 +58,7 @@ namespace Origin
 
         printf("\033[%d;%dm", (color < 16) ? offset : bright_offset, fg_colors[color % 16] + FgColor);
     }
-    auto Console::PrintColor(i32 fg, i32 bg) const -> void
+    auto Console::print_color(i32 fg, i32 bg) const -> void
     {
         constexpr i32 offset = 30;
         constexpr i32 bright_offset = 60;
@@ -72,11 +71,11 @@ namespace Origin
                fg_colors[fg % 16] + FgColor,
                BgColor + bg % 16);
     }
-    auto Console::UngetChar(i32 ch) -> i32
+    auto Console::unget_char(i32 ch) -> i32
     {
         return ungetc(ch, stdin);
     }
-    auto Console::GetChar(bool echo) -> i32
+    auto Console::get_char(bool echo) -> i32
     {
         struct termios oldt
         {
@@ -108,7 +107,7 @@ namespace Origin
      *
      * @return the product of X and Y coordinates
      */
-    auto Console::GetXY(i32& x, i32& y) -> i32
+    auto Console::get_xy(i32& x, i32& y) -> i32
     {
         static constexpr i8 seq[] = "\033[6n";
         static constexpr i8 end[] = "R";
@@ -158,11 +157,11 @@ namespace Origin
      *
      * @return the x-coordinate value
      */
-    auto Console::GetX() -> i32
+    auto Console::get_x() -> i32
     {
         i32 x = 0;
         i32 y = 0;
-        GetXY(x, y);
+        get_xy(x, y);
         return x;
     }
     /**
@@ -170,11 +169,11 @@ namespace Origin
      *
      * @return the Y coordinate value
      */
-    auto Console::GetY() -> i32
+    auto Console::get_y() -> i32
     {
         i32 x = 0;
         i32 y = 0;
-        GetXY(x, y);
+        get_xy(x, y);
         return y;
     }
 
@@ -182,7 +181,7 @@ namespace Origin
      * If there are bytes available, enable cannonical and echo modes
      * so that the next read call retrieves the keypress
      */
-    auto Console::KeyHit() -> i32
+    auto Console::key_hit() -> i32
     {
         constexpr i32 icanon_echo = (ICANON | ECHO);
         i32 available = 0;
@@ -228,7 +227,7 @@ namespace Origin
      *
      * @throws None
      */
-    auto Console::PrintChar(const i8 c) -> i8
+    auto Console::print_char(const i8 c) -> i8
     {
         printf("%c", c);
         return c;
@@ -242,18 +241,18 @@ namespace Origin
      *
      * @throws None
      */
-    auto Console::PrintStr(const string& str) -> i32
+    auto Console::print_str(const string& str) -> i32
     {
         printf("%s", str.c_str());
         return 0;
     }
-    auto Console::PrintStrColor(const string& str, i32 fg, i32 bg) -> i32
+    auto Console::print_str_color(const string& str, i32 fg, i32 bg) -> i32
     {
-        SetFgColor(fg);
-        SetBgColor(bg);
-        PrintStr(str);
-        SetFgColor(WHITE);
-        SetBgColor(BLACK);
+        set_fg_color(fg);
+        set_bg_color(bg);
+        print_str(str);
+        set_fg_color(WHITE);
+        set_bg_color(BLACK);
         return 0;
     }
     /**
@@ -266,14 +265,14 @@ namespace Origin
      *
      * @throws None
      */
-    auto Console::ChangeColor(i32 fg, i32 bg) -> i32
+    auto Console::change_color(i32 fg, i32 bg) -> i32
     {
         printf("\033[%d;%dm", fg + 30, bg + 40);
         return 0;
     }
-    auto Console::ChangeColor(i32 color) -> i32
+    auto Console::change_color(i32 color) -> i32
     {
-        return ChangeColor(color % 16, color / 16);
+        return change_color(color % 16, color / 16);
     }
     /**
      * Print a C-style string to the console.
@@ -284,40 +283,40 @@ namespace Origin
      *
      * @throws None
      */
-    auto Console::PrintCStr(const i8* str) -> i32
+    auto Console::print_c_str(const i8* str) -> i32
     {
         printf("%s", str);
         return 0;
     }
-    auto Console::GetHome() -> string
+    auto Console::get_home() -> string
     {
-        return GetEnv("HOME");
+        return get_env("HOME");
     }
-    auto Console::GetCwd() -> string
+    auto Console::get_cwd() -> string
     {
         i8 cwd[1024];
-        return ToString(getcwd(cwd, sizeof(cwd)));
+        return getcwd(cwd, sizeof(cwd));
     }
-    auto Console::GetUser() -> string
+    auto Console::get_user() -> string
     {
-        return ToString(cuserid(nullptr));
+        return cuserid(nullptr);
     }
     /**
      * Get the hostname of the system.
      *
      * @return The hostname as a string
      */
-    auto Console::GetHostname() -> string
+    auto Console::get_hostname() -> string
     {
         i8 hostname[1024];
         gethostname(hostname, sizeof(hostname));
         return hostname;
     }
-    auto Console::IsValidPass(const string& passwd) -> bool
+    auto Console::is_valid_pass(const string& passwd) -> bool
     {
         return (passwd.length() > 0 && passwd.length() <= 32 && passwd.find_first_not_of("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz./") == string::npos);
     }
-    auto Console::GetPass(const string& prompt) -> string
+    auto Console::get_pass(const string& prompt) -> string
     {
         string passwd;
         passwd.resize(32);
@@ -325,7 +324,7 @@ namespace Origin
         {
             std::cout << prompt;
             std::cin >> passwd;
-            if (IsValidPass(passwd))
+            if (is_valid_pass(passwd))
             {
                 return passwd;
                 break;
@@ -333,11 +332,11 @@ namespace Origin
         }
         return "";
     }
-    auto Console::GetEnv(const string& name) -> string
+    auto Console::get_env(const string& name) -> string
     {
-        return ToString(getenv(name.c_str()));
+        return getenv(name.c_str());
     }
-    auto Console::ReadText(i32 l, i32 t, i32 r, i32 b, void* destination)
+    auto Console::read_text(i32 l, i32 t, i32 r, i32 b, void* destination)
         -> size_t
     {
         printf("\033[%d;%d;%d;%dH", b, t, r, l);
@@ -347,7 +346,7 @@ namespace Origin
         }
         return fread(destination, 1, static_cast<size_t>(l * t) * r, stdin);
     }
-    auto Console::WriteText(i32 l, i32 t, i32 r, i32 b, void* source) -> size_t
+    auto Console::write_text(i32 l, i32 t, i32 r, i32 b, void* source) -> size_t
     {
         printf("\033[%d;%d;%d;%dH", b, t, r, l);
         if (fflush(stdout) == EOF)

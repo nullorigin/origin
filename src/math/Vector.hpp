@@ -1,0 +1,566 @@
+#pragma once
+#include <functional>
+#include <numeric>
+#include <string>
+#include <vector>
+namespace Origin
+{
+    template<typename T>
+    class Vector : public std::vector<T>
+    {
+    public:
+        using vector = Vector<T>;
+        using iterator = typename std::vector<T>::iterator;
+        using value_type = typename std::vector<T>::value_type;
+        using pointer = typename std::vector<T>::pointer;
+        using reference = typename std::vector<T>::reference;
+        using allocator_type = typename std::vector<T>::allocator_type;
+        using size_type = typename std::vector<T>::size_type;
+        using difference_type = typename std::vector<T>::difference_type;
+        using const_reference = typename std::vector<T>::const_reference;
+        using const_pointer = typename std::vector<T>::const_pointer;
+        using const_iterator = typename std::vector<T>::const_iterator;
+        using reverse_iterator = typename std::vector<T>::reverse_iterator;
+        using const_reverse_iterator =
+            typename std::vector<T>::const_reverse_iterator;
+        auto to_string()
+        {
+            std::string out = "Vector(";
+            for (size_type i = 0; i < size(); ++i)
+            {
+                out = out.append(std::to_string(this->at(i)));
+                if (i != size() - 1)
+                {
+                    out = out.append(", ");
+                }
+            }
+            out = out.append(")");
+            return out;
+        }
+        Vector() = default;
+        Vector(const Vector& rhs) :
+            std::vector<T>(rhs) {}
+        Vector& operator=(const Vector& rhs) noexcept
+        {
+            copy(rhs);
+            return *this;
+        }
+        Vector(Vector&& rhs) noexcept :
+            std::vector<T>(move(rhs))
+        {
+            *this = move(rhs);
+        }
+        Vector& operator=(Vector&& rhs) noexcept
+        {
+            std::vector<T>::operator=(move(rhs));
+            return *this;
+        };
+        ~Vector() = default;
+        Vector(std::initializer_list<T> list) :
+            std::vector<T>(list) {}
+        explicit Vector(size_type size) :
+            std::vector<T>(size)
+        {
+            if (size > 0)
+            {
+                reserve(size);
+                fill(this->begin(), this->end(), 0);
+            }
+        }
+        explicit Vector(size_type size, const_reference value) :
+            std::vector<T>(size, value)
+        {
+            if (size > 0)
+            {
+                reserve(size);
+                fill(this->begin(), this->end(), value);
+            }
+        }
+        Vector(size_type size, value_type value) :
+            std::vector<T>(size, value) {}
+        Vector(size_type size, pointer values) :
+            std::vector<T>(size, *values) {}
+        Vector(size_type size, value_type value, allocator_type alloc) :
+            std::vector<T>(size, value, alloc) {}
+        Vector(size_type size, pointer values, allocator_type alloc) :
+            std::vector<T>(size, *values, alloc) {}
+        Vector(iterator it, size_type size) :
+            std::vector<T>(size, *it)
+        {
+            this->assign(it, it + size);
+        }
+
+        typename std::vector<T>::iterator begin() noexcept
+        {
+            return std::vector<T>::begin();
+        }
+        typename std::vector<T>::iterator end() noexcept
+        {
+            return std::vector<T>::end();
+        }
+        template<typename U>
+        constexpr auto cast(U c) -> U
+        {
+            return (c);
+        }
+        void push_back(value_type value) { std::vector<T>::push_back(value); }
+
+        void pop_back() { std::vector<T>::pop_back(); }
+        auto data() { return std::vector<T>::data(); }
+        void clear() { std::vector<T>::clear(); }
+        void erase(const_iterator pos) { std::vector<T>::erase(pos); }
+        void erase(const_iterator first, const_iterator last)
+        {
+            std::vector<T>::erase(first, last);
+        }
+        bool empty() const { return std::vector<T>::empty(); }
+        size_type size() const { return std::vector<T>::size(); }
+        size_type max_size() const { return std::vector<T>::max_size(); }
+        size_type capacity() const { return std::vector<T>::capacity(); }
+        void resize(size_type size) { std::vector<T>::resize(size); }
+
+        void resize(size_type size, value_type value)
+        {
+            std::vector<T>::resize(size, value);
+        }
+
+        void assign(size_type size, value_type value)
+        {
+            std::vector<T>::assign(size, value);
+        }
+
+        void assign(size_type size, pointer values)
+        {
+            for (size_type i = 0; i < size; ++i)
+            {
+                this->push_back(values[i]);
+            }
+        }
+
+        void assign(size_type size, pointer values, size_type offset)
+        {
+            for (size_type i = 0; i < size; ++i)
+            {
+                this->push_back(values[i + offset]);
+            }
+        }
+        const_iterator begin() const noexcept { return std::vector<T>::begin(); }
+        const_iterator end() const noexcept { return std::vector<T>::end(); }
+        const_iterator cbegin() const noexcept { return std::vector<T>::cbegin(); }
+        const_iterator cend() const noexcept { return std::vector<T>::cend(); }
+        const_reverse_iterator crbegin() const noexcept
+        {
+            return std::vector<T>::crbegin();
+        }
+        const_reverse_iterator crend() const noexcept
+        {
+            return std::vector<T>::crend();
+        }
+        reverse_iterator rbegin() { return std::vector<T>::rbegin(); }
+        reverse_iterator rend() { return std::vector<T>::rend(); }
+        typename std::vector<T>::iterator append(Vector other)
+        {
+            this->reserve(this->size() + other.size());
+            for (auto it = other.begin(); it != other.end(); ++it)
+            {
+                this->push_back(*it);
+            }
+            return begin();
+        }
+        typename std::vector<T>::iterator prepend(Vector other)
+        {
+            this->reserve(this->size() + other.size());
+            for (auto it = other.rbegin(); it != other.rend(); ++it)
+            {
+                this->insert(begin(), *it);
+            }
+            return this->begin();
+        }
+        void resize_and_overwrite(size_type n, value_type value)
+        {
+            std::vector<T>::resize(n, value);
+        }
+        auto at(size_type index) { return std::vector<T>::at(index); }
+        auto copy(Vector other)
+        {
+            std::copy(other.begin(), other.end(), this->begin());
+        }
+        auto move(Vector other)
+        {
+            return std::move(other.begin(), other.end(), this->begin());
+        }
+        void destroy() { this->Clear(); }
+        void shift(size_type count)
+        {
+            std::vector<T>::erase(this->begin(), this->begin() + count);
+        }
+        void pop_front() { std::vector<T>::erase(this->begin()); }
+        void swap(Vector& other) { std::vector<T>::swap(other); }
+        auto emplace_back(value_type&& args...)
+        {
+            return std::vector<T>::emplace_back(args);
+        }
+        typename std::vector<T>::iterator emplace(const_iterator pos,
+                                                  value_type&& args...)
+        {
+            return std::vector<T>::emplace(pos, args);
+        }
+        typename std::vector<T>::iterator insert(const_iterator pos,
+                                                 value_type value)
+        {
+            return std::vector<T>::insert(pos, value);
+        }
+        void reserve(size_type size) { std::vector<T>::reserve(size); }
+        void shrink_to_fit() { std::vector<T>::shrink_to_fit(); }
+        void sort() { std::sort(this->begin(), this->end()); }
+        void reverse() { std::reverse(this->begin(), this->end()); }
+        void fill(value_type value) { std::fill(this->begin(), this->end(), value); }
+        void fill(size_type size, value_type value)
+        {
+            std::fill(this->begin(), this->begin() + size, value);
+        }
+        void transform(Vector& other,
+                       std::function<void(value_type&, value_type&)> f)
+        {
+            std::transform(this->begin(), this->end(), other.begin(), other.end(), f);
+        }
+        auto find(value_type value) -> iterator
+        {
+            return std::find(this->begin(), this->end(), value);
+        }
+        void replace(value_type old_value, value_type new_value)
+        {
+            return std::replace(this->begin(), this->end(), old_value, new_value);
+        }
+        void replace(size_type x, size_type y, value_type value)
+        {
+            return std::replace(this->begin() + x, this->begin() + y, value);
+        }
+        void replace_if(const_iterator first, const_iterator last, std::function<bool(value_type)> f)
+        {
+            return std::replace_if(this->begin(), this->end(), first, last, f);
+        }
+        size_type count(const value_type& value)
+        {
+            return std::count(this->begin(), this->end(), value);
+        }
+        size_type sum(const value_type& value)
+        {
+            return std::accumulate(this->begin(), this->end(), value);
+        }
+        size_type sum() { return std::accumulate(this->begin(), this->end(), 0); }
+        auto max() -> value_type
+        {
+            return *std::max_element(this->begin(), this->end());
+        }
+        auto min() -> value_type
+        {
+            return *std::min_element(this->begin(), this->end());
+        }
+        auto max_index() -> size_type
+        {
+            return std::distance(this->begin(),
+                                 std::max_element(this->begin(), this->end()));
+        }
+        auto min_index() -> size_type
+        {
+            return std::distance(this->begin(),
+                                 std::min_element(this->begin(), this->end()));
+        }
+        auto random() -> value_type { return this->at(std::rand() % this->Size()); }
+        auto set(size_type index, value_type value)
+        {
+            this[index] = value;
+            return *this;
+        }
+        auto set(size_type offset, pointer values) -> Vector
+        {
+            std::copy(values, values + this->size(), this->begin() + offset);
+            return *this;
+        }
+        auto randomize() -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i = this->at(std::rand() % this->size());
+            }
+            return *this;
+        }
+        auto operator+(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret += other;
+            return ret;
+        }
+
+        auto operator-(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret -= other;
+            return ret;
+        }
+
+        auto operator*(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret *= other;
+            return ret;
+        }
+
+        auto operator/(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret /= other;
+            return ret;
+        }
+        auto operator%(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret %= other;
+            return ret;
+        }
+        auto operator&(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret &= other;
+            return ret;
+        }
+        auto operator|(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret |= other;
+            return ret;
+        }
+        auto operator^(Vector& other) -> Vector
+        {
+            Vector ret(*this);
+            ret ^= other;
+            return ret;
+        }
+        auto operator=(value_type value) -> Vector&
+        {
+            std::fill(this->begin(), this->end(), value);
+            return *this;
+        }
+        auto operator=(Vector other) noexcept -> Vector&
+        {
+            std::move(this->begin(), this->end(), other.begin());
+            swap(other);
+            return *this;
+        }
+        auto operator+=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::plus<value_type>());
+            return *this;
+        }
+        auto operator-=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::minus<value_type>());
+            return *this;
+        }
+        auto operator*=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::multiplies<value_type>());
+            return *this;
+        }
+        auto operator/=(Vector& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::divides<value_type>());
+            return *this;
+        }
+        template<typename U>
+        auto operator%=(Vector<U>& other) -> Vector&
+        {
+            Vector<T>* ret = *this;
+            std::transform(ret->begin(), ret->end(), other.begin(), ret->begin(), std::modulus<U>());
+            return *this = *ret;
+        }
+        template<typename U>
+        auto operator&=(Vector<U>& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_and<U>());
+            return *this;
+        }
+        template<typename U>
+        auto operator|=(Vector<U>& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_or<U>());
+            return *this;
+        }
+        template<typename U>
+        auto operator^=(Vector<U>& other) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_xor<U>());
+            return *this;
+        }
+
+        auto operator-() -> Vector
+        {
+            Vector ret(*this);
+            std::transform(ret->begin(), ret.end(), ret.begin(), std::negate<value_type>());
+            return ret;
+        }
+        auto operator!() -> Vector
+        {
+            Vector ret(*this);
+            std::transform(ret->begin(), ret.end(), ret.begin(), std::logical_not<value_type>());
+            return ret;
+        }
+        auto operator++() -> Vector&
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::plus<value_type>());
+            return *this;
+        }
+        auto operator--() -> Vector&
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::minus<value_type>());
+            return *this;
+        }
+        auto operator++(int) -> Vector
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::plus<value_type>());
+            return *this;
+        }
+        auto operator--(int) -> Vector
+        {
+            std::transform(this->begin(), this->end(), this->begin(), std::minus<value_type>());
+            return *this;
+        }
+        bool operator==(Vector& other)
+        {
+            return std::equal(this->begin(), this->end(), other.begin());
+        }
+        bool operator!=(Vector& other)
+        {
+            return !std::equal(this->begin(), this->end(), other.begin());
+        }
+        bool operator<(Vector& other)
+        {
+            return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end());
+        }
+        bool operator>(Vector& other)
+        {
+            return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>());
+        }
+        bool operator<=(Vector& other)
+        {
+            return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>());
+        }
+        bool operator>=(Vector& other)
+        {
+            return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end());
+        }
+        bool operator&&(Vector& other)
+        {
+            return std::inner_product(this->begin(), this->end(), other.begin(), (cast<value_type>(0)));
+        }
+        bool operator||(Vector& other)
+        {
+            return std::inner_product(this->begin(), this->end(), other.begin(), (cast<value_type>(0)));
+        }
+        auto operator+(value_type value) -> Vector
+        {
+            Vector ret(*this);
+            for (auto& i : ret)
+            {
+                i += value;
+            }
+            return ret;
+        }
+
+        auto operator-(value_type value) -> Vector
+        {
+            Vector ret(*this);
+            for (auto& i : ret)
+            {
+                i -= value;
+            }
+            return ret;
+        }
+
+        auto operator*(value_type value) -> Vector
+        {
+            Vector ret(*this);
+            for (auto& i : ret)
+            {
+                i *= value;
+            }
+            return ret;
+        }
+
+        auto operator/(value_type value) -> Vector
+        {
+            Vector ret(*this);
+            for (auto& i : ret)
+            {
+                i /= value;
+            }
+            return ret;
+        }
+
+        auto operator%(value_type value) -> Vector
+        {
+            Vector ret(*this);
+            for (auto& i : ret)
+            {
+                i %= value;
+            }
+            return ret;
+        }
+        auto operator+=(value_type value) -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i += value;
+            }
+            return *this;
+        }
+
+        auto operator-=(value_type value) -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i -= value;
+            }
+            return *this;
+        }
+
+        auto operator*=(value_type value) -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i *= value;
+            }
+            return *this;
+        }
+
+        auto operator/=(value_type value) -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i /= value;
+            }
+            return *this;
+        }
+        auto operator%=(value_type value) -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i %= value;
+            }
+            return *this;
+        }
+        Vector& operator=(std::initializer_list<T> list)
+        {
+            assign(*list.begin(), list.size());
+            return *this;
+        }
+        auto operator[](size_type index) -> T& { return *data() + index; }
+
+        explicit operator pointer() const { return data(); }
+
+        explicit operator size_type() const { return size(); }
+
+        explicit operator size_type() { return size(); }
+    };
+} // namespace Origin

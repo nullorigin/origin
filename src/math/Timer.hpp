@@ -1,10 +1,7 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 #include "Basic.hpp"
-#include "String.hpp"
 #include <chrono>
-#include <iostream>
-#include <sstream>
 
 namespace Origin
 {
@@ -29,27 +26,27 @@ namespace Origin
 
     public:
         Duration() = default;
-        explicit Duration(TimeUnit _tu) { Set(0.0, _tu); }
+        explicit Duration(TimeUnit _tu) { set(0.0, _tu); }
         Duration(const Duration&) = default;
         Duration(Duration&& /*unused*/) noexcept {}
 
-        auto Nanoseconds() const -> f128;
-        auto Microseconds() const -> f128;
-        auto Milliseconds() const -> f128;
-        auto Seconds() const -> f128;
-        auto Minutes() const -> f128;
-        auto Hours() const -> f128;
-        auto Days() const -> f128;
-        auto Weeks() const -> f128;
+        auto nanoseconds() const -> f128;
+        auto microseconds() const -> f128;
+        auto milliseconds() const -> f128;
+        auto seconds() const -> f128;
+        auto minutes() const -> f128;
+        auto hours() const -> f128;
+        auto days() const -> f128;
+        auto weeks() const -> f128;
         auto operator=(const Duration& rhs) noexcept -> Duration&;
         ~Duration() = default;
         auto operator=(Duration&& /*unused*/) noexcept -> Duration&;
         explicit Duration(f128 nano, TimeUnit tu = TimeUnit::Nano);
-        static auto Zero() -> Duration;
-        auto Set(f128 nano) -> void;
-        auto Set(f128 _nano, TimeUnit tu) -> void;
-        auto Get(TimeUnit tu = TimeUnit::Nano) const -> Duration;
-        auto GetString(TimeUnit tu = TimeUnit::Nano) const -> string;
+        static auto zero() -> Duration;
+        auto set(f128 nano) -> void;
+        auto set(f128 _nano, TimeUnit tu) -> void;
+        auto get(TimeUnit tu = TimeUnit::Nano) const -> Duration;
+        auto get_string(TimeUnit tu = TimeUnit::Nano) const -> string;
         explicit operator i128() const;
         explicit operator string() const;
 
@@ -100,40 +97,40 @@ namespace Origin
         Timer();
         explicit Timer(const string& _name);
         ~Timer();
-        static auto Nano() -> f128;
-        static auto Micro() -> f128;
-        static auto Milli() -> f128;
-        static auto Sec() -> f128;
-        static auto Min() -> f128;
-        static auto Hour() -> f128;
-        static auto Day() -> f128;
-        static auto Week() -> f128;
-        auto SetName(const string& name) -> void;
-        auto SetLimit(const f128 _limit) -> void;
-        static auto Now() -> f128;
+        static auto nano() -> f128;
+        static auto micro() -> f128;
+        static auto milli() -> f128;
+        static auto sec() -> f128;
+        static auto min() -> f128;
+        static auto hour() -> f128;
+        static auto day() -> f128;
+        static auto week() -> f128;
+        auto set_name(const string& name) -> void;
+        auto set_limit(const f128 _limit) -> void;
+        static auto now() -> f128;
 
-        static auto GetID() -> ID;
-        auto GetName() const -> string;
-        auto GetStart() const -> f128;
-        auto GetResumed() const -> f128;
-        auto GetPaused() const -> f128;
-        auto GetRemaining() const -> f128;
-        auto GetElapsed() const -> f128;
+        static auto get_id() -> ID;
+        auto get_name() const -> string;
+        auto get_start() const -> f128;
+        auto get_resumed() const -> f128;
+        auto get_paused() const -> f128;
+        auto get_remaining() const -> f128;
+        auto get_elapsed() const -> f128;
 
-        auto GetEnd() const -> f128;
-        auto GetOffset() const -> f128;
-        auto GetLimit() const -> f128;
+        auto get_end() const -> f128;
+        auto get_offset() const -> f128;
+        auto get_limit() const -> f128;
         explicit Timer(TimerState _state);
-        auto Set(TimerState _state) -> void;
-        auto Is(TimerState _state) -> bool;
-        auto Pause() -> bool;
-        auto Resume() -> bool;
-        auto Stop() -> bool;
+        auto set(TimerState _state) -> void;
+        auto is(TimerState _state) -> bool;
+        auto pause() -> bool;
+        auto resume() -> bool;
+        auto stop() -> bool;
 
-        auto Start() -> bool;
-        auto Restart() -> bool;
+        auto start() -> bool;
+        auto restart() -> bool;
 
-        auto IsRunning() const -> bool;
+        auto is_running() const -> bool;
         [[nodiscard]] explicit operator Timer*()
         {
             this->Ptr = this;
@@ -160,52 +157,52 @@ namespace Origin
         }
 
     public:
-        static auto Nano() -> f128
+        static auto nano() -> f128
         {
             return std::chrono::high_resolution_clock::now().time_since_epoch().count();
         }
-        static auto Micro() -> f128 { return (Nano() / 1000.0); }
-        static auto Milli() -> f128 { return (Nano() / 1000000.0); }
-        static auto Sec() -> f128 { return (Nano() / 1000000000.0); };
-        static auto Min() -> f128 { return (Nano() / 60000000000.0); }
-        static auto Hour() -> f128 { return (Nano() / 3600000000000.0); };
-        static auto Day() -> f128 { return (Nano() / 86400000000000.0); }
-        static auto Week() -> f128 { return (Nano() / 604800000000000.0); }
-        static auto Elapsed(ID id, TimeUnit _p = TimeUnit::Nano) -> f128
+        static auto micro() -> f128 { return (nano() / 1000.0); }
+        static auto milli() -> f128 { return (nano() / 1000000.0); }
+        static auto sec() -> f128 { return (nano() / 1000000000.0); };
+        static auto min() -> f128 { return (nano() / 60000000000.0); }
+        static auto hour() -> f128 { return (nano() / 3600000000000.0); };
+        static auto day() -> f128 { return (nano() / 86400000000000.0); }
+        static auto week() -> f128 { return (nano() / 604800000000000.0); }
+        static auto elapsed(ID id, TimeUnit _p = TimeUnit::Nano) -> f128
         {
             switch (_p)
             {
             case TimeUnit::Nano:
-                time_point[id] = Nano();
+                time_point[id] = nano();
                 break;
             case TimeUnit::Micro:
-                time_point[id] = Micro();
+                time_point[id] = micro();
                 break;
             case TimeUnit::Milli:
-                time_point[id] = Milli();
+                time_point[id] = milli();
                 break;
             case TimeUnit::Second:
-                time_point[id] = Sec();
+                time_point[id] = sec();
                 break;
             case TimeUnit::Minute:
-                time_point[id] = Min();
+                time_point[id] = min();
                 break;
             case TimeUnit::Hour:
-                time_point[id] = Hour();
+                time_point[id] = hour();
                 break;
             case TimeUnit::Day:
-                time_point[id] = Day();
+                time_point[id] = day();
                 break;
             case TimeUnit::Week:
-                time_point[id] = Week();
+                time_point[id] = week();
                 break;
             default:
                 break;
             }
             return time_point[id];
         }
-        static auto Reset(ID id) -> void { time_point[id] = Nano(); }
-        static auto ToString(ID id) -> string
+        static auto reset(ID id) -> void { time_point[id] = nano(); }
+        static auto to_string(ID id) -> string
         {
             return std::to_string(time_point[id]) + "ns";
         }

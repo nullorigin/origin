@@ -11,13 +11,13 @@ namespace Origin
     class Run
     {
         u8 MinArgs = 0;
-        string Output{};
-        string Input{};
+        string Output;
+        string Input;
         Timer Timers[2] = { Timer(), Timer() };
         i32 RunState{};
         long Cycles{};
         long MaxCycles{};
-        bool Status{};
+        bool RunStatus{};
         static const i8 UNINITIALIZED = 0, INITIALIZING = 1, INITIALIZED = 2,
                         STARTING = 3, STARTED = 4, PAUSING = 5, PAUSED = 6,
                         RESUMING = 7, RESUMED = 8, STOPPING = 9, STOPPED = 10,
@@ -68,103 +68,109 @@ namespace Origin
         const string CmdArg[16] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
         const i32 AllTxt = -1, PromptTxt = 0, StateTxt = 1, CycleTxt = 2,
                   TimerTxt = 3, ExecTxt = 4;
-        explicit Run(const i8* cmd) { Parse(cmd); }
-        explicit Run(const string& cmd) { Parse(cmd); }
-        Run(i8p cmd, i8p argv[]) { Exec(cmd, argv); }
+        explicit Run(const i8* cmd) { parse(cmd); }
+        explicit Run(const string& cmd) { parse(cmd); }
+        Run(i8p cmd, i8p argv[]) { exec(cmd, argv); }
         /* A dependency map of applicable run states to enter into after a state
 switch. Uses the constants above as specifiers for the equivalent index. */
 
     public:
         Run() = default;
-        static auto GetCode() -> ExCode { return Origin::GetCode(); }
-        static auto SetCode(ExCode code) -> void { Origin::SetCode(code); }
-        Run(i32 argc, i8** argv) :
-            MaxCycles(1000000000) { SetState(UNINITIALIZED); }
+        Run(i32 /*argc*/, i8** /*argv*/) :
+            MaxCycles(1000000000) { set_run_state(UNINITIALIZED); }
         ~Run() = default;
 
         // The main loop of the application. Splits the output into a separate thread
         // and continues updating the input status until the application is exited or
         // a time limit is reached.
-        auto Loop(f128 runtime) -> i32;
+        auto loop(f128 runtime) -> i32;
         // Sets the run state of the application to 'Initializing' and Upon success,
         // sets the run state to 'Initialized'.
-        auto DoInit() -> bool;
+        auto do_init() -> bool;
         // Sets the run state of the application to 'Starting' and executes specified
         // commands. Upon success,the run state is set to 'Started'.
-        auto DoStart() -> bool;
+        auto do_start() -> bool;
         // Sets the run state of the application to 'Pausing' and executes specified
         // commands. Upon success, the run state is set to 'Paused'. In addition, the
         // output is frozen and saved until the 'resume' command is executed, at which
         // point it continues from where it left off.
-        auto DoPause() -> bool;
+        auto do_pause() -> bool;
         // Sets the run state of the application to 'Resuming' and executes specified
         // commands. Upon success, the run state is set to 'Resumed'. This command is
         // only valid if the application is in the 'Paused' state. In addition, the
         // output is frozen until this command is called at which point it
         // continues from where it left off.
-        auto DoResume() -> bool;
+        auto do_resume() -> bool;
         // Sets the run state of the application to 'Stopping' and executes specified
         // commands. Upon success, the run state is set to 'Stopped'. In this state
         // The only applicable commands are 'start', 'restart' and 'exit'.
-        auto DoStop() -> bool;
+        auto do_stop() -> bool;
         // Sets the run state of the application to 'Restarting' and executes
         // specified commands. Upon success, the run state is set to 'Restarted'. All
         // Variables are reset to their initial values.
-        auto DoRestart() -> bool;
+        auto do_restart() -> bool;
         // Sets the run state of the application to 'Exiting' and executes specified
         // commands. Upon failure, the kill command is executed and forces the
         // application to close. Upon success, the run state is set to 'Exited' and
         // exits normally.
-        auto DoExit() -> bool;
+        auto do_exit() -> bool;
         // Sets the run state of the application to 'Killing' and then 'Killed'. The
         // application is forced to close when this command is executed.
-        auto DoKill() -> bool;
+        auto do_kill() -> bool;
+
         // Returns the entire map of valid run states to enter into during a state
         // switch.
-        inline auto GetRunMap() -> const i8 (*)[8] { return RunMap; }
+        inline auto get_run_map() -> const i8 (*)[8] { return RunMap; }
         // Returns an array of applicable run states in which to switch to
         // from a given previous state.
-        inline auto GetStateNext(i32 state) -> const i8 (*)[8]
+        inline auto get_state_next(i32 state) -> const i8 (*)[8]
         {
             return &RunMap[state];
         }
         // Returns the string representation of a given run state.
-        inline auto GetStateString(i32 state) -> string
+        inline auto get_state_string(i32 state) -> string
         {
             return RunStates[state];
         }
-        auto GetArg(const string& command) -> string;
-        auto GetCmd(const string& command) -> i32;
+        auto get_arg(const string& command) -> string;
+        auto get_cmd(const string& command) -> i32;
         // Returns the string representation of a given command from its index.
-        inline auto GetCmd(i8 index) -> i32 { return CmdMap[index]; }
+        inline auto get_cmd(i8 index) -> i32 { return CmdMap[index]; }
         // Determines if the application is in a state in which it is actually
         // running.
-        auto IsRunning() const -> bool;
+        auto is_running() const -> bool;
         // Returns true if the application is in the specified state.
-        inline auto Is(i8 state) const -> bool { return (RunState == state); }
-        inline auto GetState() const -> i8 { return RunState; }
-        inline auto GetOutput() -> string { return Output; }
-        inline auto GetInput() -> string { return Input; }
-        inline auto GetCycles() const -> u64 { return Cycles; }
-        inline auto SetCycles(u64 cycles) -> void { Cycles = cycles; }
-        auto IncrementCycles() -> void;
-        inline auto GetMaxCycles() const -> u64 { return MaxCycles; }
-        auto SetMaxCycles(u64 cycles) -> i8;
-        auto ResetCycles() -> void { Cycles = 0; }
-        auto SetStatus(bool status) -> bool;
-        auto GetStatus() const -> bool { return Status; }
-        auto SetState(i8 target) -> bool;
-        auto ProcessCycles() -> i8;
-        auto ProcessState(i8 state) -> i8;
-        auto SetMinArgs(u8 min_args) -> void;
-        auto GetMinArgs() -> u8;
+        inline auto is_state(i8 rstate) const -> bool { return (RunState == rstate); }
+        inline auto get_state() const -> i8 { return RunState; }
+        inline auto get_output() -> string { return Output; }
+        inline auto get_input() -> string { return Input; }
+        inline auto get_cycles() const -> u64 { return Cycles; }
+        inline auto set_cycles(u64 cycles) -> void { Cycles = cycles; }
+        auto increment_cycles() -> void;
+        inline auto get_max_cycles() const -> u64 { return MaxCycles; }
+        auto set_max_cycles(u64 cycles) -> i8;
+        inline auto reset_cycles() -> void { Cycles = 0; }
+        auto set_run_status(bool status) -> bool
+        {
+            return RunStatus = status;
+        }
+        inline auto get_status() const -> bool { return RunStatus; }
+        auto set_run_state(i8 target) -> bool;
+        auto process_cycles() -> i8;
+        auto process_state(i8 state) -> i8;
+        // Reads input from various sources and acts accordingly.
+        auto process_input() -> i8;
+        // Writes output to various destinations and acts accordingly.
+        auto process_output() -> i8;
+        auto set_min_args(u8 min_args) -> void;
+        auto get_min_args() -> u8;
 
-        auto Call(const string& cmd) -> string;
+        auto call(const string& cmd) -> string;
 
-        auto Call(i8p cmd) -> string;
-        auto Exec(i8p command, const i8p argv[]) -> void;
-        static auto Parse(const i8p cmd) -> string { return { cmd }; }
-        auto Parse(const string& cmd) -> string;
+        auto call(i8p cmd) -> string;
+        auto exec(i8p command, const i8p argv[]) -> void;
+        auto parse(const i8p cmd) -> string;
+        auto parse(const string& cmd) -> string;
     };
 } // namespace Origin
 #endif

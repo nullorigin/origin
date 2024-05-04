@@ -1,5 +1,5 @@
-#include "Origin.hpp"
-namespace origin
+
+namespace Origin
 {
 
-} // namespace origin
+} // namespace Origin

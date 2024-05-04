@@ -1,5 +1,6 @@
 
 #include "Timer.hpp"
+#include <sstream>
 namespace Origin
 {
     Timer::Timer() :
@@ -25,41 +26,41 @@ namespace Origin
         timer_id--;
     }
 
-    bool Timer::Is(TimerState _state)
+    bool Timer::is(TimerState _state)
     {
         return this->State == _state;
     }
-    auto Duration::Nanoseconds() const -> f128
+    auto Duration::nanoseconds() const -> f128
     {
         return Nano;
     }
-    auto Duration::Microseconds() const -> f128
+    auto Duration::microseconds() const -> f128
     {
-        return (Nanoseconds() / 1000.0);
+        return (nanoseconds() / 1000.0);
     }
-    auto Duration::Milliseconds() const -> f128
+    auto Duration::milliseconds() const -> f128
     {
-        return (Nanoseconds() / 1000000.0);
+        return (nanoseconds() / 1000000.0);
     }
-    auto Duration::Seconds() const -> f128
+    auto Duration::seconds() const -> f128
     {
-        return (Nanoseconds() / 1000000000.0);
+        return (nanoseconds() / 1000000000.0);
     };
-    auto Duration::Minutes() const -> f128
+    auto Duration::minutes() const -> f128
     {
-        return (Nanoseconds() / 60000000000.0);
+        return (nanoseconds() / 60000000000.0);
     }
-    auto Duration::Hours() const -> f128
+    auto Duration::hours() const -> f128
     {
-        return (Nanoseconds() / 3600000000000.0);
+        return (nanoseconds() / 3600000000000.0);
     };
-    auto Duration::Days() const -> f128
+    auto Duration::days() const -> f128
     {
-        return (Nanoseconds() / 86400000000000.0);
+        return (nanoseconds() / 86400000000000.0);
     }
-    auto Duration::Weeks() const -> f128
+    auto Duration::weeks() const -> f128
     {
-        return (Nanoseconds() / 604800000000000.0);
+        return (nanoseconds() / 604800000000000.0);
     }
     auto Duration::operator=(const Duration& rhs) noexcept -> Duration&
     {
@@ -72,31 +73,31 @@ namespace Origin
     }
     Duration::Duration(f128 nano, TimeUnit tu)
     {
-        Set(nano, tu);
+        set(nano, tu);
     }
-    auto Duration::Zero() -> Duration
+    auto Duration::zero() -> Duration
     {
         return Duration(0);
     }
-    auto Duration::Set(f128 nano) -> void
+    auto Duration::set(f128 nano) -> void
     {
         this->Nano = nano;
     }
-    auto Duration::Set(f128 _nano, TimeUnit tu) -> void
+    auto Duration::set(f128 _nano, TimeUnit tu) -> void
     {
         this->Tu = tu;
         this->Nano = _nano;
     }
-    auto Duration::Get(TimeUnit tu) const -> Duration
+    auto Duration::get(TimeUnit tu) const -> Duration
     {
         return Duration(this->Nano, tu);
     }
-    auto Duration::GetString(TimeUnit tu) const -> string
+    auto Duration::get_string(TimeUnit tu) const -> string
     {
         std::stringstream ss = std::stringstream();
         ss.precision(9);
         ss << std::fixed;
-        ss << (this->Nanoseconds() / (1000000000.0 / static_cast<f128>(tu)));
+        ss << (this->nanoseconds() / (1000000000.0 / static_cast<f128>(tu)));
         return ss.str();
     }
     Duration::operator i128() const
@@ -105,7 +106,7 @@ namespace Origin
     }
     Duration::operator string() const
     {
-        return GetString();
+        return get_string();
     }
     auto Duration::operator+(const Duration& rhs) const -> Duration
     {
@@ -125,32 +126,32 @@ namespace Origin
     }
     auto Duration::operator+=(const Duration& rhs) -> Duration&
     {
-        Set(this->Nano + rhs.Nano);
+        set(this->Nano + rhs.Nano);
         return *this;
     }
     auto Duration::operator-=(const Duration& rhs) -> Duration&
     {
-        Set(this->Nano - rhs.Nano);
+        set(this->Nano - rhs.Nano);
         return *this;
     }
     auto Duration::operator*=(const Duration& rhs) -> Duration&
     {
-        Set(this->Nano * rhs.Nano);
+        set(this->Nano * rhs.Nano);
         return *this;
     }
     auto Duration::operator/=(const Duration& rhs) -> Duration&
     {
-        Set(this->Nano / rhs.Nano);
+        set(this->Nano / rhs.Nano);
         return *this;
     }
     auto Duration::operator++() -> Duration&
     {
-        Set(this->Nano + 1);
+        set(this->Nano + 1);
         return *this;
     }
     auto Duration::operator--() -> Duration&
     {
-        Set(this->Nano - 1);
+        set(this->Nano - 1);
         return *this;
     }
     auto Duration::operator-() const noexcept -> Duration
@@ -181,93 +182,93 @@ namespace Origin
     {
         return this->Nano >= rhs.Nano;
     }
-    auto Timer::Nano() -> f128
+    auto Timer::nano() -> f128
     {
         std::chrono::duration now = std::chrono::high_resolution_clock::now().time_since_epoch();
         return static_cast<f128>(now.count());
     }
-    auto Timer::Micro() -> f128
+    auto Timer::micro() -> f128
     {
-        return (Nano() / 1000.0);
+        return (nano() / 1000.0);
     }
-    auto Timer::Milli() -> f128
+    auto Timer::milli() -> f128
     {
-        return (Nano() / 1000000.0);
+        return (nano() / 1000000.0);
     }
-    auto Timer::Sec() -> f128
+    auto Timer::sec() -> f128
     {
-        return (Nano() / 1000000000.0);
+        return (nano() / 1000000000.0);
     };
-    auto Timer::Min() -> f128
+    auto Timer::min() -> f128
     {
-        return (Nano() / 60000000000.0);
+        return (nano() / 60000000000.0);
     }
-    auto Timer::Hour() -> f128
+    auto Timer::hour() -> f128
     {
-        return (Nano() / 3600000000000.0);
+        return (nano() / 3600000000000.0);
     };
-    auto Timer::Day() -> f128
+    auto Timer::day() -> f128
     {
-        return (Nano() / 86400000000000.0);
+        return (nano() / 86400000000000.0);
     }
-    auto Timer::Week() -> f128
+    auto Timer::week() -> f128
     {
-        return (Nano() / 604800000000000.0);
+        return (nano() / 604800000000000.0);
     }
-    auto Timer::SetName(const string& name) -> void
+    auto Timer::set_name(const string& name) -> void
     {
         this->Name = name;
     }
-    auto Timer::SetLimit(const f128 _limit) -> void
+    auto Timer::set_limit(const f128 _limit) -> void
     {
         this->Limit = _limit;
     }
-    auto Timer::Now() -> f128
+    auto Timer::now() -> f128
     {
-        return Timer::Nano();
+        return Timer::nano();
     }
-    auto Timer::GetID() -> ID
+    auto Timer::get_id() -> ID
     {
         return timer_id;
     }
-    auto Timer::GetName() const -> string
+    auto Timer::get_name() const -> string
     {
         return this->Name;
     }
-    auto Timer::GetStart() const -> f128
+    auto Timer::get_start() const -> f128
     {
         return this->Started;
     }
-    auto Timer::GetResumed() const -> f128
+    auto Timer::get_resumed() const -> f128
     {
         return this->Resumed;
     }
-    auto Timer::GetPaused() const -> f128
+    auto Timer::get_paused() const -> f128
     {
         return this->Paused;
     }
-    auto Timer::GetRemaining() const -> f128
+    auto Timer::get_remaining() const -> f128
     {
-        return GetEnd() - Now();
+        return get_end() - Timer::now();
     }
-    auto Timer::GetElapsed() const -> f128
+    auto Timer::get_elapsed() const -> f128
     {
         f128 elapsed{ 0 };
         if (State == TimerState::Started || State == TimerState::Resumed || State == TimerState::Paused)
         {
-            elapsed = Now() - Started - Offset;
+            elapsed = now() - Started - Offset;
         }
         return elapsed;
     }
-    auto Timer::GetEnd() const -> f128
+    auto Timer::get_end() const -> f128
     {
         return this->Limit + (this->Started - this->Offset);
     }
-    auto Timer::GetOffset() const -> f128
+    auto Timer::get_offset() const -> f128
     {
         return this->Offset;
     }
-    auto Timer::GetLimit() const -> f128
+    auto Timer::get_limit() const -> f128
     {
         return this->Limit;
     }
@@ -275,25 +276,25 @@ namespace Origin
         State(_state)
     {
     }
-    auto Timer::Set(TimerState _state) -> void
+    auto Timer::set(TimerState _state) -> void
     {
         this->State = _state;
     }
-    auto Timer::Pause() -> bool
+    auto Timer::pause() -> bool
     {
-        if (IsRunning() && !Is(TimerState::Paused))
+        if (is_running() && !is(TimerState::Paused))
         {
             State = TimerState::Paused;
-            Paused = Now();
+            Paused = Timer::now();
             return true;
         }
         return false;
     }
-    auto Timer::Resume() -> bool
+    auto Timer::resume() -> bool
     {
-        if (Is(TimerState::Paused))
+        if (is(TimerState::Paused))
         {
-            auto now = Now();
+            auto now = Timer::now();
             State = TimerState::Resumed;
             Offset += now - Paused;
             return true;
@@ -301,11 +302,11 @@ namespace Origin
 
         return false;
     }
-    auto Timer::Stop() -> bool
+    auto Timer::stop() -> bool
     {
-        if (IsRunning())
+        if (is_running())
         {
-            Stopped = Now();
+            Stopped = Timer::now();
             State = TimerState::Stopped;
             Started = 0;
             Resumed = 0;
@@ -318,38 +319,38 @@ namespace Origin
 
         return false;
     }
-    auto Timer::Start() -> bool
+    auto Timer::start() -> bool
     {
-        if (Is(TimerState::Paused))
+        if (is(TimerState::Paused))
         {
-            return Resume();
+            return resume();
         }
 
-        if (!IsRunning())
+        if (!is_running())
         {
             State = TimerState::Started;
-            Started = Now();
+            Started = Timer::now();
             return true;
         }
 
         return false;
     }
-    auto Timer::Restart() -> bool
+    auto Timer::restart() -> bool
     {
-        if (!IsRunning())
+        if (!is_running())
         {
             return false;
         }
 
         State = TimerState::Restarted;
-        if (Stop() && Start())
+        if (stop() && start())
         {
-            Restarted = Now();
+            Restarted = now();
             return true;
         }
         return false;
     }
-    auto Timer::IsRunning() const -> bool
+    auto Timer::is_running() const -> bool
     {
         return (State == TimerState::Started || State == TimerState::Resumed);
     }

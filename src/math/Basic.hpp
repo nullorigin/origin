@@ -1,34 +1,15 @@
-#ifndef HOME_MATT_ORIGIN_SRC_MATH_BASIC_HPP
-#define HOME_MATT_ORIGIN_SRC_MATH_BASIC_HPP
-
-#include <cassert>
-#include <cmath>
-#include <cstdlib>
-
-#include <functional>
-#include <initializer_list>
-#include <iterator>
-
-#include <memory>
-#include <numeric>
-#include <type_traits>
-#include <valarray>
-#include <vector>
 #pragma once
 #include <algorithm>
 
-#include <chrono>
+#include <cassert>
 
 #include <cstddef>
 
+#include <cstdlib>
+
 #include <cstring>
-
 #include <immintrin.h>
-
-#include <random>
-
 #include <string>
-
 #include <utility>
 
 /*
@@ -143,50 +124,50 @@ namespace Origin
     static const u32 C8 = 0xff, C16 = 0xffff, C32 = 0xffffff, C64 = 0xffffffff;
     constexpr f64 PI = 3.14159265358979323846535897932384;
     template<typename T>
-    constexpr auto Cast(T c) -> T
+    constexpr auto cast(T c) -> T
     {
         return (c);
     }
     template<typename T>
-    constexpr auto Cast(T c, T d) -> T
+    constexpr auto cast(T c, T d) -> T
     {
         return (c << (sizeof(T) * 4) | d);
     }
-#define imax8 Cast<i8>(127)
-#define imax16 Cast<i16>(32767)
-#define imax32 Cast<i32>(2147483647)
-#define imax64 Cast<i64>(9223372036854775807)
-#define umax8 Cast<u8>(255)
-#define umax16 Cast<u16>(65535)
-#define umax32 Cast<u32>(4294967295)
-#define umax64 Cast<u64>(18446744073709551615)
-#define smax8 Cast<s8>(127)
-#define smax16 Cast<s16>(32767)
-#define smax32 Cast<s32>(2147483647)
-#define smax64 Cast<s64>(9223372036854775807)
-#define fmax32 Cast<f32>(3.40282346638528859811704183484516925440e+38f)
-#define fmax64 Cast<f64>(1.797693134862315708145274237317043567981e+308)
-#define fmax128 Cast<f128>(1.18973149535723176508575932662800702e+4932)
-#define imin8 Cast<i8>(-128)
-#define imin16 Cast<i16>(-32768)
-#define imin32 Cast<i32>(-2147483648)
-#define umin8 Cast<u8>(0)
-#define umin16 Cast<u16>(0)
-#define umin32 Cast<u32>(0)
-#define umin64 Cast<u64>(0)
-#define smin8 Cast<s8>(-128)
-#define smin16 Cast<s16>(-32768)
-#define smin16 Cast<s16>(-32768)
-#define smin32 Cast<s32>(-2147483648)
-#define smin64 Cast<s64>(-9223372036854775808)
-#define fmin32 Cast<f32>(-3.40282346638528859811704183484516925440e+38f)
-#define fmin64 Cast<f64>(-1.797693134862315708145274237317043567981e+308)
-#define fmin128 Cast<f128>(-1.18973149535723176508575932662800702e+4932)
-#define fe32 Cast<f32>(1.1920928955078125e-07f)
-#define fe64 Cast<f64>(2.220446049250313080847263336181640625e-16)
-#define fie64 Cast<f64>(22204460492503130)
-#define fe128 Cast<f128>(1.9259299443872358530559779425849159658203125e-34)
-#define fie128 Cast<f128>(192509299444872355)
+#define imax8 cast<i8>(127)
+#define imax16 cast<i16>(32767)
+#define imax32 cast<i32>(2147483647)
+#define imax64 cast<i64>(9223372036854775807)
+#define umax8 cast<u8>(255)
+#define umax16 cast<u16>(65535)
+#define umax32 cast<u32>(4294967295)
+#define umax64 cast<u64>(18446744073709551615)
+#define smax8 cast<s8>(127)
+#define smax16 cast<s16>(32767)
+#define smax32 cast<s32>(2147483647)
+#define smax64 cast<s64>(9223372036854775807)
+#define fmax32 cast<f32>(3.40282346638528859811704183484516925440e+38f)
+#define fmax64 cast<f64>(1.797693134862315708145274237317043567981e+308)
+#define fmax128 cast<f128>(1.18973149535723176508575932662800702e+4932)
+#define imin8 cast<i8>(-128)
+#define imin16 cast<i16>(-32768)
+#define imin32 cast<i32>(-2147483648)
+#define umin8 cast<u8>(0)
+#define umin16 cast<u16>(0)
+#define umin32 cast<u32>(0)
+#define umin64 cast<u64>(0)
+#define smin8 cast<s8>(-128)
+#define smin16 cast<s16>(-32768)
+#define smin16 cast<s16>(-32768)
+#define smin32 cast<s32>(-2147483648)
+#define smin64 cast<s64>(-9223372036854775808)
+#define fmin32 cast<f32>(-3.40282346638528859811704183484516925440e+38f)
+#define fmin64 cast<f64>(-1.797693134862315708145274237317043567981e+308)
+#define fmin128 cast<f128>(-1.18973149535723176508575932662800702e+4932)
+#define fe32 cast<f32>(1.1920928955078125e-07f)
+#define fe64 cast<f64>(2.220446049250313080847263336181640625e-16)
+#define fie64 cast<f64>(22204460492503130)
+#define fe128 cast<f128>(1.9259299443872358530559779425849159658203125e-34)
+#define fie128 cast<f128>(192509299444872355)
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
@@ -907,134 +888,134 @@ namespace Origin
     template<typename T>
     constexpr auto abs(T a)
     {
-        return Cast<T>(__builtin_elementwise_abs(a));
+        return cast<T>(__builtin_elementwise_abs(a));
     }
     template<typename T>
     constexpr auto ceil(T a)
     {
-        return Cast<T>(__builtin_elementwise_ceil(a));
+        return cast<T>(__builtin_elementwise_ceil(a));
     }
     template<typename T>
     constexpr auto floor(T a)
     {
-        return Cast<T>(__builtin_elementwise_floor(a));
+        return cast<T>(__builtin_elementwise_floor(a));
     }
     template<typename T>
     constexpr auto round(T a)
     {
-        return Cast<T>(__builtin_elementwise_round(a));
+        return cast<T>(__builtin_elementwise_round(a));
     }
     template<typename T>
     constexpr auto trunc(T a)
     {
-        return Cast<T>(__builtin_elementwise_trunc(a));
+        return cast<T>(__builtin_elementwise_trunc(a));
     }
     template<typename T>
     constexpr auto rint(T a)
     {
-        return Cast<T>(__builtin_elementwise_rint(a));
+        return cast<T>(__builtin_elementwise_rint(a));
     }
     template<typename T>
     constexpr auto nearbyint(T a)
     {
-        return Cast<T>(__builtin_elementwise_nearbyint(a));
+        return cast<T>(__builtin_elementwise_nearbyint(a));
     }
     template<typename T, typename U>
     constexpr auto copysign(T a, U b)
     {
-        return Cast<T>(__builtin_elementwise_copysign(a, b));
+        return cast<T>(__builtin_elementwise_copysign(a, b));
     }
     template<typename T>
     constexpr auto sin(T a)
     {
-        return Cast<T>(__builtin_elementwise_sin(a));
+        return cast<T>(__builtin_elementwise_sin(a));
     }
     template<typename T>
     constexpr auto cos(T a)
     {
-        return Cast<T>(__builtin_elementwise_cos(a));
+        return cast<T>(__builtin_elementwise_cos(a));
     }
     template<typename T>
     constexpr auto addsat(T a, T b)
     {
-        return Cast<T>(__builtin_elementwise_add_sat(a, b));
+        return cast<T>(__builtin_elementwise_add_sat(a, b));
     }
     template<typename T>
     constexpr auto subsat(T a, T b)
     {
-        return Cast<T>(__builtin_elementwise_sub_sat(a, b));
+        return cast<T>(__builtin_elementwise_sub_sat(a, b));
     }
     template<typename T>
     constexpr auto max(T a, T b)
     {
-        return Cast<T>(__builtin_elementwise_max(a, b));
+        return cast<T>(__builtin_elementwise_max(a, b));
     }
     template<typename T>
     constexpr auto min(T a, T b)
     {
-        return Cast<T>(__builtin_elementwise_min(a, b));
+        return cast<T>(__builtin_elementwise_min(a, b));
     }
     template<typename T>
     constexpr auto sqrt(T a)
     {
-        return Cast<T>(__builtin_sqrt(a));
+        return cast<T>(__builtin_sqrt(a));
     }
     template<typename T>
     constexpr auto log(T a)
     {
-        return Cast<T>(__builtin_elementwise_log(a));
+        return cast<T>(__builtin_elementwise_log(a));
     }
     template<typename T>
     constexpr auto log2(T a)
     {
-        return Cast<T>(__builtin_elementwise_log2(a));
+        return cast<T>(__builtin_elementwise_log2(a));
     }
     template<typename T>
     constexpr auto log10(T a)
     {
-        return Cast<T>(__builtin_elementwise_log10(a));
+        return cast<T>(__builtin_elementwise_log10(a));
     }
     template<typename T>
     constexpr auto exp(T a)
     {
-        return Cast<T>(__builtin_elementwise_exp(a));
+        return cast<T>(__builtin_elementwise_exp(a));
     }
     template<typename T>
     inline auto exp2(T a)
     {
-        return Cast<T>(__builtin_elementwise_exp2(a));
+        return cast<T>(__builtin_elementwise_exp2(a));
     }
     template<typename T, typename U>
     constexpr auto pow(T a, U b)
     {
-        return Cast<T>(__builtin_elementwise_pow(a, b));
+        return cast<T>(__builtin_elementwise_pow(a, b));
     }
 #endif // NO_BUILTIN
     using ID = u64;
     template<typename T>
     constexpr auto isnum(const T _a)
     {
-        return !(Cast<bool>(__builtin_isnan(_a))) && !(Cast<bool>(__builtin_isinf(_a)));
+        return !(cast<bool>(__builtin_isnan(_a))) && !(cast<bool>(__builtin_isinf(_a)));
     }
     template<typename T>
     constexpr auto isnan(const T _a)
     {
-        return Cast<bool>(__builtin_isnan(f64(_a)));
+        return cast<bool>(__builtin_isnan(f64(_a)));
     }
     template<typename T>
     constexpr auto isinf(const T _a)
     {
-        return Cast<bool>(__builtin_isinf(_a));
+        return cast<bool>(__builtin_isinf(_a));
     }
     template<typename T>
     constexpr auto isnormal(const T _a)
     {
-        return Cast<bool>(__builtin_isnormal(_a));
+        return cast<bool>(__builtin_isnormal(_a));
     }
     template<typename T>
     constexpr auto isfinite(const T _a)
     {
-        return Cast<bool>(__builtin_isfinite(_a));
+        return cast<bool>(__builtin_isfinite(_a));
     }
 
     template<typename T>
@@ -1098,22 +1079,22 @@ namespace Origin
     template<typename T>
     constexpr auto hypot(T _a, T _b)
     {
-        return Cast<T>(__builtin_hypot(_a, _b));
+        return cast<T>(__builtin_hypot(_a, _b));
     }
     template<typename T>
     constexpr auto square(const T _a)
     {
-        return Cast<T>(_a * _a);
+        return cast<T>(_a * _a);
     }
     template<typename T>
     constexpr auto madd(const T _a, T _b, const T _c)
     {
-        return Cast<T>(__builtin_elementwise_add_sat((_a * _b), _c));
+        return cast<T>(__builtin_elementwise_add_sat((_a * _b), _c));
     }
     template<typename T>
     constexpr auto sign(const T _a)
     {
-        return Cast<T>(__builtin_copysign(_a));
+        return cast<T>(__builtin_copysign(_a));
     }
     template<typename T>
     constexpr auto clamp(const T _a, const T _b, const T _c)
@@ -1179,7 +1160,7 @@ namespace Origin
         }
         catch (...)
         {
-            return Cast<T>(0);
+            return cast<T>(0);
         };
     }
     template<typename T>
@@ -1225,440 +1206,13 @@ namespace Origin
     {
         return __builtin_atan2(_a, _b);
     }
-
-    template<typename T>
-    class Vector;
-    template<typename T>
-    class Iterator : public std::vector<T>::iterator
-    {
-    public:
-        friend class Vector<T>;
-        using iterator = Iterator<T>;
-        using value_type = typename std::vector<T>::value_type;
-        using pointer = typename std::vector<T>::pointer;
-        using reference = typename std::vector<T>::reference;
-        using difference_type = typename std::vector<T>::difference_type;
-        using size_type = typename std::vector<T>::size_type;
-        explicit Iterator(pointer p) noexcept :
-            std::vector<T>::iterator(p)
-        {
-            *P = p;
-        }
-        Iterator() = default;
-        Iterator(const Iterator&) = default;
-        Iterator& operator=(const Iterator&) = default;
-        Iterator(Iterator&&) = default;
-        Iterator& operator=(Iterator&&) = default;
-        ~Iterator() = default;
-
-        reference operator*() const noexcept
-        {
-            return *P;
-        }
-
-        pointer operator->() const noexcept
-        {
-            return P;
-        }
-
-        reference operator[](difference_type n) const noexcept
-        {
-            return *(P + n);
-        }
-
-        Iterator& operator++()
-        {
-            ++P;
-            return *this;
-        }
-
-        Iterator& operator--()
-        {
-            --P;
-            return *this;
-        }
-        Iterator operator!=(const Iterator& other) const
-        {
-            std::transform(this->P, this->P + 1, other.P, this->P, std::not_equal_to<value_type>());
-            return *this;
-        }
-        const Iterator operator++(int)
-        {
-            auto tmp = *this;
-            ++P;
-            return tmp;
-        }
-
-        Iterator operator--(int)
-        {
-            auto tmp = *this;
-            --P;
-            return tmp;
-        }
-
-        Iterator operator+(difference_type n) const
-        {
-            return { P + n };
-        }
-
-        Iterator& operator+=(difference_type n)
-        {
-            P += n;
-            return *this;
-        }
-
-        Iterator operator-(difference_type n) const
-        {
-            return Iterator(P - n);
-        }
-
-        Iterator& operator-=(difference_type n)
-        {
-            P -= n;
-            return *this;
-        }
-
-        difference_type operator-(Iterator other) const
-        {
-            return P - other.P;
-        }
-
-    private:
-        pointer P = nullptr;
-    };
-
-    template<typename T>
-    class Vector : public std::vector<T>
-    {
-    public:
-        using vector = Vector<T>;
-        using iterator = typename std::vector<T>::iterator;
-        using value_type = typename std::vector<T>::value_type;
-        using pointer = typename std::vector<T>::pointer;
-        using reference = typename std::vector<T>::reference;
-        using allocator_type = typename std::vector<T>::allocator_type;
-        using size_type = typename std::vector<T>::size_type;
-        using difference_type = typename std::vector<T>::difference_type;
-        using const_reference = typename std::vector<T>::const_reference;
-        using const_pointer = typename std::vector<T>::const_pointer;
-        using const_iterator = typename std::vector<T>::const_iterator;
-        using reverse_iterator = typename std::vector<T>::reverse_iterator;
-        using const_reverse_iterator = typename std::vector<T>::const_reverse_iterator;
-        friend class Iterator<T>;
-        auto ToString() const
-        {
-            string out = "Vector(";
-            for (u64 i = 0; i < size(); ++i)
-            {
-                out = out.append(std::to_string(this->at(i)));
-                if (i != size() - 1)
-                {
-                    out = out.append(", ");
-                }
-            }
-            out = out.append(")");
-            return out;
-        }
-        Vector() = default;
-        Vector(const Vector& rhs) :
-            std::vector<T>(rhs)
-        {
-            std::copy(rhs.begin(), rhs.end(), this->begin());
-        }
-        Vector& operator=(const Vector& rhs) noexcept
-        {
-            std::copy(rhs.begin(), rhs.end(), this->begin());
-            return *this;
-        }
-        Vector(Vector&& rhs) noexcept :
-            std::vector<T>(std::move(rhs))
-        {
-            *this = std::move(rhs);
-        }
-        Vector& operator=(Vector&& rhs) noexcept
-        {
-            std::vector<T>::operator=(std::move(rhs));
-            return *this;
-        };
-        ~Vector() = default;
-        Vector(std::initializer_list<T> list) :
-            std::vector<T>(list) {}
-        explicit Vector(size_type size) :
-            std::vector<T>(size)
-        {
-            if (size > 0)
-            {
-                reserve(size);
-                fill(this->begin(), this->end(), 0);
-            }
-        }
-        explicit Vector(size_type size, const_reference value) :
-            std::vector<T>(size, value)
-        {
-            if (size > 0)
-            {
-                reserve(size);
-                fill(this->begin(), this->end(), value);
-            }
-        }
-        Vector(size_type size, value_type value) :
-            std::vector<T>(size, value) {}
-        Vector(size_type size, pointer values) :
-            std::vector<T>(size, *values) {}
-        Vector(size_type size, value_type value, allocator_type alloc) :
-            std::vector<T>(size, value, alloc) {}
-        Vector(size_type size, pointer values, allocator_type alloc) :
-            std::vector<T>(size, *values, alloc) {}
-        Vector(iterator it, size_type size) :
-            std::vector<T>(size, *it)
-        {
-            this->assign(it, it + vector::size());
-        }
-
-        typename std::vector<T>::iterator begin() noexcept { return std::vector<T>::begin(); }
-        typename std::vector<T>::iterator end() noexcept { return std::vector<T>::end(); }
-        template<typename U>
-        constexpr auto cast(U c) -> U
-        {
-            return (c);
-        }
-        void push_back(value_type value) { std::vector<T>::push_back(value); }
-
-        void pop_back()
-        {
-            std::vector<T>::pop_back();
-        }
-        auto data() { return std::vector<T>::data(); }
-        void clear() { std::vector<T>::clear(); }
-        bool empty() const { return std::vector<T>::empty(); }
-        size_type size() const { return std::vector<T>::size(); }
-        size_type max_size() const { return std::vector<T>::max_size(); }
-        size_type capacity() const { return std::vector<T>::capacity(); }
-        void resize(size_type size) { std::vector<T>::resize(size); }
-
-        void resize(size_type size, value_type value) { std::vector<T>::resize(size, value); }
-
-        void assign(size_type size, value_type value) { std::vector<T>::assign(size, value); }
-
-        void assign(size_type size, pointer values)
-        {
-            for (size_type i = 0; i < size; ++i)
-            {
-                this->push_back(values[i]);
-            }
-        }
-
-        void assign(size_type size, pointer values, size_type offset)
-        {
-            for (size_type i = 0; i < size; ++i)
-            {
-                this->push_back(values[i + offset]);
-            }
-        }
-        const_iterator begin() const noexcept { return std::vector<T>::begin(); }
-        const_iterator end() const noexcept { return std::vector<T>::end(); }
-        const_iterator cbegin() const noexcept { return std::vector<T>::cbegin(); }
-        const_iterator cend() const noexcept { return std::vector<T>::cend(); }
-        const_reverse_iterator crbegin() const noexcept { return std::vector<T>::crbegin(); }
-        const_reverse_iterator crend() const noexcept { return std::vector<T>::crend(); }
-        reverse_iterator rbegin() { return std::vector<T>::rbegin(); }
-        reverse_iterator rend() { return std::vector<T>::rend(); }
-        typename std::vector<T>::iterator append(Vector other)
-        {
-            this->reserve(this->size() + other.size());
-            for (auto it = other.begin(); it != other.end(); ++it)
-            {
-                push_back(*it);
-            }
-            return begin();
-        }
-        typename std::vector<T>::iterator prepend(Vector other)
-        {
-            this->reserve(this->size() + other.size());
-            for (auto it = other.rbegin(); it != other.rend(); ++it)
-            {
-                insert(begin(), *it);
-            }
-            return begin();
-        }
-        void swap(Vector& other) { std::vector<T>::swap(other); }
-        value_type emplace_back(value_type&& args...) { return std::vector<T>::emplace_back(args); }
-        typename std::vector<T>::iterator emplace(const_iterator pos, value_type&& args...) { return std::vector<T>::emplace(pos, args); }
-        typename std::vector<T>::iterator insert(const_iterator pos, value_type value) { return std::vector<T>::insert(pos, value); }
-        void reserve(size_type size) { std::vector<T>::reserve(size); }
-        void shrink_to_fit() { std::vector<T>::shrink_to_fit(); }
-        void sort() { std::sort(this->begin(), this->end()); }
-        void reverse() { std::reverse(this->begin(), this->end()); }
-        void fill(value_type value) { std::fill(this->begin(), this->end(), value); }
-        void fill(size_type size, value_type value) { std::fill(this->begin(), this->begin() + size, value); }
-        auto operator+(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret += other;
-            return ret;
-        }
-
-        auto operator-(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret -= other;
-            return ret;
-        }
-
-        auto operator*(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret *= other;
-            return ret;
-        }
-
-        auto operator/(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret /= other;
-            return ret;
-        }
-        auto operator%(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret %= other;
-            return ret;
-        }
-        auto operator&(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret &= other;
-            return ret;
-        }
-        auto operator|(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret |= other;
-            return ret;
-        }
-        auto operator^(Vector& other) -> Vector
-        {
-            Vector ret(*this);
-            ret ^= other;
-            return ret;
-        }
-        auto operator=(value_type value) -> Vector&
-        {
-            std::fill(this->begin(), this->end(), value);
-            return *this;
-        }
-        auto operator=(Vector other) noexcept -> Vector&
-        {
-            std::move(this->begin(), this->end(), other.begin());
-            swap(other);
-            return *this;
-        }
-        auto operator+=(Vector& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::plus<value_type>());
-            return *this;
-        }
-        auto operator-=(Vector& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::minus<value_type>());
-            return *this;
-        }
-        auto operator*=(Vector& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::multiplies<value_type>());
-            return *this;
-        }
-        auto operator/=(Vector& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::divides<value_type>());
-            return *this;
-        }
-        template<typename U>
-        auto operator%=(Vector<U>& other) -> Vector&
-        {
-            Vector<T>* ret = *this;
-            std::transform(ret->begin(), ret->end(), other.begin(), ret->begin(), std::modulus<U>());
-            return *this = *ret;
-        }
-        template<typename U>
-        auto operator&=(Vector<U>& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_and<U>());
-            return *this;
-        }
-        template<typename U>
-        auto operator|=(Vector<U>& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_or<U>());
-            return *this;
-        }
-        template<typename U>
-        auto operator^=(Vector<U>& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_xor<U>());
-            return *this;
-        }
-
-        auto operator-() -> Vector
-        {
-            Vector ret(*this);
-            std::transform(ret->begin(), ret.end(), ret.begin(), std::negate<value_type>());
-            return ret;
-        }
-        auto operator!() -> Vector
-        {
-            Vector ret(*this);
-            std::transform(ret->begin(), ret.end(), ret.begin(), std::logical_not<value_type>());
-            return ret;
-        }
-        auto operator++() -> Vector&
-        {
-            std::transform(this->begin(), this->end(), this->begin(), std::plus<value_type>());
-            return *this;
-        }
-        auto operator--() -> Vector&
-        {
-            std::transform(this->begin(), this->end(), this->begin(), std::minus<value_type>());
-            return *this;
-        }
-        auto operator++(int) -> Vector
-        {
-            std::transform(this->begin(), this->end(), this->begin(), std::plus<value_type>());
-            return *this;
-        }
-        auto operator--(int) -> Vector
-        {
-            std::transform(this->begin(), this->end(), this->begin(), std::minus<value_type>());
-            return *this;
-        }
-        bool operator==(Vector& other) { return std::equal(this->begin(), this->end(), other.begin()); }
-        bool operator!=(Vector& other) { return !std::equal(this->begin(), this->end(), other.begin()); }
-        bool operator<(Vector& other) { return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end()); }
-        bool operator>(Vector& other) { return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>()); }
-        bool operator<=(Vector& other) { return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>()); }
-        bool operator>=(Vector& other) { return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end()); }
-        bool operator&&(Vector& other) { return std::inner_product(this->begin(), this->end(), other.begin(), (Cast<value_type>(0))); }
-        bool operator||(Vector& other) { return std::inner_product(this->begin(), this->end(), other.begin(), (Cast<value_type>(0))); }
-        Vector& operator=(std::initializer_list<T> list)
-        {
-            assign(*list.begin(), list.size());
-            return *this;
-        }
-        auto operator[](size_type index) -> T& { return *data() + index; }
-
-        explicit operator pointer() const { return data(); }
-
-        explicit operator size_type() const { return size(); }
-
-        explicit operator size_type() { return size(); }
-    };
     template<u64 N>
     struct Complex
     {
     public:
         union
         {
-            f128 data[N * 2];
+            f128 Data[N * 2];
             struct
             {
                 f128 Real[N];
@@ -1670,21 +1224,21 @@ namespace Origin
             C.Real = real;
             C.Imag = imag;
         }
-        static auto Zero() -> Complex { return { 0, 0 }; }
-        static auto Add(const Complex A, const Complex B) noexcept -> Complex
+        static auto zero() -> Complex { return { 0, 0 }; }
+        static auto add(const Complex A, const Complex B) noexcept -> Complex
         {
             return { A.Real + B.Real, A.Imag + B.Imag };
         }
-        static auto Sub(const Complex A, const Complex B) noexcept -> Complex
+        static auto sub(const Complex A, const Complex B) noexcept -> Complex
         {
             return { A.Real - B.Real, A.Imag - B.Imag };
         }
 
-        auto Mul(const Complex b) const noexcept -> Complex
+        auto mul(const Complex b) const noexcept -> Complex
         {
             return { C.Real * b.Real - C.Imag * b.Imag, C.Real * b.Imag + C.Imag * b.Real };
         }
-        auto Mul(f64* out, const f64* in) const noexcept
+        auto mul(f64* out, const f64* in) const noexcept
         {
             auto* ret = out;
             for (u64 i = 0; i < N; i++)
@@ -1695,12 +1249,12 @@ namespace Origin
             return ret;
         }
 
-        static auto Div(Complex a, Complex b) noexcept -> Complex
+        static auto div(Complex a, Complex b) noexcept -> Complex
         {
             return { (a.Real * b.Real + a.Imag * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag),
                      (a.Imag * b.Real - a.Real * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag) };
         }
-        static auto FFT(const Complex* input, u64 n) -> Complex*
+        static auto fft(const Complex* input, u64 n) -> Complex*
         {
             auto output = new Complex[n];
             f64 wn = -2 * PI / n;
@@ -1779,7 +1333,7 @@ namespace Origin
             return output;
         }
 
-        static auto Conjugate(Complex* C1) -> Complex*
+        static auto conjugate(Complex* C1) -> Complex*
         {
             auto* c = C1;
             for (u64 i = 0; i < N; i++)
@@ -1789,7 +1343,7 @@ namespace Origin
             return c;
         }
 
-        static auto FFT2(Complex* input) -> Complex*
+        static auto fft2(Complex* input) -> Complex*
         {
             auto* c = input;
 
@@ -1843,12 +1397,12 @@ namespace Origin
             return c;
         }
 
-        static auto IFFT(Complex C1[]) -> Complex*
+        static auto ifft(Complex C1[]) -> Complex*
         {
             auto* c = C1;
-            c = Conjugate(c, N);
-            FFT2(c, N);
-            c = Conjugate(c, N);
+            c = conjugate(c, N);
+            fft2(c, N);
+            c = conjugate(c, N);
             return c;
         }
     } __attribute__((aligned(32)));
@@ -1886,7 +1440,7 @@ namespace Origin
             MemSize = MemUsed = 0.0;
             MemUnit = Unit::BYTE;
         }
-        [[nodiscard]] auto Convert(const enum Unit unit) const -> Mem
+        [[nodiscard]] auto convert(const enum Unit unit) const -> Mem
         {
             const u8 one = 1;
             const u8 unit0 = static_cast<u8>(MemUnit) * 10;
@@ -1895,7 +1449,7 @@ namespace Origin
             ratio /= one << unit1;
             return Mem(MemSize * ratio, MemUsed * ratio, unit);
         }
-        [[nodiscard]] auto Convert(const Mem& mem) const -> Mem
+        [[nodiscard]] auto convert(const Mem& mem) const -> Mem
         {
             const u8 one = 1;
             if (mem.MemUnit == Unit::NONE)
@@ -1908,18 +1462,18 @@ namespace Origin
             ratio /= one << unit1;
             return Mem{ mem.MemSize * ratio, mem.MemUsed * ratio, mem.MemUnit };
         }
-        auto operator[](enum Unit unit) const { return Convert(unit); }
+        auto operator[](enum Unit unit) const { return convert(unit); }
         auto operator=(const Mem& rhs) -> Mem& = default;
         auto operator=(Mem&& rhs) noexcept -> Mem& { return *this = rhs; }
-        [[nodiscard]] constexpr auto Size() const -> f64 { return MemSize; }
-        [[nodiscard]] constexpr auto Total() const -> f64 { return Size(); }
-        [[nodiscard]] constexpr auto Available() const -> f64 { return MemSize - MemUsed; }
-        [[nodiscard]] constexpr auto Used() const -> f64 { return MemUsed; }
-        [[nodiscard]] constexpr auto Free() const -> f64 { return MemSize - MemUsed; }
-        [[nodiscard]] constexpr auto Percentage() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
-        [[nodiscard]] constexpr auto PercentageUsed() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
-        [[nodiscard]] constexpr auto PercentageFree() const -> f64 { return ((MemSize) / (MemUsed)) * 100.0; }
-        constexpr auto Set(const f64 size = -1, const f64 used = -1, enum Unit unit = Unit::NONE) -> Mem&
+        [[nodiscard]] constexpr auto size() const -> f64 { return MemSize; }
+        [[nodiscard]] constexpr auto total() const -> f64 { return size(); }
+        [[nodiscard]] constexpr auto available() const -> f64 { return MemSize - MemUsed; }
+        [[nodiscard]] constexpr auto used() const -> f64 { return MemUsed; }
+        [[nodiscard]] constexpr auto free() const -> f64 { return MemSize - MemUsed; }
+        [[nodiscard]] constexpr auto percentage() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
+        [[nodiscard]] constexpr auto percentage_used() const -> f64 { return ((MemUsed) / (MemSize)) * 100.0; }
+        [[nodiscard]] constexpr auto percentage_free() const -> f64 { return ((MemSize) / (MemUsed)) * 100.0; }
+        constexpr auto set(const f64 size = -1, const f64 used = -1, enum Unit unit = Unit::NONE) -> Mem&
         {
             if (unit != Unit::NONE)
             {
@@ -1941,4 +1495,3 @@ namespace Origin
     } __attribute__((aligned(32))) __attribute__((packed));
 
 } // namespace Origin
-#endif

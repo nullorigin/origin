@@ -46,46 +46,46 @@ namespace Origin
         Console(i32 h, i32 w, i32 bg, i32 fg) :
             Height(h), Width(w), BgColor(bg), FgColor(fg) {};
         ~Console();
-        static auto ClearEOL() -> void;
-        static auto InsertLine() -> void;
-        static auto GotoXY(i32 x, i32 y) -> void;
+        static auto clear_eol() -> void;
+        static auto insert_line() -> void;
+        static auto goto_xy(i32 x, i32 y) -> void;
 
-        auto ClearScreen() const -> void;
+        auto clear_screen() const -> void;
 
-        auto SetBgColor(i32 color) -> void;
-        auto SetFgColor(i32 color) -> void;
-        auto PrintBgColor(i32 color) const -> void;
+        auto set_bg_color(i32 color) -> void;
+        auto set_fg_color(i32 color) -> void;
+        auto print_bg_color(i32 color) const -> void;
 
-        auto PrintFgColor(i32 color) const -> void;
+        auto print_fg_color(i32 color) const -> void;
 
-        auto PrintColor(i32 fg, i32 bg) const -> void;
+        auto print_color(i32 fg, i32 bg) const -> void;
 
-        static auto UngetChar(i32 ch) -> i32;
-        static auto GetChar(bool echo = false) -> i32;
+        static auto unget_char(i32 ch) -> i32;
+        static auto get_char(bool echo = false) -> i32;
 
-        static auto GetXY(i32& x, i32& y) -> i32;
+        static auto get_xy(i32& x, i32& y) -> i32;
 
-        static auto GetX() -> i32;
+        static auto get_x() -> i32;
 
-        static auto GetY() -> i32;
+        static auto get_y() -> i32;
 
-        static auto KeyHit() -> i32;
-        static auto PrintChar(i8 c) -> i8;
-        static auto PrintStr(const string& str) -> i32;
-        auto PrintStrColor(const string& str, i32 fg, i32 bg) -> i32;
-        static auto ChangeColor(i32 fg, i32 bg) -> i32;
-        static auto ChangeColor(i32 color) -> i32;
-        static auto PrintCStr(const i8* str) -> i32;
-        static auto GetHome() -> string;
-        static auto GetCwd() -> string;
-        static auto GetUser() -> string;
-        static auto GetHostname() -> string;
-        static auto IsValidPass(const string& passwd) -> bool;
-        static auto GetPass(const string& prompt) -> string;
-        static auto GetEnv(const string& name) -> string;
-        static auto ReadText(i32 l, i32 t, i32 r, i32 b, void* destination)
+        static auto key_hit() -> i32;
+        static auto print_char(i8 c) -> i8;
+        static auto print_str(const string& str) -> i32;
+        auto print_str_color(const string& str, i32 fg, i32 bg) -> i32;
+        static auto change_color(i32 fg, i32 bg) -> i32;
+        static auto change_color(i32 color) -> i32;
+        static auto print_c_str(const i8* str) -> i32;
+        static auto get_home() -> string;
+        static auto get_cwd() -> string;
+        static auto get_user() -> string;
+        static auto get_hostname() -> string;
+        static auto is_valid_pass(const string& passwd) -> bool;
+        static auto get_pass(const string& prompt) -> string;
+        static auto get_env(const string& name) -> string;
+        static auto read_text(i32 l, i32 t, i32 r, i32 b, void* destination)
             -> size_t;
-        static auto WriteText(i32 l, i32 t, i32 r, i32 b, void* source) -> size_t;
+        static auto write_text(i32 l, i32 t, i32 r, i32 b, void* source) -> size_t;
     } __attribute__((aligned(128)));
 } // namespace Origin
 #endif
