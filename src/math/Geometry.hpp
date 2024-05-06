@@ -135,20 +135,11 @@ namespace Origin
     class Vec3
     {
     public:
-        union
-        {
-            f64* Data = new f64[3];
-            struct
-            {
-                f64 X;
-                f64 Y;
-                f64 Z;
-            } __attribute__((aligned(32)));
-        };
+        f64 X, Y, Z;
         Vec3() = default;
         Vec3(Vec3 const&) = default;
         Vec3(Vec3&&) = default;
-        ~Vec3() { delete[] this->Data; }
+        ~Vec3() = default;
         Vec3(f64 x, f64 y, f64 z)
         {
             X = x;
@@ -157,38 +148,20 @@ namespace Origin
         }
         auto operator=(Vec3 const&) -> Vec3& = default;
         auto operator=(Vec3&&) -> Vec3& = default;
-        auto operator[](u64 i) const -> f64& { return this->Data[i]; }
-
         auto operator+(f64 rhs) const -> Vec3 { return { X + rhs, Y + rhs, Z + rhs }; }
-
         auto operator-(f64 rhs) const -> Vec3 { return { X - rhs, Y - rhs, Z - rhs }; }
-
         auto operator*(Vec3 const& rhs) const -> Vec3 { return { X * rhs.X, Y * rhs.Y, Z * rhs.Z }; }
-
         auto operator/(Vec3 const& rhs) const -> Vec3 { return { X / rhs.X, Y / rhs.Y, Z / rhs.Z }; }
         auto operator+(Vec3 const& rhs) const -> Vec3 { return { X + rhs.X, Y + rhs.Y, Z + rhs.Z }; }
-
         auto operator-(Vec3 const& rhs) const -> Vec3 { return { X - rhs.X, Y - rhs.Y, Z - rhs.Z }; }
-
         auto operator*(f64 rhs) const -> Vec3 { return { X * rhs, Y * rhs, Z * rhs }; }
-
         auto operator/(f64 rhs) const -> Vec3 { return { X / rhs, Y / rhs, Z / rhs }; }
     };
 
     class Vec4
     {
     public:
-        union
-        {
-            f64* Data = new f64[4];
-            struct
-            {
-                f64 X;
-                f64 Y;
-                f64 Z;
-                f64 W;
-            } __attribute__((aligned(32)));
-        };
+        f64 X, Y, Z, W;
         Vec4() = default;
         Vec4(Vec4 const&) = default;
         Vec4(Vec4&&) = default;
@@ -200,9 +173,8 @@ namespace Origin
             W = w;
         }
 
-        ~Vec4() { delete[] this->Data; }
+        ~Vec4() = default;
         auto operator=(Vec4&& rhs) noexcept -> Vec4& { return *this = rhs; }
-        auto operator[](u64 i) const -> f64& { return this->Data[i]; }
         auto operator=(Vec4 const& rhs) -> Vec4& = default;
         auto operator+(Vec4 const& rhs) const -> Vec4 { return { X + rhs.X, Y + rhs.Y, Z + rhs.Z, W + rhs.W }; }
 
@@ -387,7 +359,7 @@ namespace Origin
 
         static auto rotate(const Quaternion& q, Vec3& axis, Face face)
         {
-            f64 const a = acos(q.X0) + PI * 2 * ((axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]) * 2.0 - 1.0);
+            f64 const a = acos(q.X0) + PI * 2 * ((axis.X * axis.X + axis.Y * axis.Y + axis.Z * axis.Z) * 2.0 - 1.0);
             Vec3 dv;
             if (face == Face::Right)
             {

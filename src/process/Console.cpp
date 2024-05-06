@@ -6,12 +6,25 @@
 #include <unistd.h>
 namespace Origin
 {
-    Console::Console() :
-        Height(25), Width(80)
-    {
-        BgColor = BLACK;
-        FgColor = WHITE;
-    }
+    const i8* Console::color_code[17] = { "\033[0;30m", "\033[0;34m", "\033[0;32m", "\033[0;36m", "\033[0;31m", "\033[0;35m", "\033[0;33m", "\033[0;37m", "\033[1;30m", "\033[1;34m", "\033[1;32m", "\033[1;36m", "\033[1;31m", "\033[1;35m", "\033[1;33m", "\033[1;37m", "\033[0m" };
+    const i8* Console::color_string[16] = {
+        "black",
+        "blue",
+        "green",
+        "cyan",
+        "red",
+        "magenta",
+        "brown",
+        "lightgray",
+        "darkgray",
+        "lightblue",
+        "lightgreen",
+        "lightcyan",
+        "lightred",
+        "lightmagenta",
+        "yellow",
+        "white",
+    };
     auto Console::clear_eol() -> void
     {
         printf("\033[2K");
@@ -29,7 +42,7 @@ namespace Origin
      *
      * @return void
      */
-    auto Console::clear_screen() const -> void
+    auto Console::clear_screen() -> void
     {
         printf("\033[%dm\033[2J\033[1;1f", BgColor);
     }
@@ -41,14 +54,14 @@ namespace Origin
     {
         FgColor = 30 + (color % 16);
     }
-    auto Console::print_bg_color(i32 color) const -> void
+    auto Console::print_bg_color(i32 color) -> void
     {
         constexpr i32 offset = 30;
         constexpr i32 bright_offset = 60;
 
         printf("\033[%d;%dm", (color < 16) ? offset : bright_offset, BgColor + color % 16);
     }
-    auto Console::print_fg_color(i32 color) const -> void
+    auto Console::print_fg_color(i32 color) -> void
     {
         constexpr i32 offset = 30;
         constexpr i32 bright_offset = 90;
@@ -58,7 +71,7 @@ namespace Origin
 
         printf("\033[%d;%dm", (color < 16) ? offset : bright_offset, fg_colors[color % 16] + FgColor);
     }
-    auto Console::print_color(i32 fg, i32 bg) const -> void
+    auto Console::print_color(i32 fg, i32 bg) -> void
     {
         constexpr i32 offset = 30;
         constexpr i32 bright_offset = 60;
@@ -68,8 +81,8 @@ namespace Origin
 
         printf("\033[%d;%d;%dm",
                (bg < 16) ? bright_offset : offset,
-               fg_colors[fg % 16] + FgColor,
-               BgColor + bg % 16);
+               fg_colors[fg % 16] + Console::FgColor,
+               Console::BgColor + bg % 16);
     }
     auto Console::unget_char(i32 ch) -> i32
     {
@@ -109,10 +122,10 @@ namespace Origin
      */
     auto Console::get_xy(i32& x, i32& y) -> i32
     {
-        static constexpr i8 seq[] = "\033[6n";
-        static constexpr i8 end[] = "R";
-        static constexpr size_t seq_len = sizeof(seq) - 1;
-        static constexpr size_t end_len = sizeof(end) - 1;
+        constexpr i8 seq[] = "\033[6n";
+        constexpr i8 end[] = "R";
+        constexpr size_t seq_len = sizeof(seq) - 1;
+        constexpr size_t end_len = sizeof(end) - 1;
 
         write(STDOUT_FILENO, seq, seq_len);
 

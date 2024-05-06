@@ -123,10 +123,10 @@ namespace Origin
 #endif
     static const u32 C8 = 0xff, C16 = 0xffff, C32 = 0xffffff, C64 = 0xffffffff;
     constexpr f64 PI = 3.14159265358979323846535897932384;
-    template<typename T>
-    constexpr auto cast(T c) -> T
+    template<typename T, typename U>
+    auto cast(U c)
     {
-        return (c);
+        return static_cast<T>(c);
     }
     template<typename T>
     constexpr auto cast(T c, T d) -> T
@@ -886,157 +886,158 @@ namespace Origin
         return __builtin_truncl(x);
     }
     template<typename T>
+    constexpr auto isnan(const T a)
+    {
+        return cast<bool>(__builtin_isnan(f128(a)));
+    }
+    template<typename T>
+    constexpr auto isinf(const T a)
+    {
+        return cast<bool>(__builtin_isinf(a));
+    }
+    template<typename T>
+    constexpr auto isnum(const T a)
+    {
+        return !(cast<bool>(__builtin_isnan(a))) && !(cast<bool>(__builtin_isinf(a)));
+    }
+    template<typename T>
     constexpr auto abs(T a)
     {
-        return cast<T>(__builtin_elementwise_abs(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_abs(a)) : 0;
     }
     template<typename T>
     constexpr auto ceil(T a)
     {
-        return cast<T>(__builtin_elementwise_ceil(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_ceil(a)) : 0;
     }
     template<typename T>
     constexpr auto floor(T a)
     {
-        return cast<T>(__builtin_elementwise_floor(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_floor(a)) : 0;
     }
     template<typename T>
     constexpr auto round(T a)
     {
-        return cast<T>(__builtin_elementwise_round(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_round(a)) : 0;
     }
     template<typename T>
     constexpr auto trunc(T a)
     {
-        return cast<T>(__builtin_elementwise_trunc(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_trunc(a)) : 0;
     }
     template<typename T>
     constexpr auto rint(T a)
     {
-        return cast<T>(__builtin_elementwise_rint(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_rint(a)) : 0;
     }
     template<typename T>
     constexpr auto nearbyint(T a)
     {
-        return cast<T>(__builtin_elementwise_nearbyint(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_nearbyint(a)) : 0;
     }
     template<typename T, typename U>
     constexpr auto copysign(T a, U b)
     {
-        return cast<T>(__builtin_elementwise_copysign(a, b));
+        return isnum(a) && isnum(b) ? cast<T>(__builtin_elementwise_copysign(a, b)) : 0;
     }
     template<typename T>
     constexpr auto sin(T a)
     {
-        return cast<T>(__builtin_elementwise_sin(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_sin(a)) : 0;
     }
     template<typename T>
     constexpr auto cos(T a)
     {
-        return cast<T>(__builtin_elementwise_cos(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_cos(a)) : 0;
     }
     template<typename T>
     constexpr auto addsat(T a, T b)
     {
-        return cast<T>(__builtin_elementwise_add_sat(a, b));
+        return isnum(a) && isnum(b) ? cast<T>(__builtin_elementwise_add_sat(a, b)) : 0;
     }
     template<typename T>
     constexpr auto subsat(T a, T b)
     {
-        return cast<T>(__builtin_elementwise_sub_sat(a, b));
+        return isnum(a) && isnum(b) ? cast<T>(__builtin_elementwise_sub_sat(a, b)) : 0;
     }
     template<typename T>
     constexpr auto max(T a, T b)
     {
-        return cast<T>(__builtin_elementwise_max(a, b));
+        return isnum(a) && isnum(b) ? cast<T>(__builtin_elementwise_max(a, b)) : 0;
     }
     template<typename T>
     constexpr auto min(T a, T b)
     {
-        return cast<T>(__builtin_elementwise_min(a, b));
+        return isnum(a) && isnum(b) ? cast<T>(__builtin_elementwise_min(a, b)) : 0;
     }
     template<typename T>
     constexpr auto sqrt(T a)
     {
-        return cast<T>(__builtin_sqrt(a));
+        return !isnan(a) ? cast<T>(__builtin_sqrt(a)) : 0;
     }
     template<typename T>
     constexpr auto log(T a)
     {
-        return cast<T>(__builtin_elementwise_log(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_log(a)) : 0;
     }
     template<typename T>
     constexpr auto log2(T a)
     {
-        return cast<T>(__builtin_elementwise_log2(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_log2(a)) : 0;
     }
     template<typename T>
     constexpr auto log10(T a)
     {
-        return cast<T>(__builtin_elementwise_log10(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_log10(a)) : 0;
     }
     template<typename T>
     constexpr auto exp(T a)
     {
-        return cast<T>(__builtin_elementwise_exp(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_exp(a)) : 0;
     }
     template<typename T>
     inline auto exp2(T a)
     {
-        return cast<T>(__builtin_elementwise_exp2(a));
+        return isnum(a) ? cast<T>(__builtin_elementwise_exp2(a)) : 0;
     }
     template<typename T, typename U>
     constexpr auto pow(T a, U b)
     {
-        return cast<T>(__builtin_elementwise_pow(a, b));
+        return isnum(a) && isnum(b) ? cast<T>(__builtin_elementwise_pow(a, b)) : 0;
     }
 #endif // NO_BUILTIN
     using ID = u64;
+
     template<typename T>
-    constexpr auto isnum(const T _a)
+    constexpr auto isnormal(const T a)
     {
-        return !(cast<bool>(__builtin_isnan(_a))) && !(cast<bool>(__builtin_isinf(_a)));
+        return cast<bool>(__builtin_isnormal(a));
     }
     template<typename T>
-    constexpr auto isnan(const T _a)
+    constexpr auto isfinite(const T a)
     {
-        return cast<bool>(__builtin_isnan(f64(_a)));
-    }
-    template<typename T>
-    constexpr auto isinf(const T _a)
-    {
-        return cast<bool>(__builtin_isinf(_a));
-    }
-    template<typename T>
-    constexpr auto isnormal(const T _a)
-    {
-        return cast<bool>(__builtin_isnormal(_a));
-    }
-    template<typename T>
-    constexpr auto isfinite(const T _a)
-    {
-        return cast<bool>(__builtin_isfinite(_a));
+        return cast<bool>(__builtin_isfinite(a));
     }
 
     template<typename T>
-    auto memmove(T* _a, const T* _b, const size_t _c)
+    auto memmove(void* a, const void* b, unsigned long c)
     {
-        return (__builtin_memmove(_a, _b, _c));
+        return cast<T>(__builtin_memmove(a, b, c));
     }
     template<typename T>
-    auto memcpy(T* _a, const T* _b, size_t _c)
+    auto memcpy(void* a, const void* b, unsigned long c)
     {
-        return (__builtin_memcpy(_a, _b, _c));
+        return cast<T>(__builtin_memcpy(a, b, c));
     }
     template<typename T>
-    auto memcmp(T* _a, const T* _b, size_t _c)
+    auto memcmp(const void* a, const void* b, unsigned long c)
     {
-        return (__builtin_memcmp(_a, _b, _c));
+        return cast<T>(__builtin_memcmp(a, b, c));
     }
     template<typename T>
-    auto memset(T* _a, const T* _b, size_t _c)
+    auto memset(void* a, int b, unsigned long c)
     {
-        return (__builtin_memset(_a, _b, _c));
+        return cast<T>(__builtin_memset(a, b, c));
     }
     template<typename T>
     constexpr auto cross(const T a[3], const T b[3], const T c[3]) noexcept

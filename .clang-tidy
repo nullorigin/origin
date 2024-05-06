@@ -35,7 +35,7 @@ CheckOptions:
   - key:             cppcoreguidelines-pro-bounds-constant-array-index.GslHeader
     value:           ''
   - key:             cppcoreguidelines-pro-bounds-constant-array-index.IncludeStyle
-    value:           '0'
+    value:           llvm
   - key:             cppcoreguidelines-pro-type-member-init.IgnoreArrays
     value:           '0'
   - key:             cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions
@@ -125,7 +125,7 @@ CheckOptions:
   - key:             modernize-make-shared.IgnoreMacros
     value:           '1'
   - key:             modernize-make-shared.IncludeStyle
-    value:           '0'
+    value:           llvm
   - key:             modernize-make-shared.MakeSmartPtrFunction
     value:           'std::make_shared'
   - key:             modernize-make-shared.MakeSmartPtrFunctionHeader
@@ -133,7 +133,7 @@ CheckOptions:
   - key:             modernize-make-unique.IgnoreMacros
     value:           '1'
   - key:             modernize-make-unique.IncludeStyle
-    value:           '0'
+    value:           llvm
   - key:             modernize-make-unique.MakeSmartPtrFunction
     value:           'std::make_unique'
   - key:             modernize-make-unique.MakeSmartPtrFunctionHeader

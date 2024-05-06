@@ -106,7 +106,7 @@ namespace Origin
         static auto day() -> f128;
         static auto week() -> f128;
         auto set_name(const string& name) -> void;
-        auto set_limit(const f128 _limit) -> void;
+        auto set_limit(f128 _limit) -> void;
         static auto now() -> f128;
 
         static auto get_id() -> ID;
@@ -121,6 +121,7 @@ namespace Origin
         auto get_offset() const -> f128;
         auto get_limit() const -> f128;
         explicit Timer(TimerState _state);
+        auto get_string(TimeUnit tu) const -> string;
         auto set(TimerState _state) -> void;
         auto is(TimerState _state) -> bool;
         auto pause() -> bool;

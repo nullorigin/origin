@@ -97,7 +97,7 @@ namespace Origin
         std::stringstream ss = std::stringstream();
         ss.precision(9);
         ss << std::fixed;
-        ss << (this->nanoseconds() / (1000000000.0 / static_cast<f128>(tu)));
+        ss << (this->nanoseconds() / static_cast<f128>(tu));
         return ss.str();
     }
     Duration::operator i128() const
@@ -253,10 +253,10 @@ namespace Origin
     }
     auto Timer::get_elapsed() const -> f128
     {
-        f128 elapsed{ 0 };
+        f128 elapsed = 0.0;
         if (State == TimerState::Started || State == TimerState::Resumed || State == TimerState::Paused)
         {
-            elapsed = now() - Started - Offset;
+            return elapsed = now() - Started - Offset;
         }
         return elapsed;
     }
@@ -275,6 +275,14 @@ namespace Origin
     Timer::Timer(TimerState _state) :
         State(_state)
     {
+    }
+    auto Timer::get_string(TimeUnit tu) const -> string
+    {
+        std::stringstream ss = std::stringstream();
+        ss.precision(9);
+        ss << std::fixed;
+        ss << (get_elapsed() / static_cast<f128>(tu));
+        return ss.str();
     }
     auto Timer::set(TimerState _state) -> void
     {

@@ -5,27 +5,23 @@ namespace Origin
 {
     auto get_header_txt() -> std::string
     {
-        std::string header[5] = { "[--NONE--]", "[--INFO--]", "[-WARNING-]", "[--ERROR--]", "[--FATAL--]" };
-        msg.header = "#############################" + header[i32(msg.status)] +
-                     "#############################";
+        const std::string header[6] = { "[--NONE--]", "[--INFO--]", "[-WARNING-]", "[--ERROR--]", "[--FATAL--]", "[--NONE--]" };
+        msg.header = std::string(30, '#') + header[cast<i32>(msg.status)] +
+                     std::string(30, '#');
         return msg.header;
     }
 
-    auto get_end_txt(std::string begin, i8 padding, std::string ending) -> std::string
+    auto get_end_txt(const std::string& begin, const i8& padding, const std::string& ending) -> std::string
     {
-        std::string end{};
-        for (u64 i = begin.length(); i < msg.header.length() - 1; i++)
-        {
-            end += padding;
-        }
-        end += ending;
-        return end + "\n";
+        std::string end = std::string(msg.header.length() - begin.length() - 1, padding);
+        end += ending + "\n";
+        return end;
     }
     auto set_code(Code code) -> Code
     {
-        if (msg.code < Code::any)
+        if (msg.code < Code::Any)
         {
-            return Code::any;
+            return Code::Any;
         }
         msg.code = code;
         return code;
@@ -33,16 +29,16 @@ namespace Origin
 
     auto reset() -> void
     {
-        msg.code = Code::none;
-        msg.status = Code::info;
-        msg.offset = Code::none;
-        msg.level = Code::none;
+        msg.code = Code::None;
+        msg.status = Code::Info;
+        msg.offset = Code::None;
+        msg.level = Code::None;
     }
     auto set_status(Code status) -> Code
     {
-        if (status < Code::any)
+        if (status < Code::Any)
         {
-            msg.status = Code::any;
+            msg.status = Code::Any;
             return msg.status;
         }
         msg.status = status;
@@ -50,9 +46,9 @@ namespace Origin
     }
     auto set_level(Code level) -> Code
     {
-        if (msg.level < Code::any)
+        if (msg.level < Code::Any)
         {
-            msg.level = Code::any;
+            msg.level = Code::Any;
             return msg.level;
         }
         msg.level = level;
@@ -68,7 +64,7 @@ namespace Origin
         msg.footer = std::string(msg.header.length() - 1, '#');
         return msg.footer;
     }
-    auto get_info_txt(std::string info) -> std::string
+    auto get_info_txt(const std::string& info) -> std::string
     {
         std::string info_txt = "#-Info: [ " + info + " ]";
         return info_txt + get_end_txt(info_txt, ' ', "#");
@@ -89,4 +85,4 @@ namespace Origin
     {
         return msg.status;
     }
-} // namespace Origin::dbg
+} // namespace Origin
