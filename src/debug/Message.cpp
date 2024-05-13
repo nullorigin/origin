@@ -1,9 +1,9 @@
 #include <Message.hpp>
 #include <string>
 
-namespace Origin
+namespace origin
 {
-    auto get_header_txt() -> std::string
+    auto getHeaderTxt() -> std::string
     {
         const std::string header[6] = { "[--NONE--]", "[--INFO--]", "[-WARNING-]", "[--ERROR--]", "[--FATAL--]", "[--NONE--]" };
         msg.header = std::string(30, '#') + header[cast<i32>(msg.status)] +
@@ -11,13 +11,13 @@ namespace Origin
         return msg.header;
     }
 
-    auto get_end_txt(const std::string& begin, const i8& padding, const std::string& ending) -> std::string
+    auto getEndTxt(const std::string& begin, const i8& padding, const std::string& ending) -> std::string
     {
         std::string end = std::string(msg.header.length() - begin.length() - 1, padding);
         end += ending + "\n";
         return end;
     }
-    auto set_code(Code code) -> Code
+    auto setCode(Code code) -> Code
     {
         if (msg.code < Code::Any)
         {
@@ -34,7 +34,7 @@ namespace Origin
         msg.offset = Code::None;
         msg.level = Code::None;
     }
-    auto set_status(Code status) -> Code
+    auto setStatus(Code status) -> Code
     {
         if (status < Code::Any)
         {
@@ -44,7 +44,7 @@ namespace Origin
         msg.status = status;
         return status;
     }
-    auto set_level(Code level) -> Code
+    auto setLevel(Code level) -> Code
     {
         if (msg.level < Code::Any)
         {
@@ -54,22 +54,22 @@ namespace Origin
         msg.level = level;
         return level;
     }
-    auto set_offset(Code offset) -> Code
+    auto setOffset(Code offset) -> Code
     {
         msg.offset = offset;
         return offset;
     }
-    auto get_footer_txt() -> std::string
+    auto getFooterTxt() -> std::string
     {
         msg.footer = std::string(msg.header.length() - 1, '#');
         return msg.footer;
     }
-    auto get_info_txt(const std::string& info) -> std::string
+    auto getInfoTxt(const std::string& info) -> std::string
     {
         std::string info_txt = "#-Info: [ " + info + " ]";
-        return info_txt + get_end_txt(info_txt, ' ', "#");
+        return info_txt + getEndTxt(info_txt, ' ', "#");
     }
-    auto get_code() -> Code
+    auto getCode() -> Code
     {
         return msg.code;
     }
@@ -77,12 +77,12 @@ namespace Origin
     {
         return msg.status == status;
     }
-    auto get_level() -> Code
+    auto getLevel() -> Code
     {
         return msg.level;
     }
-    auto get_status() -> Code
+    auto getStatus() -> Code
     {
         return msg.status;
     }
-} // namespace Origin
+} // namespace origin

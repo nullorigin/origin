@@ -1,7 +1,7 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 #include "Basic.hpp"
-namespace Origin
+namespace origin
 {
     struct Color
     {
@@ -42,35 +42,35 @@ namespace Origin
             ret.A = mn.A < ret.A ? mn.A : ret.A;
             return ret;
         }
-        auto operator=(Color&& other) noexcept -> Color&
+        auto operator=(Color&& in) noexcept -> Color&
         {
-            R = other.R;
-            G = other.G;
-            B = other.B;
-            A = other.A;
+            R = in.R;
+            G = in.G;
+            B = in.B;
+            A = in.A;
             return *this;
         }
-        auto operator=(const Color& other) noexcept -> Color&
+        auto operator=(const Color& in) noexcept -> Color&
         {
-            R = other.R;
-            G = other.G;
-            B = other.B;
-            A = other.A;
+            R = in.R;
+            G = in.G;
+            B = in.B;
+            A = in.A;
             return *this;
         }
-        auto operator+(const Color& rhs) const -> Color
+        auto operator+(const Color& in) const -> Color
         {
-            return { R + rhs.R, G + rhs.G, B + rhs.B, A + rhs.A };
+            return { R + in.R, G + in.G, B + in.B, A + in.A };
         }
-        auto operator-(const Color& rhs) const -> Color
+        auto operator-(const Color& in) const -> Color
         {
-            return { R - rhs.R, G - rhs.G, B - rhs.B, A - rhs.A };
+            return { R - in.R, G - in.G, B - in.B, A - in.A };
         }
-        auto operator*(const Color& rhs) const -> Color
+        auto operator*(const Color& in) const -> Color
         {
-            return { R * rhs.R, G * rhs.G, B * rhs.B, A * rhs.A };
+            return { R * in.R, G * in.G, B * in.B, A * in.A };
         }
-        auto operator/(const Color& rhs) const -> Color { return { R / rhs.R, G / rhs.G, B / rhs.B, A / rhs.A }; }
+        auto operator/(const Color& in) const -> Color { return { R / in.R, G / in.G, B / in.B, A / in.A }; }
     } __attribute__((aligned(32)));
-}
+} // namespace origin
 #endif

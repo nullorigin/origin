@@ -1,21 +1,18 @@
 #include "Origin.hpp"
-#include "Basic.hpp"
 #include "Message.hpp"
-#include "process/Console.hpp"
 #include "process/Exec.hpp"
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <iostream>
-#include <memory>
+#include <string>
 #include <unistd.h>
-namespace Origin
+namespace origin
 {
 
-    int exit_dbg(int sig, void* /*ptr*/)
+    int exitDbg(int sig, void* /*ptr*/)
     {
-        set_level(Code::Info);
-        Code status = Origin::run.get_run_status();
+        setLevel(Code::Info);
+        Code status = origin::run.getRunStatus();
         if (status == Code::Success)
         {
             debug("Process Exited Normally.", status);
@@ -29,24 +26,24 @@ namespace Origin
 
     auto exit() -> Code
     {
-        return run.do_exit();
+        return run.doExit();
     }
     auto init(bool debug) -> Code
     {
         if (debug)
         {
             int* arg = nullptr;
-            ::on_exit(reinterpret_cast<void (*)(int, void*)>(Origin::exit_dbg), arg); // ::on_exit(exit_dbg, cast<void*>(debug));
-            set_level(Code::Info);
+            ::on_exit(reinterpret_cast<void (*)(int, void*)>(origin::exitDbg), arg); // ::on_exit(exit_dbg, cast<void*>(debug));
+            setLevel(Code::Info);
         }
         else
         {
-            set_level(Code::None);
+            setLevel(Code::None);
         }
-        Origin::run = Run();
-        Origin::run.set_max_cycles(1000000000);
-        Origin::run.loop();
-        return Origin::run.get_run_status();
+        origin::run = Run();
+        origin::run.setMaxCycles(1000000000);
+        origin::run.loop();
+        return origin::run.getRunStatus();
     }
 
-} // namespace Origin
+} // namespace origin

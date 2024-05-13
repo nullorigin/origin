@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"codeium.enableSearch": true,
+		"codium.codeCompletion.enable": true,
+		"workbench.list.smoothScrolling": true,
+		"remote.autoForwardPortsFallback": 0,
+		"clangd.enableCodeCompletion": true,
+		"cmake.loadCompileCommands": true,
+		"codium.rag.maxLocalSnippets": 100,
+	}
+}

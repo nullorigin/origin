@@ -9,7 +9,7 @@
 #include <string>
 #include <utility>
 #include <valarray>
-namespace Origin
+namespace origin
 {
     template<typename X, typename Y>
     class KeyVal
@@ -19,28 +19,29 @@ namespace Origin
         std::valarray<Y> Val = std::valarray<Y>();
 
     public:
-        KeyVal<X, Y>& operator=(KeyVal<X, Y>&& other) noexcept
+        KeyVal<X, Y>& operator=(KeyVal<X, Y>&& in) noexcept
         {
-            Key = std::move(other.Key);
-            Val = std::move(other.Val);
+            Key = std::move(in.Key);
+            Val = std::move(in.Val);
             return *this;
         }
-        auto& operator=(const KeyVal<X, Y>& other)
+        auto operator=(KeyVal<X, Y> in) noexcept -> KeyVal<X, Y>&
         {
-            Key = other.Key;
-            Val = other.Val;
+            Key = in.Key;
+            Val = in.Val;
+            *this = std::move(*this);
             return *this;
         }
-        KeyVal<X, Y>(KeyVal<X, Y>&& other) noexcept :
-            Key(std::move(other.Key)),
-            Val(std::move(other.Val))
+        KeyVal<X, Y>(KeyVal<X, Y>&& in) noexcept :
+            Key(std::move(in.Key)),
+            Val(std::move(in.Val))
         {
-            other.Key = std::valarray<X>(0);
-            other.Val = std::valarray<Y>(0);
+            in.Key = std::valarray<X>(0);
+            in.Val = std::valarray<Y>(0);
         }
-        KeyVal<X, Y>(const KeyVal<X, Y>& other) noexcept :
-            Key(other.Key),
-            Val(other.Val) {}
+        KeyVal<X, Y>(const KeyVal<X, Y>& in) noexcept :
+            Key(in.Key),
+            Val(in.Val) {}
         explicit KeyVal<X, Y>(const std::valarray<X>& key, const std::valarray<Y>& val) :
             Key(std::valarray<X>(key)), Val(std::valarray<X>(val))
         {
@@ -51,14 +52,14 @@ namespace Origin
         }
         ~KeyVal<X, Y>() = default;
     };
-    static auto to_lower(const string& str) -> string
+    static auto toLower(const string& str) -> string
     {
         string ret = str;
         std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
         return ret;
     }
 
-    static auto to_upper(const string& str) -> string
+    static auto toUpper(const string& str) -> string
     {
         string ret = str;
         std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
@@ -255,7 +256,7 @@ namespace Origin
     {
         return str.erase(0, str.find(toErase) + toErase.length());
     }
-    static auto erase_all(string& str, const string& toErase) -> string&
+    static auto eraseAll(string& str, const string& toErase) -> string&
     {
         auto last_pos = str.find_first_not_of(toErase);
         auto pos = str.find_first_of(toErase, last_pos);
@@ -267,20 +268,20 @@ namespace Origin
         }
         return str;
     }
-    inline auto num_digits(f128 num, string& buf) -> f128
+    inline auto numDigits(f128 num, string& buf) -> f128
     {
         f128 ret = floor(log10(num) + 1);
         buf = std::to_string(static_cast<u64>(ret));
         return ret;
     }
 
-    inline auto num_to_string(f128 num, u32 precision = 9) -> string
+    inline auto numToString(f128 num, u32 precision = 9) -> string
     {
         string buffer(38, '\0');
         string digits(38, '\0');
         if (precision == 0 || precision > 38)
         {
-            precision = static_cast<u32>(num_digits(num, digits));
+            precision = static_cast<u32>(numDigits(num, digits));
         }
         std::stringstream ss;
         ss.precision(precision);
@@ -289,6 +290,6 @@ namespace Origin
         ss >> buffer;
         return buffer;
     }
-} // namespace Origin
+} // namespace origin
 
 #endif // STRING_HPP

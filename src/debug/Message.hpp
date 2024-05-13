@@ -1,16 +1,14 @@
 #pragma once
-#include <filesystem>
 #ifndef MESSAGE_HPP
 #define MESSAGE_HPP
 #include "Basic.hpp"
-#include <sstream>
 
 #include <string>
 
 #ifndef ASSERT_ENABLED
 #define ASSERT_ENABLED true
 #endif
-namespace Origin
+namespace origin
 {
     enum class Code : i8
     {
@@ -53,88 +51,88 @@ namespace Origin
         std::string footer;
     } __attribute__((aligned(128)));
     static Message msg;
-    auto get_header_txt() -> std::string;
-    auto get_end_txt(const std::string& begin, const i8& padding, const std::string& ending) -> std::string;
-    auto get_info_txt(const std::string& info) -> std::string;
-    auto get_footer_txt() -> std::string;
-    auto get_code() -> Code;
-    auto set_code(Code code) -> Code;
+    auto getHeaderTxt() -> std::string;
+    auto getEndTxt(const std::string& begin, const i8& padding, const std::string& ending) -> std::string;
+    auto getInfoTxt(const std::string& info) -> std::string;
+    auto getFooterTxt() -> std::string;
+    auto getCode() -> Code;
+    auto setCode(Code code) -> Code;
     auto is(Code status) -> bool;
     auto reset() -> void;
-    auto set_status(Code status) -> Code;
-    auto set_level(Code level) -> Code;
-    auto get_level() -> Code;
-    auto get_status() -> Code;
+    auto setStatus(Code status) -> Code;
+    auto setLevel(Code level) -> Code;
+    auto getLevel() -> Code;
+    auto getStatus() -> Code;
 
-    auto set_offset(Code offset) -> Code;
+    auto setOffset(Code offset) -> Code;
 
 #define get_file_txt() ("#-File: [ " + std::string(__FILE__) + " ]")
 #define get_function_txt() ("#-Function: [ " + std::string(__PRETTY_FUNCTION__) + " ]")
 #define get_line_txt() ("#-Line: [ " + std::to_string(__LINE__) + " ]")
 #define get_time_txt() ("#-Time: [ " + std::string(__TIME__) + " ]")
 
-#define HEADER_TXT get_header_txt() + '\n'
+#define HEADER_TXT getHeaderTxt() + '\n'
 #define FILE_TXT_BEGIN get_file_txt()
-#define FILE_TXT (FILE_TXT_BEGIN + get_end_txt(get_file_txt(), ' ', "#"))
+#define FILE_TXT (FILE_TXT_BEGIN + getEndTxt(get_file_txt(), ' ', "#"))
 #define LINE_TXT_BEGIN get_line_txt()
-#define LINE_TXT (LINE_TXT_BEGIN + get_end_txt(LINE_TXT_BEGIN, ' ', "#"))
+#define LINE_TXT (LINE_TXT_BEGIN + getEndTxt(LINE_TXT_BEGIN, ' ', "#"))
 #define FUNCTION_TXT_BEGIN get_function_txt()
-#define FUNCTION_TXT (FUNCTION_TXT_BEGIN + get_end_txt(FUNCTION_TXT_BEGIN, ' ', "#"))
+#define FUNCTION_TXT (FUNCTION_TXT_BEGIN + getEndTxt(FUNCTION_TXT_BEGIN, ' ', "#"))
 #define TIME_TXT_BEGIN get_time_txt()
-#define TIME_TXT (TIME_TXT_BEGIN + get_end_txt(TIME_TXT_BEGIN, ' ', "#"))
-#define INFO_TXT(mesg) get_info_txt(mesg)
-#define FOOTER_TXT_BEGIN get_footer_txt()
-#define FOOTER_TXT (FOOTER_TXT_BEGIN + get_end_txt(FOOTER_TXT_BEGIN, '#', "#"))
+#define TIME_TXT (TIME_TXT_BEGIN + getEndTxt(TIME_TXT_BEGIN, ' ', "#"))
+#define INFO_TXT(mesg) getInfoTxt(mesg)
+#define FOOTER_TXT_BEGIN getFooterTxt()
+#define FOOTER_TXT (FOOTER_TXT_BEGIN + getEndTxt(FOOTER_TXT_BEGIN, '#', "#"))
 #define MSG(mesg) (HEADER_TXT + FILE_TXT + FUNCTION_TXT + LINE_TXT + TIME_TXT + INFO_TXT(mesg) + FOOTER_TXT)
 #define DBG(mesg, status)                                                                \
-    set_status(status);                                                                  \
+    setStatus(status);                                                                   \
     switch (status)                                                                      \
     {                                                                                    \
     case Code::Any:                                                                      \
         if (is(Code::Any))                                                               \
         {                                                                                \
             std::cout << MSG(mesg) << "\n";                                              \
-            set_code(status);                                                            \
+            setCode(status);                                                             \
         }                                                                                \
         break;                                                                           \
     case Code::Info:                                                                     \
         if (is(Code::Info))                                                              \
         {                                                                                \
             std::cout << MSG(mesg) << "\n";                                              \
-            set_code(Code::Info);                                                        \
+            setCode(Code::Info);                                                         \
         }                                                                                \
         break;                                                                           \
     case Code::Warning:                                                                  \
         if (is(Code::Warning))                                                           \
         {                                                                                \
             std::cout << MSG(mesg) << "\n";                                              \
-            set_code(Code::Warning);                                                     \
+            setCode(Code::Warning);                                                      \
         }                                                                                \
         break;                                                                           \
     case Code::Error:                                                                    \
         if (is(Code::Error))                                                             \
         {                                                                                \
             std::cout << MSG(mesg) << "\n";                                              \
-            set_code(Code::Error);                                                       \
+            setCode(Code::Error);                                                        \
         }                                                                                \
         break;                                                                           \
     case Code::Fatal:                                                                    \
         if (is(Code::Fatal))                                                             \
         {                                                                                \
             std::cout << MSG(mesg) << "\n";                                              \
-            set_code(Code::Fatal);                                                       \
+            setCode(Code::Fatal);                                                        \
         }                                                                                \
         break;                                                                           \
     case Code::None:                                                                     \
         if (is(Code::None))                                                              \
         {                                                                                \
-            set_code(Code::None);                                                        \
+            setCode(Code::None);                                                         \
         }                                                                                \
         break;                                                                           \
     default:                                                                             \
         std::cout << MSG("ERROR: Invalid status Code: " + std::to_string((i32)(status))) \
                   << "\n";                                                               \
-        set_code(Code::Error);                                                           \
+        setCode(Code::Error);                                                            \
         break;                                                                           \
     }
 #define debug(mesg, status) DBG(mesg, status)
@@ -144,6 +142,6 @@ namespace Origin
     {                                     \
         DBG(mesg, Code::Error);           \
     }
-} // namespace Origin
+} // namespace origin
 
 #endif // MSG_HPP

@@ -5,7 +5,7 @@
 #include <string>
 #include <termios.h>
 #include <unistd.h>
-namespace Origin
+namespace origin
 {
     constexpr i32 FIONREAD = 0x541B;
     using std::string;
@@ -14,8 +14,8 @@ namespace Origin
     private:
         i32 Height{ 25 };
         i32 Width{ 80 };
-        i32 BgColor{ 0 };
-        i32 FgColor{ 15 };
+        i32 Bg_color{ 0 };
+        i32 Fg_color{ 15 };
 
     public:
         /* Console color identifiers*/
@@ -31,49 +31,49 @@ namespace Origin
         Console() :
             Console(25, 80, 0, 15) {}
         Console(i32 h, i32 w, i32 bg, i32 fg) :
-            Height(h), Width(w), BgColor(bg), FgColor(fg) {}
+            Height(h), Width(w), Bg_color(bg), Fg_color(fg) {}
         ~Console() = default;
-        auto clear_eol() -> void;
-        auto insert_line() -> void;
-        auto goto_xy(i32 x, i32 y) -> void;
+        auto clearEol() -> void;
+        auto insertLine() -> void;
+        auto gotoXy(i32 x, i32 y) -> void;
 
-        auto clear_screen() -> void;
+        auto clearScreen() -> void;
 
-        auto set_bg_color(i32 color) -> void;
-        auto set_fg_color(i32 color) -> void;
-        auto print_bg_color(i32 color) -> void;
+        auto setBgColor(i32 color) -> void;
+        auto setFgColor(i32 color) -> void;
+        auto printBgColor(i32 color) -> void;
 
-        auto print_fg_color(i32 color) -> void;
+        auto printFgColor(i32 color) -> void;
 
-        auto print_color(i32 fg, i32 bg) -> void;
+        auto printColor(i32 fg, i32 bg) -> void;
 
-        auto unget_char(i32 ch) -> i32;
-        auto get_char(bool echo = false) -> i32;
+        auto ungetChar(i32 ch) -> i32;
+        auto getChar(bool echo = false) -> i32;
 
-        auto get_xy(i32& x, i32& y) -> i32;
+        auto getXy(i32& x, i32& y) -> i32;
 
-        auto get_x() -> i32;
+        auto getX() -> i32;
 
-        auto get_y() -> i32;
+        auto getY() -> i32;
 
-        auto key_hit() -> i32;
-        auto print_char(i8 c) -> i8;
-        auto print_str(const string& str) -> i32;
-        auto print_str_color(const string& str, i32 fg, i32 bg) -> i32;
-        auto change_color(i32 fg, i32 bg) -> i32;
-        auto change_color(i32 color) -> i32;
-        auto print_c_str(const i8* str) -> i32;
-        auto get_home() -> string;
-        auto get_cwd() -> string;
-        auto get_user() -> string;
-        auto get_hostname() -> string;
-        auto is_valid_pass(const string& passwd) -> bool;
-        auto get_pass(const string& prompt) -> string;
-        auto get_env(const string& name) -> string;
-        auto read_text(i32 l, i32 t, i32 r, i32 b, void* destination)
+        auto keyHit() -> i32;
+        auto printChar(i8 c) -> i8;
+        auto printStr(const string& str) -> i32;
+        auto printStrColor(const string& str, i32 fg, i32 bg) -> i32;
+        auto changeColor(i32 fg, i32 bg) -> i32;
+        auto changeColor(i32 color) -> i32;
+        auto printCStr(const i8* str) -> i32;
+        auto getHome() -> string;
+        auto getCwd() -> string;
+        auto getUser() -> string;
+        auto getHostname() -> string;
+        auto isValidPass(const string& passwd) -> bool;
+        auto getPass(const string& prompt) -> string;
+        auto getEnv(const string& name) -> string;
+        auto readText(i32 l, i32 t, i32 r, i32 b, void* destination)
             -> size_t;
-        auto write_text(i32 l, i32 t, i32 r, i32 b, void* source) -> size_t;
+        auto writeText(i32 l, i32 t, i32 r, i32 b, void* source) -> size_t;
     } __attribute__((aligned(16)));
     static Console con = Console(25, 80, 0, 15);
-} // namespace Origin
+} // namespace origin
 #endif

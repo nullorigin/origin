@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <memory>
-namespace Origin
+namespace origin
 {
     enum : const u8
     {
@@ -40,19 +40,19 @@ namespace Origin
     public:
         explicit Biquad(u8 type = Lowpass, f64 Fc = 0.50, f64 Q = 0.707, f64 peakGainDB = 0.0);
         ~Biquad();
-        void set_type(u8 type);
-        void set_q(f64 Q);
-        void set_fc(f64 Fc);
-        void set_peak_gain(f64 peakGainDB);
-        void set_biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
+        void setType(u8 type);
+        void setQ(f64 Q);
+        void setFc(f64 Fc);
+        void setPeakGain(f64 peakGainDB);
+        void setBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
         auto process(f64 in) -> f64;
 
     protected:
-        void calc_biquad();
+        void calcBiquad();
 
         i32 Type;
         f64 A0, A1, A2, B1, B2;
-        f64 Fc, Q, PeakGain;
+        f64 Fc, Q, Peak_gain;
         f64 Z1, Z2;
     };
 
@@ -171,5 +171,5 @@ namespace Origin
         I = i;
         return r;
     }
-} // namespace Origin
+} // namespace origin
 #endif // Biquad_h

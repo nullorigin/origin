@@ -2,12 +2,15 @@
 #include "Console.hpp"
 #include "Message.hpp"
 #include "Origin.hpp"
+#include <functional>
+#include <memory>
 #include "Timer.hpp"
+#include "Vector.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <unistd.h>
-namespace Origin
+namespace origin
 {
     const i32 Run::RUN_MAP[17][8] = {
         { UNINITIALIZED, INITIALIZING, -1, -1, -1, -1, -1, -1 },
@@ -51,97 +54,106 @@ namespace Origin
     const u32 Run::CMD_LEN[16] = { 4, 1, 5, 1, 5, 1, 6, 1, 4, 1, 7, 1, 4, 1, 4, 1 };
     const u32 Run::CMD_MAP[16] = { 1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15 };
     const string Run::CMD_ARG[16] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
-
+    Run::Run()
+    {
+        setMaxCycles(0);
+        setRunState(UNINITIALIZED);
+    }
+    Run::Run(i32 /*argc*/, i8** /*argv*/)
+    {
+        setMaxCycles(0);
+        setRunState(UNINITIALIZED);
+    }
     auto Run::loop(f128 runtime) -> Code
     {
-        RunStatus = set_max_cycles();
+        Run_status = setMaxCycles();
         if (runtime > 0)
         {
-            Timers[0].set_limit(runtime);
+            Timers[0].setLimit(runtime);
         }
         else
         {
-            Timers[0].set_limit(INFINITY);
+            Timers[0].setLimit(INFINITY);
         }
-        do_init();
+        doInit();
         while (true)
         {
-            RunStatus = process_cycles();
-            RunStatus = process_output();
-            RunStatus = process_input();
-            if (get_run_state() >= EXITING || Timers[0].get_remaining() <= 0)
+            Run_status = processCycles();
+            Run_status = processIO();
+
+            if (getRunState() >= EXITING || Timers[0].getRemaining() <= 0)
             {
-                return do_exit();
+                return doExit();
             }
         }
-        return do_kill();
+        return doKill();
     }
-    auto Run::do_init() -> Code
+    auto Run::doInit() -> Code
     {
-        if (RunState == UNINITIALIZED)
+        if (Run_state == UNINITIALIZED)
         {
-            if (set_run_state(INITIALIZING) == Code::Success)
+            if (setRunState(INITIALIZING) == Code::Success)
             {
-                Code code = set_run_state(INITIALIZED);
+                Code code = setRunState(INITIALIZED);
                 return code;
             }
         }
         return Code::Error;
     }
-    auto Run::do_start() -> Code
+    auto Run::doStart() -> Code
     {
-        if (set_run_state(STARTING) == Code::Success)
+        if (setRunState(STARTING) == Code::Success)
         {
             Timers[0].start();
-            return set_run_state(STARTED);
+            return setRunState(STARTED);
         }
         return Code::Error;
     }
-    auto Run::do_pause() -> Code
+    auto Run::doPause() -> Code
     {
-        if (set_run_state(PAUSING) == Code::Success)
+        if (setRunState(PAUSING) == Code::Success)
         {
             Timers[0].pause();
-            return set_run_state(PAUSED);
+            return setRunState(PAUSED);
         }
         return Code::Failure;
     }
-    auto Run::do_resume() -> Code
+    auto Run::doResume() -> Code
     {
-        if (set_run_state(RESUMING) == Code::Success)
+        if (setRunState(RESUMING) == Code::Success)
         {
             Timers[0].resume();
-            return set_run_state(RESUMED);
+            return setRunState(RESUMED);
         }
         return Code::Failure;
     }
-    auto Run::do_stop() -> Code
+    auto Run::doStop() -> Code
     {
-        if (set_run_state(STOPPING) == Code::Success)
+        if (setRunState(STOPPING) == Code::Success)
         {
             Timers[0].stop();
-            reset_cycles();
-            return set_run_state(STOPPED);
+            resetCycles();
+            return setRunState(STOPPED);
         }
 
         return Code::Failure;
     }
-    auto Run::do_restart() -> Code
+    auto Run::doRestart() -> Code
     {
-        if (set_run_state(RESTARTING) == Code::Success)
+        if (setRunState(RESTARTING) == Code::Success)
         {
             Timers[0].restart();
-            reset_cycles();
-            return set_run_state(RESTARTED);
+            resetCycles();
+            return setRunState(RESTARTED);
         }
         return Code::Failure;
     }
-    auto Run::do_exit() -> Code
+    auto Run::doExit() -> Code
     {
-        if (set_run_state(EXITING) == Code::Success)
+        if (setRunState(EXITING) == Code::Success)
         {
             Timers[0].stop();
-            reset_cycles();
+            resetCycles();
             Cycles = 0;
             try
             {
@@ -150,33 +162,32 @@ namespace Origin
             catch (...)
             {
                 debug("Failed to exit process.", Code::Error);
-                return set_run_status(Code::Failure);
+                return Code::Failure;
             }
-            set_run_status(Code::Success);
-            return set_run_state(EXITED);
+            return setRunState(EXITED);
         }
         return Code::Failure;
     }
-    auto Run::do_kill() -> Code
+    auto Run::doKill() -> Code
     {
         Timers[0].stop();
-        reset_cycles();
-        if (set_run_state(KILLING) == Code::Success)
+        resetCycles();
+        if (setRunState(KILLING) == Code::Success)
         {
             try
             {
-                std::exit(-1);
+                std::quick_exit(-1);
             }
             catch (...)
             {
                 debug("Failed to kill process.", Code::Error);
-                return set_run_status(Code::Failure);
+                return setRunStatus(Code::Failure);
             }
-            return set_run_state(KILLED);
+            return setRunState(KILLED);
         }
         return Code::Failure;
     }
-    auto Run::get_arg(const string& command) -> string
+    auto Run::getArg(const string& command) -> string
     {
         for (i8 i = 0; i < 16; i++)
         {
@@ -187,7 +198,7 @@ namespace Origin
         }
         return "";
     }
-    auto Run::get_cmd(const string& command) -> u32
+    auto Run::getCmd(const string& command) -> u32
     {
         for (i8 i = 0; i < 16; i++)
         {
@@ -198,9 +209,9 @@ namespace Origin
         }
         return -1;
     }
-    auto Run::is_running() const -> Code
+    auto Run::isRunning() const -> Code
     {
-        i8 const state = get_run_state();
+        i8 const state = getRunState();
         if (((state < PAUSED) && (state > UNINITIALIZED)) ||
             (state < EXITED && state >= RESUMING && state != STOPPED &&
              state != RESTARTED))
@@ -209,37 +220,37 @@ namespace Origin
         }
         return Code::False;
     }
-    auto Run::increment_cycles() -> Code
+    auto Run::incrementCycles() -> Code
     {
-        if (is_running() == Code::True && Timers[0].is_running())
+        if (isRunning() == Code::True && Timers[0].isRunning())
         {
             Cycles++;
         }
-        if (Cycles > MaxCycles)
+        if (Cycles > Max_cycles)
         {
-            return do_exit();
+            return doExit();
         }
         return Code::Failure;
     }
-    auto Run::set_max_cycles(u64 cycles) -> Code
+    auto Run::setMaxCycles(u64 cycles) -> Code
     {
         if (cycles <= 0)
         {
-            MaxCycles = INFINITY;
+            Max_cycles = INFINITY;
             return Code::Warning;
         }
-        MaxCycles = cycles;
+        Max_cycles = cycles;
         return Code::Success;
     }
 
-    auto Run::set_run_state(i32 rtarget) -> Code
+    auto Run::setRunState(i32 rtarget) -> Code
     {
         Code rstatus = Code::None;
-        i32 rstate = get_run_state();
+        i32 rstate = getRunState();
         i32 i = 0;
         if (rstate == rtarget)
         {
-            return set_run_status(Code::Success);
+            return setRunStatus(Code::Success);
         }
         if (rtarget >= 1 && rtarget < 17)
         {
@@ -253,77 +264,77 @@ namespace Origin
                 i++;
             }
         }
-        RunState = rstate;
+        Run_state = rstate;
         if (rstatus != Code::Success)
         {
-            return set_run_status(Code::Failure);
+            return setRunStatus(Code::Failure);
         }
-        return set_run_status(Code::Success);
+        return setRunStatus(Code::Success);
     }
-    auto Run::process_cycles() -> Code
+    auto Run::processCycles() -> Code
     {
-        increment_cycles();
-        if (get_cycles() >= get_max_cycles() && get_max_cycles() > 0)
+        incrementCycles();
+        if (getCycles() >= getMaxCycles() && getMaxCycles() > 0)
         {
-            return do_exit();
+            return doExit();
         }
         return Code::Success;
     }
-    auto Run::process_state(i32 state) -> Code
+    auto Run::processState(i32 state) -> Code
     {
         switch (state)
         {
         case INITIALIZING:
-            if (set_run_status(do_init()) == Code::Success)
+            if (setRunStatus(doInit()) == Code::Success)
             {
                 debug("Initialized", Code::Info);
                 return Code::Initialized;
             }
             break;
         case STARTING:
-            if (set_run_status(do_start()) == Code::Success)
+            if (setRunStatus(doStart()) == Code::Success)
             {
                 debug("Started", Code::Info);
                 return Code::Started;
             }
             break;
         case PAUSING:
-            if (set_run_status(do_pause()) == Code::Success)
+            if (setRunStatus(doPause()) == Code::Success)
             {
                 debug("Paused", Code::Info);
                 return Code::Paused;
             }
             break;
         case RESUMING:
-            if (set_run_status(do_resume()) == Code::Success)
+            if (setRunStatus(doResume()) == Code::Success)
             {
                 debug("Resumed", Code::Info);
                 return Code::Resumed;
             }
             break;
         case STOPPING:
-            if (set_run_status(do_stop()) == Code::Success)
+            if (setRunStatus(doStop()) == Code::Success)
             {
                 debug("Stopped", Code::Info);
                 return Code::Stopped;
             }
             break;
         case RESTARTING:
-            if (set_run_status(do_restart()) == Code::Success)
+            if (setRunStatus(doRestart()) == Code::Success)
             {
                 debug("Restarted", Code::Info);
                 return Code::Restarted;
             }
             break;
         case EXITING:
-            if (set_run_status(do_exit()) == Code::Success)
+            if (setRunStatus(doExit()) == Code::Success)
             {
                 debug("Exited", Code::Info);
                 return Code::Exited;
             }
             break;
         case KILLING:
-            if (set_run_status(do_kill()) == Code::Success)
+            if (setRunStatus(doKill()) == Code::Success)
             {
                 debug("Killed", Code::Info);
                 return Code::Killed;
@@ -335,51 +346,54 @@ namespace Origin
         }
         return Code::Failure;
     }
-    auto Run::set_min_args(u32 min_args) -> Code
+    auto Run::setMinArgs(u32 min_args) -> Code
     {
         if (min_args == 0)
         {
             debug("Minimum number of arguments was set to 0.", Code::Info);
             return Code::Info;
         }
-        MinArgs = min_args;
+        Min_args = min_args;
         return Code::Success;
     }
-    auto Run::get_min_args() -> u32
+    auto Run::getMinArgs() -> u32
     {
-        if (MinArgs == 0)
+        if (Min_args == 0)
         {
             debug("Minimum number of arguments is set to 0.", Code::Info);
             return 0;
         }
-        if (MinArgs < 0)
+        if (Min_args < 0)
         {
             debug("Minimum number of arguments is less than 0.", Code::Error);
-            MinArgs = 0;
+
+            return Min_args = 0;
         }
-        return MinArgs;
+        return Min_args;
     }
     auto Run::call(const string& cmd) -> string
     {
-        string output;
+        string out;
         std::unique_ptr<FILE, decltype(&pclose)> in{ popen(cmd.c_str(), "r"), pclose };
         if (!in)
         {
             debug("Null pointer passed to popen().", Code::Error);
+            setStatus(Code::Failure);
             return "";
         }
         i8 buffer[128];
         while (fgets(buffer, sizeof(buffer), in.get()) != nullptr)
         {
-            output += buffer;
+            out += buffer;
         }
         if (ferror(in.get()) != 0)
         {
             debug("Error while executing command.", Code::Error);
+            setStatus(Code::Failure);
             return "";
         }
         debug("Command executed successfully.", Code::Info);
-        return output;
+        return out;
     }
     auto Run::call(const i8p cmd) -> string
     {
@@ -415,17 +429,17 @@ namespace Origin
             debug("Null pointer passed to Exec().", Code::Error);
             return Code::Failure;
         }
-        string output = call(string(command) + " " + string(argv[0]));
-        if (output.length() <= string::npos && output.length() > 0)
+        string out = call(string(command) + " " + string(argv[0]));
+        if (out.length() <= string::npos && out.length() > 0)
         {
             debug("Invalid command string passed.", Code::Error);
             return Code::Failure;
         }
-        Output = output.substr(0, output.length() - 1);
+        Output = out.substr(0, out.length() - 1);
         debug("Command Successfully Executed.", Code::Info);
         return Code::Success;
     }
-    auto Run::parse(const string& cmd) -> string
+    auto Run::parse(const string& cmd) const -> string
     {
         if (cmd.length() <= string::npos && cmd.length() > 0)
         {
@@ -434,34 +448,30 @@ namespace Origin
         }
         return cmd;
     }
-    auto Run::parse(const i8p cmd) -> string
-    {
-        return { cmd };
-    }
-    auto Run::get_text(i32 name, const std::string& dlim) -> std::string
+    auto Run::getText(i32 name, const std::string& dlim) -> std::string
     {
         std::string txt[] = {
-            (">-(" + con.get_user() + "@" + con.get_hostname() + ")-$ [" +
-             get_input() + "]" + dlim),
-            (" (State)=[" + get_state_string(get_run_state()) + "]" + dlim),
-            (" (Cycles)=[" + std::to_string(get_cycles()) + "]" + dlim),
-            (" (Timer)=[" + (Timers[0].get_string(TimeUnit::Second) + "s]") + dlim),
-            (dlim + ExecText + dlim)
+            (">-(" + con.getUser() + "@" + con.getHostname() + ")-$ [" +
+             getInput() + "]" + dlim),
+            (" (State)=[" + getStateString(getRunState()) + "]" + dlim),
+            (" (Cycles)=[" + std::to_string(getCycles()) + "]" + dlim),
+            (" (Timer)=[" + (Timers[0].getString(TimeUnit::Second) + "s]") + dlim),
+            (dlim + Exec_text + dlim)
         };
-        if (this->is_running() == Code::True)
+        if (this->isRunning() == Code::True)
         {
-            TimerText = txt[3];
+            Timer_text = txt[3];
         }
         else if (Timers[0].is(TimerState::Paused))
         {
-            txt[3] = TimerText;
+            txt[3] = Timer_text;
         }
         std::string txt_out;
         if (name >= 0 && name < 5)
         {
             txt_out = txt[name];
         }
-        else if (name == AllTxt)
+        else if (name == ALL_TXT)
         {
             for (i32 i = 0; i < 5; i++)
             {
@@ -470,97 +480,133 @@ namespace Origin
         }
         return txt_out;
     }
-    auto Run::set_input(const std::string& input, bool format) -> Code
+    auto Run::setInput(const std::string& in, bool format) -> Code
     {
         Input.clear();
         if (format)
         {
-            for (i8 i : input)
+            try
             {
-                if (i != '\0' && i != '\r' && i != cast<i8>(8))
+                for (i8 i : in)
                 {
-                    Input += i;
+                    if (i != '\0' && i != '\r' && i != cast<i8>(8))
+                    {
+                        Input += i;
+                    }
                 }
+            }
+            catch (...)
+            {
+                debug("Failed to format input.", Code::Error);
+                return Code::Failure;
             }
         }
         else
         {
-            Input = input;
+            Input = in;
         }
         return Code::Success;
     }
-    auto Run::set_output(const std::string& output, bool format) -> Code
+    auto Run::setOutput(const std::string& out, bool format) -> Code
     {
         Output.clear();
         if (format)
         {
-            for (i8 o : output)
+            try
             {
-                if (o != '\0' && o != '\r')
+                for (i8 o : out)
                 {
-                    Output.push_back(o);
+                    if (o != '\0' && o != '\r')
+                    {
+                        Output.push_back(o);
+                    }
                 }
+            }
+            catch (...)
+            {
+                debug("Failed to format output.", Code::Error);
+                return Code::Failure;
             }
         }
         else
         {
-            Output = output;
+            Output = out;
         }
         return Code::Success;
     }
-    auto Run::process_input() -> Code
+    auto Run::processOut() -> Code
     {
-        i32 cur_state = get_run_state();
-        if ((cur_state >= UNINITIALIZED) && (cur_state <= EXITED))
+        if (Timer::now() >= Time_out_max)
         {
-            std::string in = get_input();
-            if (con.key_hit() != 0)
+            Time_out_max = (Timer::now() + 10000000);
+            try
             {
-                i32 const i = con.get_char();
-                i8 ch = static_cast<i8>(i);
-                if ((ch != '\n') && (ch != '\r') && (ch != '\0'))
+                con.clearScreen();
+                flush(std::cout);
+                flush(std::cerr);
+                const std::string out = getText(ALL_TXT);
+                if (setOutput(out, false) != Code::Success)
                 {
-                    if (ch == 8 || ch == 127 || ch == 27)
-                    {
-                        in = in.substr(0, in.size() - 1);
-                    }
-                    else
-                    {
-                        in += ch;
-                    }
-                    in.shrink_to_fit();
-                    return set_input(in, true);
+                    return Code::Failure;
                 }
-
-                cur_state = get_cmd(in);
-                if (cur_state != -1)
-                {
-                    return process_state(cur_state);
-                }
-                if (!in.empty() || ch == '\n')
-                {
-                    ExecText = (call(in));
-                }
-                return set_input("", false);
+                std::cout << getOutput() << std::flush;
             }
-            return Code::Success;
+            catch (...)
+            {
+                return Code::Failure;
+            }
         }
-        return Code::Failure;
+        return Code::Success;
+    }
+    auto Run::processIn() -> Code
+    {
+        i32 cur_state = getRunState();
+        const Code rstatus = getRunStatus();
+        if ((Timer::now() >= Time_in_max) && (rstatus != Code::Failure && rstatus != Code::Error))
+        {
+            Time_in_max = (Timer::now() + 10000);
+            if ((cur_state > INITIALIZING) && (cur_state <= EXITED))
+            {
+                std::string in = getInput();
+                if (con.keyHit() != 0)
+                {
+                    i32 const i = con.getChar();
+                    i8 ch = static_cast<i8>(i);
+                    if ((ch != '\n') && (ch != '\r') && (ch != '\0'))
+                    {
+                        if (ch == 8 || ch == 127 || ch == 27)
+                        {
+                            in = in.substr(0, in.size() - 1);
+                        }
+                        else
+                        {
+                            in += ch;
+                        }
+                        in.shrink_to_fit();
+                        return setInput(in, true);
+                    }
+
+                    cur_state = getCmd(in);
+                    if (cur_state != -1)
+                    {
+                        return processState(cur_state);
+                    }
+                    if (!in.empty() || ch == '\n')
+                    {
+                        Exec_text = (call(in));
+                    }
+                    return setInput("", false);
+                }
+                return Code::Success;
+            }
+        }
+        return rstatus;
+    }
+    auto Run::processIO() -> Code
+    {
+        Code rstatus = getRunStatus();
+        const bool success = ((processIn() == Code::Success) && (processOut() == Code::Success) && (rstatus <= Code::Error) && (rstatus != Code::Failure));
+        return (!success) ? Code::Failure : Code::Success;
     }
 
-    auto Run::process_output() -> Code
-    {
-        if (Timer::now() >= TimeMax)
-        {
-            TimeMax = (Timer::now() + 10000000);
-            con.clear_screen();
-            flush(std::cout);
-            flush(std::cerr);
-            std::string const out = get_text(AllTxt);
-            set_output(out, false);
-            std::cout << get_output() << std::flush;
-            return Code::Success;
-        }
-        return Code::None;
-    }
-} // namespace Origin
+} // namespace origin

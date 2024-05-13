@@ -1,16 +1,16 @@
 #include "Geometry.hpp"
-namespace Origin
+namespace origin
 {
 
-    auto cross(Vec3 const& _lhs, Vec3 const& rhs) -> Vec3
+    auto cross(Vec3 const& v0, Vec3 const& v1) -> Vec3
     {
-        return { _lhs.Y * rhs.Z - _lhs.Z * rhs.Y,
-                 _lhs.Z * rhs.X - _lhs.X * rhs.Z,
-                 _lhs.X * rhs.Y - _lhs.Y * rhs.X };
+        return { v0.Y * v1.Z - v0.Z * v1.Y,
+                 v0.Z * v1.X - v0.X * v1.Z,
+                 v0.X * v1.Y - v0.Y * v1.X };
     }
-    auto cross(Vec2 const& _lhs, Vec2 const& rhs) -> Vec2
+    auto cross(Vec2 const& v0, Vec2 const& v1) -> Vec2
     {
-        return { _lhs.Y * rhs.X - _lhs.X * rhs.Y,
-                 _lhs.X * rhs.Y - _lhs.Y * rhs.X };
+        return { v0.Y * v1.X - v0.X * v1.Y,
+                 v0.X * v1.Y - v0.Y * v1.X };
     }
-} // namespace Origin
+} // namespace origin

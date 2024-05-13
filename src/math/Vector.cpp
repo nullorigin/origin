@@ -1,6 +1,5 @@
-#include "Vector.hpp"
 
-namespace Origin
+namespace origin
 {
 
-} // namespace Origin
+} // namespace origin

@@ -17,52 +17,52 @@
 //
 
 #include "Biquad.hpp"
-namespace Origin
+namespace origin
 {
     Biquad::Biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB)
     {
         A0 = 1.0;
         A1 = A2 = B1 = B2 = 0.0;
-        set_biquad(type, Fc, Q, peakGainDB);
+        setBiquad(type, Fc, Q, peakGainDB);
         Z1 = Z2 = 0.0;
     }
 
-    void Biquad::set_type(u8 type)
+    void Biquad::setType(u8 type)
     {
         this->Type = type;
-        calc_biquad();
+        calcBiquad();
     }
 
-    void Biquad::set_q(f64 Q)
+    void Biquad::setQ(f64 Q)
     {
         this->Q = Q;
-        calc_biquad();
+        calcBiquad();
     }
 
-    void Biquad::set_fc(f64 Fc)
+    void Biquad::setFc(f64 Fc)
     {
         this->Fc = Fc;
-        calc_biquad();
+        calcBiquad();
     }
 
-    void Biquad::set_peak_gain(f64 peakGainDB)
+    void Biquad::setPeakGain(f64 peakGainDB)
     {
-        this->PeakGain = peakGainDB;
-        calc_biquad();
+        this->Peak_gain = peakGainDB;
+        calcBiquad();
     }
 
-    void Biquad::set_biquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB)
+    void Biquad::setBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB)
     {
         this->Type = type;
         this->Q = Q;
         this->Fc = Fc;
-        set_peak_gain(peakGainDB);
+        setPeakGain(peakGainDB);
     }
 
-    void Biquad::calc_biquad()
+    void Biquad::calcBiquad()
     {
         f64 norm = 0.0;
-        const f64 v = powi(abs(PeakGain) / 20.0, 10);
+        const f64 v = powi(abs(Peak_gain) / 20.0, 10);
         const f64 k = tan(PI * Fc);
         const f64 v2 = v * 2;
         const f64 kk = k * k;
@@ -108,7 +108,7 @@ namespace Origin
             break;
 
         case Peak:
-            if (PeakGain >= 0)
+            if (Peak_gain >= 0)
             { // boost
                 norm = 1 / (1 + 1 / Q * kkk);
                 A0 = (1 + v / Q * k + kk) * norm;
@@ -128,7 +128,7 @@ namespace Origin
             }
             break;
         case Lowshelf:
-            if (PeakGain >= 0)
+            if (Peak_gain >= 0)
             { // boost
                 norm = 1 / (1 + sqrt2 * k + kk);
                 A0 = (1 + sqrt_v2 * k + v * kk) * norm;
@@ -148,7 +148,7 @@ namespace Origin
             }
             break;
         case Highshelf:
-            if (PeakGain >= 0)
+            if (Peak_gain >= 0)
             { // boost
                 norm = 1 / (1 + sqrt2 * k + kk);
                 A0 = (v + sqrt_v2 * k + kk) * norm;
@@ -169,4 +169,4 @@ namespace Origin
             break;
         }
     }
-} // namespace Origin
+} // namespace origin

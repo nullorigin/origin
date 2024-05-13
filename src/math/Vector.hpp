@@ -1,9 +1,11 @@
 #pragma once
 #include <functional>
+#include <map>
 #include <numeric>
+#include <regex>
 #include <string>
 #include <vector>
-namespace Origin
+namespace origin
 {
     template<typename T>
     class Vector : public std::vector<T>
@@ -23,7 +25,7 @@ namespace Origin
         using reverse_iterator = typename std::vector<T>::reverse_iterator;
         using const_reverse_iterator =
             typename std::vector<T>::const_reverse_iterator;
-        auto to_string()
+        auto toString()
         {
             std::string out = "Vector(";
             for (size_type i = 0; i < size(); ++i)
@@ -56,6 +58,12 @@ namespace Origin
             return *this;
         };
         ~Vector() = default;
+        template<typename... Args>
+        explicit Vector(Args... args) :
+            std::vector<T>(args...)
+        {
+            *this = std::vector<T>(args...);
+        }
         Vector(std::initializer_list<T> list) :
             std::vector<T>(list) {}
         explicit Vector(size_type size) :
@@ -103,9 +111,9 @@ namespace Origin
         {
             return (c);
         }
-        void push_back(value_type value) { std::vector<T>::push_back(value); }
+        void pushBack(value_type value) { std::vector<T>::push_back(value); }
 
-        void pop_back() { std::vector<T>::pop_back(); }
+        void popBack() { std::vector<T>::pop_back(); }
         auto data() { return std::vector<T>::data(); }
         void clear() { std::vector<T>::clear(); }
         void erase(const_iterator pos) { std::vector<T>::erase(pos); }
@@ -115,14 +123,9 @@ namespace Origin
         }
         bool empty() const { return std::vector<T>::empty(); }
         size_type size() const { return std::vector<T>::size(); }
-        size_type max_size() const { return std::vector<T>::max_size(); }
+        size_type maxSize() const { return std::vector<T>::max_size(); }
         size_type capacity() const { return std::vector<T>::capacity(); }
         void resize(size_type size) { std::vector<T>::resize(size); }
-
-        void resize(size_type size, value_type value)
-        {
-            std::vector<T>::resize(size, value);
-        }
 
         void assign(size_type size, value_type value)
         {
@@ -133,7 +136,7 @@ namespace Origin
         {
             for (size_type i = 0; i < size; ++i)
             {
-                this->push_back(values[i]);
+                this->pushBack(values[i]);
             }
         }
 
@@ -141,7 +144,7 @@ namespace Origin
         {
             for (size_type i = 0; i < size; ++i)
             {
-                this->push_back(values[i + offset]);
+                this->pushBack(values[i + offset]);
             }
         }
         const_iterator begin() const noexcept { return std::vector<T>::begin(); }
@@ -158,47 +161,48 @@ namespace Origin
         }
         reverse_iterator rbegin() { return std::vector<T>::rbegin(); }
         reverse_iterator rend() { return std::vector<T>::rend(); }
-        typename std::vector<T>::iterator append(Vector other)
+        typename std::vector<T>::iterator append(Vector in)
         {
-            this->reserve(this->size() + other.size());
-            for (auto it = other.begin(); it != other.end(); ++it)
+            this->reserve(this->size() + in.size());
+            for (auto it = in.begin(); it != in.end(); ++it)
             {
-                this->push_back(*it);
+                this->pushBack(*it);
             }
             return begin();
         }
-        typename std::vector<T>::iterator prepend(Vector other)
+        typename std::vector<T>::iterator prepend(Vector in)
         {
-            this->reserve(this->size() + other.size());
-            for (auto it = other.rbegin(); it != other.rend(); ++it)
+            this->reserve(this->size() + in.size());
+            for (auto it = in.rbegin(); it != in.rend(); ++it)
             {
                 this->insert(begin(), *it);
             }
             return this->begin();
         }
-        void resize_and_overwrite(size_type n, value_type value)
+        void resizeAndOverwrite(size_type n, value_type value)
         {
-            std::vector<T>::resize(n, value);
+            this->resize(n);
+            this->fill(this->begin(), this->end(), value);
         }
         auto at(size_type index) { return std::vector<T>::at(index); }
-        auto copy(Vector other)
+        auto copy(Vector in)
         {
-            std::copy(other.begin(), other.end(), this->begin());
+            std::copy(in.begin(), in.end(), this->begin());
         }
-        auto move(Vector other)
+        auto move(Vector in)
         {
-            return std::move(other.begin(), other.end(), this->begin());
+            return std::move(in.begin(), in.end(), this->begin());
         }
-        void destroy() { this->Clear(); }
+        void destroy() { this->clear(); }
         void shift(size_type count)
         {
             std::vector<T>::erase(this->begin(), this->begin() + count);
         }
-        void pop_front() { std::vector<T>::erase(this->begin()); }
-        void swap(Vector& other) { std::vector<T>::swap(other); }
-        auto emplace_back(value_type&& args...)
+        void popFront() { std::vector<T>::erase(this->begin()); }
+        void swap(Vector& in) { std::vector<T>::swap(in); }
+        auto emplaceBack(value_type&& args...)
         {
-            return std::vector<T>::emplace_back(args);
+            return std::vector<T>::emplaceBack(args);
         }
         typename std::vector<T>::iterator emplace(const_iterator pos,
                                                   value_type&& args...)
@@ -210,8 +214,16 @@ namespace Origin
         {
             return std::vector<T>::insert(pos, value);
         }
+        void resizeCheck(size_type size)
+        {
+            if (size != std::vector<T>::size() && size != this->size())
+            {
+                this->reserve(size);
+                std::vector<T>::resize(size);
+            };
+        }
         void reserve(size_type size) { std::vector<T>::reserve(size); }
-        void shrink_to_fit() { std::vector<T>::shrink_to_fit(); }
+        void shrinkToFit() { std::vector<T>::shrink_to_fit(); }
         void sort() { std::sort(this->begin(), this->end()); }
         void reverse() { std::reverse(this->begin(), this->end()); }
         void fill(value_type value) { std::fill(this->begin(), this->end(), value); }
@@ -219,10 +231,18 @@ namespace Origin
         {
             std::fill(this->begin(), this->begin() + size, value);
         }
-        void transform(Vector& other,
+        void fill(size_type x, size_type y, value_type value)
+        {
+            std::fill(this->begin() + x, this->begin() + y, value);
+        }
+        auto back() { return std::vector<T>::back(); }
+        auto front() { return std::vector<T>::front(); }
+        auto regexSearch(const std::basic_regex<value_type>& rx) { return std::regex_search(rx, this->begin(), this->end()); }
+        auto regexReplace(const std::basic_regex<value_type>& rx, const value_type& rep) { return std::regex_replace(this->begin(), this->end(), rx, rep); }
+        auto transform(Vector& in,
                        std::function<void(value_type&, value_type&)> f)
         {
-            std::transform(this->begin(), this->end(), other.begin(), other.end(), f);
+            return std::transform(this->begin(), this->end(), in.begin(), in.end(), f);
         }
         auto find(value_type value) -> iterator
         {
@@ -236,7 +256,7 @@ namespace Origin
         {
             return std::replace(this->begin() + x, this->begin() + y, value);
         }
-        void replace_if(const_iterator first, const_iterator last, std::function<bool(value_type)> f)
+        void replaceIf(const_iterator first, const_iterator last, std::function<bool(value_type)> f)
         {
             return std::replace_if(this->begin(), this->end(), first, last, f);
         }
@@ -257,12 +277,12 @@ namespace Origin
         {
             return *std::min_element(this->begin(), this->end());
         }
-        auto max_index() -> size_type
+        auto maxIndex() -> size_type
         {
             return std::distance(this->begin(),
                                  std::max_element(this->begin(), this->end()));
         }
-        auto min_index() -> size_type
+        auto minIndex() -> size_type
         {
             return std::distance(this->begin(),
                                  std::min_element(this->begin(), this->end()));
@@ -286,125 +306,117 @@ namespace Origin
             }
             return *this;
         }
-        auto operator+(Vector& other) -> Vector
+        auto operator+(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret += other;
-            return ret;
+            Vector out(*this);
+            return out += in;
         }
 
-        auto operator-(Vector& other) -> Vector
+        auto operator-(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret -= other;
-            return ret;
+            Vector out(*this);
+            return out -= in;
         }
 
-        auto operator*(Vector& other) -> Vector
+        auto operator*(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret *= other;
-            return ret;
+            Vector out(*this);
+            return out *= in;
         }
 
-        auto operator/(Vector& other) -> Vector
+        auto operator/(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret /= other;
-            return ret;
+            Vector out(*this);
+            return out /= in;
         }
-        auto operator%(Vector& other) -> Vector
+        auto operator%(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret %= other;
-            return ret;
+            Vector out(*this);
+            return out %= in;
         }
-        auto operator&(Vector& other) -> Vector
+        auto operator&(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret &= other;
-            return ret;
+            Vector out(*this);
+            return out &= in;
         }
-        auto operator|(Vector& other) -> Vector
+        auto operator|(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret |= other;
-            return ret;
+            Vector out(*this);
+            return out |= in;
         }
-        auto operator^(Vector& other) -> Vector
+        auto operator^(Vector& in) -> Vector
         {
-            Vector ret(*this);
-            ret ^= other;
-            return ret;
+            Vector out(*this);
+            return out ^= in;
         }
         auto operator=(value_type value) -> Vector&
         {
             std::fill(this->begin(), this->end(), value);
             return *this;
         }
-        auto operator=(Vector other) noexcept -> Vector&
+        auto operator=(Vector in) noexcept -> Vector&
         {
-            std::move(this->begin(), this->end(), other.begin());
-            swap(other);
+            std::move(this->begin(), this->end(), in.begin());
+            swap(in);
             return *this;
         }
-        auto operator+=(Vector& other) -> Vector&
+        auto operator+=(Vector& in) -> Vector&
         {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::plus<value_type>());
+            std::transform(this->begin(), this->end(), in.begin(), this->begin(), std::plus<value_type>());
             return *this;
         }
-        auto operator-=(Vector& other) -> Vector&
+        auto operator-=(Vector& in) -> Vector&
         {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::minus<value_type>());
+            std::transform(this->begin(), this->end(), in.begin(), this->begin(), std::minus<value_type>());
             return *this;
         }
-        auto operator*=(Vector& other) -> Vector&
+        auto operator*=(Vector& in) -> Vector&
         {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::multiplies<value_type>());
+            std::transform(this->begin(), this->end(), in.begin(), this->begin(), std::multiplies<value_type>());
             return *this;
         }
-        auto operator/=(Vector& other) -> Vector&
+        auto operator/=(Vector& in) -> Vector&
         {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::divides<value_type>());
-            return *this;
-        }
-        template<typename U>
-        auto operator%=(Vector<U>& other) -> Vector&
-        {
-            Vector<T>* ret = *this;
-            std::transform(ret->begin(), ret->end(), other.begin(), ret->begin(), std::modulus<U>());
-            return *this = *ret;
-        }
-        template<typename U>
-        auto operator&=(Vector<U>& other) -> Vector&
-        {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_and<U>());
+            std::transform(this->begin(), this->end(), in.begin(), this->begin(), std::divides<value_type>());
             return *this;
         }
         template<typename U>
-        auto operator|=(Vector<U>& other) -> Vector&
+        auto operator%=(Vector<U>& in) -> Vector&
         {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_or<U>());
+            Vector<T>* out = *this;
+            std::transform(out->begin(), out->end(), in.begin(), out->begin(), std::modulus<U>());
+            return *this = *out;
+        }
+        template<typename U>
+        auto operator&=(Vector<U>& in) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), in.begin(), this->begin(), std::bit_and<U>());
             return *this;
         }
         template<typename U>
-        auto operator^=(Vector<U>& other) -> Vector&
+        auto operator|=(Vector<U>& in) -> Vector&
         {
-            std::transform(this->begin(), this->end(), other.begin(), this->begin(), std::bit_xor<U>());
+            std::transform(this->begin(), this->end(), in.begin(), this->begin(), std::bit_or<U>());
+            return *this;
+        }
+        template<typename U>
+        auto operator^=(Vector<U>& in) -> Vector&
+        {
+            std::transform(this->begin(), this->end(), in.begin(), this->begin(), std::bit_xor<U>());
             return *this;
         }
 
         auto operator-() -> Vector
         {
-            Vector ret(*this);
-            std::transform(ret->begin(), ret.end(), ret.begin(), std::negate<value_type>());
-            return ret;
+            Vector out(*this);
+            std::transform(out->begin(), out.end(), out.begin(), std::negate<value_type>());
+            return out;
         }
         auto operator!() -> Vector
         {
-            Vector ret(*this);
-            std::transform(ret->begin(), ret.end(), ret.begin(), std::logical_not<value_type>());
-            return ret;
+            Vector out(*this);
+            std::transform(out->begin(), out.end(), out.begin(), std::logical_not<value_type>());
+            return out;
         }
         auto operator++() -> Vector&
         {
@@ -426,86 +438,116 @@ namespace Origin
             std::transform(this->begin(), this->end(), this->begin(), std::minus<value_type>());
             return *this;
         }
-        bool operator==(Vector& other)
+        bool operator==(Vector& in)
         {
-            return std::equal(this->begin(), this->end(), other.begin());
+            return std::equal(this->begin(), this->end(), in.begin());
         }
-        bool operator!=(Vector& other)
+        bool operator!=(Vector& in)
         {
-            return !std::equal(this->begin(), this->end(), other.begin());
+            return !std::equal(this->begin(), this->end(), in.begin());
         }
-        bool operator<(Vector& other)
+        bool operator<(Vector& in)
         {
-            return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end());
+            return std::lexicographical_compare(this->begin(), this->end(), in.begin(), in.end());
         }
-        bool operator>(Vector& other)
+        bool operator>(Vector& in)
         {
-            return std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>());
+            return std::lexicographical_compare(this->begin(), this->end(), in.begin(), in.end(), std::greater<value_type>());
         }
-        bool operator<=(Vector& other)
+        bool operator<=(Vector& in)
         {
-            return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end(), std::greater<value_type>());
+            return !std::lexicographical_compare(this->begin(), this->end(), in.begin(), in.end(), std::greater<value_type>());
         }
-        bool operator>=(Vector& other)
+        bool operator>=(Vector& in)
         {
-            return !std::lexicographical_compare(this->begin(), this->end(), other.begin(), other.end());
+            return !std::lexicographical_compare(this->begin(), this->end(), in.begin(), in.end());
         }
-        bool operator&&(Vector& other)
+        bool operator&&(Vector& in)
         {
-            return std::inner_product(this->begin(), this->end(), other.begin(), (cast<value_type>(0)));
+            return std::inner_product(this->begin(), this->end(), in.begin(), (cast<value_type>(0)));
         }
-        bool operator||(Vector& other)
+        bool operator||(Vector& in)
         {
-            return std::inner_product(this->begin(), this->end(), other.begin(), (cast<value_type>(0)));
+            return std::inner_product(this->begin(), this->end(), in.begin(), (cast<value_type>(0)));
         }
         auto operator+(value_type value) -> Vector
         {
-            Vector ret(*this);
-            for (auto& i : ret)
+            Vector out(*this);
+            for (auto& i : out)
             {
                 i += value;
             }
-            return ret;
+            return out;
         }
-
+        using function = std::function<value_type(value_type)>;
+        operator function() const
+        {
+            return [&](function f) {
+                for (auto& i : *this)
+                {
+                    i = f(i);
+                }
+                return *this;
+            };
+        }
         auto operator-(value_type value) -> Vector
         {
-            Vector ret(*this);
-            for (auto& i : ret)
+            Vector out(*this);
+            for (auto& i : out)
             {
                 i -= value;
             }
-            return ret;
+            return out;
         }
 
         auto operator*(value_type value) -> Vector
         {
-            Vector ret(*this);
-            for (auto& i : ret)
+            Vector out(*this);
+            for (auto& i : out)
             {
                 i *= value;
             }
-            return ret;
+            return out;
         }
 
         auto operator/(value_type value) -> Vector
         {
-            Vector ret(*this);
-            for (auto& i : ret)
+            Vector out(*this);
+            for (auto& i : out)
             {
                 i /= value;
             }
-            return ret;
+            return out;
         }
 
         auto operator%(value_type value) -> Vector
         {
-            Vector ret(*this);
-            for (auto& i : ret)
+            Vector out(*this);
+            for (auto& i : out)
             {
                 i %= value;
             }
-            return ret;
+            return out;
+        }
+
+        auto operator>>(value_type value) -> Vector
+        {
+            Vector out(*this);
+            for (auto& i : out)
+            {
+                i >>= value;
+            }
+            return out;
+        }
+
+        auto operator<<(value_type value) -> Vector
+        {
+            Vector out(*this);
+            for (auto& i : out)
+            {
+                i <<= value;
+            }
+            return out;
         }
         auto operator+=(value_type value) -> Vector
         {
@@ -550,6 +592,24 @@ namespace Origin
             }
             return *this;
         }
+
+        auto operator>>=(value_type value) -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i >>= value;
+            }
+            return *this;
+        }
+
+        auto operator<<=(value_type value) -> Vector
+        {
+            for (auto& i : *this)
+            {
+                i <<= value;
+            }
+            return *this;
+        }
         Vector& operator=(std::initializer_list<T> list)
         {
             assign(*list.begin(), list.size());
@@ -563,4 +623,4 @@ namespace Origin
 
         explicit operator size_type() { return size(); }
     };
-} // namespace Origin
+} // namespace origin
