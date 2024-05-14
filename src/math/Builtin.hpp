@@ -1,6 +1,4 @@
 #pragma once
-#include <cstdarg>
-#include <cstdio>
 namespace origin
 {
     constexpr double EPSILON_SQRT = 0.0000000000000000000000000000001;
@@ -28,11 +26,101 @@ namespace origin
     using uint64_t = unsigned long long;
     using uint128_t = __uint128_t;
     using int128_t = __int128_t;
+    using i8 = char;
+    using i16 = short;
+    using i32 = int;
+    using i64 = long long;
+    using i128 = __int128_t;
+    using u8 = unsigned char;
+    using u16 = unsigned short;
+    using u32 = unsigned int;
+    using u64 = unsigned long long;
+    using u128 = __uint128_t;
+    using s8 = signed char;
+    using s16 = signed short;
+    using s32 = signed int;
+    using s64 = long long;
+    using s128 = __int128_t;
+    using f32 = float;
+    using f64 = double;
+    using f128 = long double;
+    using u8p = unsigned char*;
+    using u16p = unsigned short*;
+    using u32p = unsigned int*;
+    using u64p = unsigned long long*;
+    using u128p = __uint128_t*;
+    using i8p = char*;
+    using i16p = short*;
+    using i32p = int*;
+    using i64p = long long*;
+    using s8p = signed char*;
+    using s16p = short*;
+    using s32p = int*;
+    using s64p = long long*;
+    using f32p = float*;
+    using f64p = double*;
+    using f128p = long double*;
+    using u8pp = unsigned char**;
+    using u16pp = unsigned short**;
+    using u32pp = unsigned int**;
+    using u64pp = unsigned long long**;
+    using u128pp = __uint128_t**;
+    using i8pp = char**;
+    using i16pp = short**;
+    using i32pp = int**;
+    using i64pp = long long**;
+    using s8pp = signed char**;
+    using s16pp = short**;
+    using s32pp = int**;
+    using s64pp = long long**;
+    using f32pp = float**;
+    using f64pp = double**;
+    using f128pp = long double**;
 
-    inline bool div_overflow(int x, int y)
+    template<typename T>
+    inline T min(T x, T y)
+    {
+        return x < y ? x : y;
+    }
+    template<typename T>
+    inline T max(T x, T y)
+    {
+        return x > y ? x : y;
+    }
+
+    template<typename T>
+    inline T abs(T x)
+    {
+        return x < 0 ? -x : x;
+    }
+
+    template<typename T>
+    inline T square(T x)
+    {
+        return x * x;
+    }
+
+    template<typename T>
+    inline bool isNumber(T a)
+    {
+        return (__builtin_isnan(a) != 0 && __builtin_isinf(a) != 0 && __builtin_isfinite(a) == 0);
+    }
+
+    inline bool mulOverflow(int& x, int y)
     {
         if (x == -2147483647 - 1 && y == -1)
+        {
             return true;
+        }
+        x *= y;
+        return false;
+    }
+    inline bool divOverflow(int x, int y)
+    {
+        if (x == -2147483647 - 1 && y == -1)
+        {
+            return true;
+        }
         x /= y;
         return false;
     }
@@ -71,26 +159,33 @@ namespace origin
     }
     inline int mod(int x, int y)
     {
+        if (x < 0)
+        {
+            return (x % y + y) % y;
+        }
         return x % y;
     }
+    inline long long lmod(long long x, long long y)
+    {
+        if (x < 0)
+        {
+            return (x % y + y) % y;
+        }
+        return (x % y);
+    }
+
     //================(MATH BUILTIN)===================//
-    inline bool mul_overflow(int x, int y)
-    {
-        return __builtin_mul_overflow(x, y, &x);
-    }
-    inline bool add_overflow(int x, int y)
-    {
-        return __builtin_add_overflow(x, y, &x);
-    }
-    inline bool sub_overflow(int x, int y)
-    {
-        return __builtin_sub_overflow(x, y, &x);
-    }
+
     inline int abs(int x)
     {
         return __builtin_abs(x);
     }
-    inline double abs(double x)
+    inline bool addOverflow(int x, int y)
+    {
+        return __builtin_add_overflow(x, y, &x);
+    }
+
+    inline double fabs(double x)
     {
         return __builtin_fabs(x);
     }
@@ -101,10 +196,6 @@ namespace origin
     inline long labs(long x)
     {
         return __builtin_labs(x);
-    }
-    inline double fabs(double x)
-    {
-        return __builtin_fabs(x);
     }
 
     inline double acos(double x)
@@ -327,6 +418,10 @@ namespace origin
     {
         return __builtin_powi(x, y);
     }
+    inline long double powli(long double x, int y)
+    {
+        return __builtin_powl(x, static_cast<long double>(y));
+    }
     inline double sin(double x)
     {
         return __builtin_sin(x);
@@ -352,7 +447,6 @@ namespace origin
     {
         return __builtin_sinhl(x);
     }
-
     inline double sqrt(double x)
     {
         return __builtin_sqrt(x);
@@ -427,15 +521,15 @@ namespace origin
         return __builtin_nanl(str);
     }
 
-    inline double huge_val()
+    inline double hugeVal()
     {
         return __builtin_huge_val();
     }
-    inline float huge_valf()
+    inline float hugeValf()
     {
         return __builtin_huge_valf();
     }
-    inline long double huge_vall()
+    inline long double hugeVall()
     {
         return __builtin_huge_vall();
     }
@@ -696,7 +790,10 @@ namespace origin
     {
         return __builtin_sqrt(x * x + y * y + z * z);
     }
-
+    inline bool subOverflow(int x, int y)
+    {
+        return __builtin_sub_overflow(x, y, &x);
+    }
     inline int ilogb(double x)
     {
         return __builtin_ilogb(x);
@@ -1051,27 +1148,31 @@ namespace origin
     {
         return __builtin_vscanf(format, ap);
     }
-    inline int printf(const char* restrict format, ...)
+
+    template<typename... Args>
+    inline int printf(const char* restrict format, Args... args)
     {
-        return __builtin_printf(format);
+        return __builtin_printf(format, args...);
     }
-    inline int scanf(const char* restrict format, ...)
+    template<typename... Args>
+    inline int scanf(const char* restrict format, Args... args)
     {
-        return __builtin_scanf(format);
+        return __builtin_scanf(format, args...);
     }
-    inline int snprintf(char* restrict s, unsigned long n, const char* restrict format, ...)
+    template<typename... Args>
+    inline int snprintf(char* restrict s, unsigned long n, const char* restrict format, Args... args)
     {
-        return __builtin_snprintf(s, n, format);
+        return __builtin_snprintf(s, n, format, args...);
     }
-    inline int sprintf(char* restrict s, const char* restrict format, ...)
+    template<typename... Args>
+    inline int sprintf(char* restrict s, const char* restrict format, Args... args)
     {
-        return __builtin_sprintf(s, format);
+        return __builtin_sprintf(s, format, args...);
     }
     inline int sscanf(const char* restrict s, const char* restrict format, ...)
     {
         return __builtin_sscanf(s, format);
     }
-
     inline int vsprintf(char* restrict s, const char* restrict format, va_list ap...)
     {
         return __builtin_vsprintf(s, format, ap);
@@ -1099,7 +1200,7 @@ namespace origin
     }
 
     //===================MEMORY======================//
-    inline char* char_memchr(const char* str, int value, unsigned long count)
+    inline char* charMemchr(const char* str, int value, unsigned long count)
     {
         return __builtin_char_memchr(str, value, count);
     }
@@ -1123,8 +1224,9 @@ namespace origin
 #ifdef va_copy
 #undef va_copy
 #endif
-    inline void va_copy(va_list dst, va_list src)
+    inline void vaCopy(va_list dst, va_list src)
     {
         return __builtin_va_copy(dst, src);
     }
+
 } // namespace origin

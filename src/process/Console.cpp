@@ -1,9 +1,7 @@
 #include "Console.hpp"
 #include "Basic.hpp"
 #include <cstdio>
-#include <cstring>
 #include <iostream>
-#include <sys/ioctl.h>
 #include <unistd.h>
 namespace origin
 {
@@ -133,13 +131,13 @@ namespace origin
         i8 buf[256];
         ssize_t len = read(STDIN_FILENO, buf, sizeof(buf));
 
-        if (len <= seq_len || std::memcmp(buf, seq, seq_len) != 0)
+        if (len <= seq_len || origin::memcmp(buf, seq, seq_len) != 0)
         {
             return 0;
         }
 
         i8p p = buf + seq_len;
-        i8p end_p = memchr<i8p>(p, end[0], len - seq_len);
+        i8p end_p = origin::memchr<i8p>(p, end[0], len - seq_len);
         if (end_p == nullptr || end_p - p < end_len)
         {
             return 0;
@@ -315,6 +313,7 @@ namespace origin
     {
         return cuserid(nullptr);
     }
+
     /**
      * Get the hostname of the system.
      *
@@ -322,8 +321,8 @@ namespace origin
      */
     auto Console::getHostname() -> string
     {
-        i8 hostname[1024];
-        gethostname(hostname, sizeof(hostname));
+        char* hostname = new i8[1024];
+        ::gethostname(hostname, sizeof(hostname));
         return hostname;
     }
     auto Console::isValidPass(const string& passwd) -> bool

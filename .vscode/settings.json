@@ -10,5 +10,7 @@
     "cmake.enabledOutputParsers": [
         "cmake"
     ],
-    "remote.autoForwardPortsFallback": 0
+    "remote.autoForwardPortsFallback": 0,
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.cmakeCommunicationMode": "fileApi"
 }

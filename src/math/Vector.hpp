@@ -1,6 +1,5 @@
 #pragma once
 #include <functional>
-#include <map>
 #include <numeric>
 #include <regex>
 #include <string>
@@ -480,7 +479,7 @@ namespace origin
             return out;
         }
         using function = std::function<value_type(value_type)>;
-        operator function() const
+        explicit operator function() const
         {
             return [&](function f) {
                 for (auto& i : *this)

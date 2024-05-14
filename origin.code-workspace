@@ -1,16 +1,34 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": ".",
+			"name": "Origin"
 		}
 	],
 	"settings": {
 		"codeium.enableSearch": true,
+		"cmake.additionalCompilerSearchDirs": [
+			"/home/matt/usr/bin"
+		],
+		"codeium.enableConfig": {
+			"*": true
+		},
+		"workbench.settings.editor": "json",
+		"clang-format.executable": "/home/matt/usr/bin/clang-format",
+		"cmake.exportCompileCommandsFile": true,
+		"codium.codeCompletion.userInstructions": "Fix errors and warnings while preserving function, variable names, and values on save",
+		"codeium.enableCodeLens": true,
+		"codium.agent.onSave.improve": true,
+		"codium.agent.onSave.issues": true,
 		"codium.codeCompletion.enable": true,
 		"workbench.list.smoothScrolling": true,
 		"remote.autoForwardPortsFallback": 0,
 		"clangd.enableCodeCompletion": true,
 		"cmake.loadCompileCommands": true,
-		"codium.rag.maxLocalSnippets": 100,
+		"codium.rag.maxLocalSnippets": 10000,
+		"cmake.sourceDirectory": "${workspaceFolder}",
+		"cmake.copyCompileCommands": "${workspaceFolder}/compile-commands.json",
+		"cmake.configureOnOpen": true,
+		"cmake.mergedCompileCommands": "${workspaceFolder}/compile-commands.json",
 	}
 }

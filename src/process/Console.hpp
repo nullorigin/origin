@@ -4,10 +4,10 @@
 #include <fcntl.h>
 #include <string>
 #include <termios.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 namespace origin
 {
-    constexpr i32 FIONREAD = 0x541B;
     using std::string;
     struct Console
     {

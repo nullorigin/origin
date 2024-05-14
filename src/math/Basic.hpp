@@ -1,17 +1,15 @@
 #pragma once
-#include <Vector.hpp>
+#include "Vector.hpp"
 
 #include <algorithm>
 
-#include <cstdlib>
-#include <functional>
 #include "Builtin.hpp"
+
+#include <cstdlib>
+
 #include <string>
 
-#include <type_traits>
 #include <utility>
-
-#include <vector>
 
 /*
 namespace origin
@@ -279,12 +277,12 @@ namespace origin
     template<typename T>
     constexpr auto isnan(T a)
     {
-        return __builtin_isnan(f128(a));
+        return cast<bool>(__builtin_isnan(f128(a)));
     }
     template<typename T>
     constexpr auto isnan(T a, T b)
     {
-        return cast<bool>(__builtin_isnan(a, b));
+        return bool(__builtin_isnan(cast<f128>(a), cast<f128>(b)));
     }
     template<typename T>
     constexpr auto isnan(T a, T b, T c)
@@ -315,282 +313,237 @@ namespace origin
         return cast<bool>(__builtin_isinf(a, b, c));
     }
 
-    template<typename T>
-    constexpr auto isinf(T a, T b, T c, T d) noexcept
+    template<typename... Args>
+    constexpr auto isinf(Args... args) noexcept
     {
-        return cast<bool>(__builtin_isinf(a, b, c, d));
+        return cast<bool>(__builtin_isinf(args...));
     }
     template<typename T>
-    inline auto isnum(T a)
+    constexpr bool isNumeric(T a)
     {
-        try
-        {
-            f128 const b = a;
-        }
-        catch (...)
-        {
-            return false;
-        }
+        f128 num{ a };
         return true;
     }
 
     template<typename T>
     constexpr auto isnum(T a, T b)
     {
-        return !(cast<bool>(__builtin_isnan(a, b)) || cast<bool>(__builtin_isinf(a, b)));
+        return !(cast<bool>(isnan(a, b)) || cast<bool>(isinf(a, b)));
     }
 
     template<typename T>
     constexpr auto isnum(T a, T b, T c)
     {
-        return !(cast<bool>(__builtin_isnan(a, b, c)) || cast<bool>(__builtin_isinf(a, b, c)));
+        return !(cast<bool>(isnan(a, b, c)) || cast<bool>(isinf(a, b, c)));
     }
 
     template<typename T>
     constexpr auto isnum(T a, T b, T c, T d) noexcept
     {
-        return !(cast<bool>(__builtin_isnan(a, b, c, d)) || cast<bool>(__builtin_isinf(a, b, c, d)));
-    }
-    template<typename T>
-    constexpr auto abs(T& a, T& b, T& c)
-    {
-        return cast<bool>(isnan(a, b, c) ? false : (__builtin_elementwise_abs(a, b, c)));
-    }
-
-    template<typename T>
-    constexpr auto abs(T& a, T& b, T& c, T& d) noexcept
-    {
-        return cast<bool>(isnan(a, b, c, d) ? false : (__builtin_elementwise_abs(a, b, c, d)));
+        return !(cast<bool>(isnan(a, b, c, d)) || cast<bool>(isinf(a, b, c, d)));
     }
 
     template<typename T>
     constexpr auto sin(T a) noexcept
     {
-        return cast<T>(isnan(a) ? 0.0 : (__builtin_sinl(cast<f128>(a))));
+        return T(__builtin_sinl(cast<f128>(a)));
     }
 
     template<typename T>
     constexpr auto cos(T a) noexcept
     {
-        return cast<T>(isnan(a) ? 0.0 : (__builtin_cosl(cast<f128>(a))));
+        return T(__builtin_cosl(cast<f128>(a)));
     }
     template<typename T>
     constexpr auto atan2(T& a, T& b) noexcept
     {
-        return cast<T>(isnan(a, b) ? 0.0 : (__builtin_atan2l(cast<f128>(a), cast<f128>(b))));
+        return T(__builtin_atan2l(cast<f128>(a), cast<f128>(b)));
     }
-    template<typename T>
-    constexpr auto atan2(T& a, T& b, T& c) noexcept
-    {
-        return cast<T>(isnan(a, b, c) ? 0.0 : (__builtin_atan2l(__builtin_atan2l(cast<f128>(a), cast<f128>(b)), cast<f128>(c))));
-    }
-
     template<typename T>
     constexpr auto asin(T a) noexcept
     {
-        return cast<T>(isnan(a) ? 0.0 : (__builtin_asinl(cast<f128>(a))));
+        return T(__builtin_asinl(cast<f128>(a)));
     }
 
     template<typename T>
     constexpr auto acos(T a) noexcept
     {
-        return cast<T>(isnan(a) ? 0.0 : (__builtin_acosl(cast<f128>(a))));
+        return T(__builtin_acosl(cast<f128>(a)));
     }
 
     template<typename T>
     constexpr auto atan(T a) noexcept
     {
-        return cast<T>(isnan(a) ? 0.0 : (__builtin_atanl(cast<f128>(a))));
+        return T(__builtin_atanl(cast<f128>(a)));
     }
     template<typename T>
-    constexpr auto ceil(T& a, T& b, T* c)
+    constexpr auto ceil(T& a, T& b)
     {
-        (__builtin_elementwise_ceil(a, b, c));
-        return *c;
-    }
-    template<typename T>
-    constexpr auto floor(T& a, T& b, T* c)
-    {
-        (__builtin_elementwise_floor(a, b, c));
-        return *c;
+        T c;
+        __builtin_elementwise_ceil(a, b, &c);
+        return c;
     }
 
     template<typename T>
-    constexpr auto round(T& a, T* b) noexcept
+    constexpr auto floor(T& a, T& b)
     {
-        (__builtin_elementwise_round(a, *b));
-        return *b;
-    }
-    template<typename T>
-    constexpr auto trunc(T& a, T& b, T* c) noexcept
-    {
-        (__builtin_elementwise_trunc(a, b, c));
-        return *c;
+        T c;
+        (__builtin_elementwise_floor(a, b, &c));
+        return c;
     }
 
     template<typename T>
-    constexpr auto rint(T& a, T& b, T* c)
+    constexpr auto round(T& a) noexcept
     {
-        (__builtin_elementwise_rint(a, b, c));
-        return *c;
+        T b;
+        (__builtin_elementwise_round(a, &b));
+        return b;
+    }
+    template<typename T>
+    constexpr auto trunc(T& a, T& b) noexcept
+    {
+        T c;
+        (__builtin_elementwise_trunc(a, b, &c));
+        return c;
+    }
+
+    template<typename T>
+    constexpr auto rint(T& a, T& b)
+    {
+        T c;
+        (__builtin_elementwise_rint(a, b, &c));
+        return c;
     }
     template<typename T>
     constexpr auto nearbyint(T& a, T& b, T* c)
     {
-        (__builtin_elementwise_nearbyint(a, b, c));
-        return *c;
+        T d;
+        (__builtin_elementwise_nearbyint(a, b, c, &d));
+        return d;
     }
 
     template<typename T, typename U>
-    constexpr auto copysign(T& a, U* b) noexcept
+    constexpr auto copysign(T& a) noexcept
     {
-        (__builtin_elementwise_copysign(a, *b));
+        T b;
+        (__builtin_elementwise_copysign(a, &b));
+        return b;
     }
 
     template<typename T>
-    constexpr auto sin(T& a, T* b) noexcept
+    constexpr auto sin(T& a) noexcept
     {
-        (__builtin_elementwise_sin(a, b));
-        return *b;
+        T b;
+        (__builtin_elementwise_sin(a, &b));
+        return b;
     }
     template<typename T>
-    constexpr auto cos(T& a, T* b)
+    constexpr auto cos(T& a)
     {
-        (__builtin_elementwise_cos(a, b));
-        return *b;
+        T b;
+        (__builtin_elementwise_cos(a, &b));
+        return b;
     }
     template<typename T>
-    constexpr auto addsat(T& a, T& b, T* c)
+    constexpr auto addsat(T& a, T& b)
     {
+        T* c = nullptr;
         (__builtin_elementwise_add_sat(a, b, c));
         return *c;
     }
-
     template<typename T>
-    constexpr auto addsat(T& a, T& b, T& c, T& d) noexcept
+    constexpr auto subsat(T& a, T& b)
     {
-        (isnan(a, b, c, d) ? T(0) : (__builtin_elementwise_add_sat(a, b, c, d)));
-    }
-    template<typename T>
-    constexpr auto subsat(T& a, T& b, T& c)
-    {
-        (isnan(a, b, c) ? T(0) : (__builtin_elementwise_sub_sat(a, b, c)));
-    }
-
-    template<typename T>
-    constexpr auto subsat(T& a, T& b, T& c, T& d) noexcept
-    {
-        (isnan(a, b, c, d) ? T(0) : (__builtin_elementwise_sub_sat(a, b, c, d)));
+        T* c = nullptr;
+        (__builtin_elementwise_sub_sat(a, b, c));
+        return *c;
     }
     template<typename T>
     constexpr auto min(T a, T b) noexcept
     {
-        return (isnan(a, b) ? T(0) : (a < b) ? a :
-                                               b);
+        return T((a < b) ? a :
+                           b);
     }
 
     template<typename T>
     constexpr auto min(T a, T b, T c) noexcept
     {
-        return (isnan(a, b, c) ? T(0) : (a < b) ? (a < c ? a : c) :
-                                                  (b < c ? b : c));
+        return T((a < b) ? (a < c ? a : c) :
+                           (b < c ? b : c));
     }
 
     template<typename T>
     constexpr auto min(T a, T b, T c, T d) noexcept
     {
-        return (isnan(a, b, c, d) ? T(0) : (a < b) ? (a < c ? (a < d ? a : d) : c) :
-                                                     (b < c ? (b < d ? b : d) : (c < d ? c : d)));
+        return T((a < b) ? (a < c ? (a < d ? a : d) : c) :
+                           (b < c ? (b < d ? b : d) : (c < d ? c : d)));
     }
     template<typename T>
     constexpr auto max(T a, T b) noexcept
     {
-        return (isnan(a, b) ? T(0) : (a < b) ? b :
-                                               a);
+        return T((a < b) ? b :
+                           a);
     }
     template<typename T>
     constexpr auto max(T a, T b, T c) noexcept
     {
-        return (isnan(a, b, c) ? T(0) : (a < b) ? (b < c ? c : b) :
-                                                  (a < c ? c : a));
+        return T((a < b) ? (b < c ? c : b) :
+                           (a < c ? c : a));
     }
 
     template<typename T>
     constexpr auto max(T a, T b, T c, T d) noexcept
     {
-        return (isnan(a, b, c, d) ? T(0) : (a < b) ? (b < c ? (c < d ? d : c) : b) :
-                                                     (a < c ? (c < d ? d : c) : (a < d ? d : a)));
+        return T((a < b) ? (b < c ? (c < d ? d : c) : b) :
+                           (a < c ? (c < d ? d : c) : (a < d ? d : a)));
     }
 
     template<typename T>
     constexpr auto sqrt(T a)
     {
-        return (isnan(a) ? T(0) : cast<T>(__builtin_sqrtl(cast<f128>(a))));
+        return T(__builtin_sqrtl(cast<f128>(a)));
     }
     template<typename T>
-    constexpr auto log(T& a, T& b, T& c)
+    constexpr auto log(T& a)
     {
-        (isnan(a) ? T(0) : cast<T>(__builtin_elementwise_log(a, b, c)));
-    }
-
-    template<typename T>
-    constexpr auto log(T& a, T& b, T& c, T& d) noexcept
-    {
-        (isnan(a, b, c, d) ? T(0) : cast<T>(__builtin_elementwise_log(a, b, c, d)));
+        T b;
+        (__builtin_elementwise_log(a, &b));
+        return b;
     }
     template<typename T>
-    constexpr auto log2(T& a, T& b, T& c)
+    constexpr auto log2(T& a, T& b)
     {
-        (isnan(a, b, c) ? T(0) : (__builtin_elementwise_log2(a, b, c)));
-    }
-
-    template<typename T>
-    constexpr auto log2(T& a, T& b, T& c, T& d) noexcept
-    {
-        (isnan(a, b, c, d) ? T(0) : (__builtin_elementwise_log2(a, b, c, d)));
+        T c;
+        (__builtin_elementwise_log2(a, b, &c));
+        return c;
     }
     template<typename T>
-    constexpr auto log10(T& a, T& b, T& c)
+    constexpr auto log10(T& a)
     {
-        (isnan(a, b, c) ? T(0) : (__builtin_elementwise_log10(a, b, c)));
-    }
-
-    template<typename T>
-    constexpr auto log10(T& a, T& b, T& c, T& d) noexcept
-    {
-        (isnan(a, b, c, d) ? T(0) : (__builtin_elementwise_log10(a, b, c, d)));
+        f128 b = cast<f128>(a);
+        (__builtin_elementwise_log10(b));
+        return T(b);
     }
     template<typename T>
-    constexpr auto exp(T& a, T& b, T& c)
+    constexpr auto exp(T& a)
     {
-        (isnan(a, b, c) ? T(0) : (__builtin_elementwise_exp(a, b, c)));
-    }
-
-    template<typename T>
-    constexpr auto exp(T& a, T& b, T& c, T& d) noexcept
-    {
-        (isnan(a, b, c, d) ? T(0) : (__builtin_elementwise_exp(a, b, c, d)));
+        T b;
+        (__builtin_elementwise_exp(a, &b));
+        return b;
     }
     template<typename T>
-    inline auto exp2(T& a, T& b, T& c)
+    inline auto exp2(T& a, T& b)
     {
-        (isnan(a, b, c) ? T(0) : (__builtin_elementwise_exp2(a, b, c)));
-    }
-
-    template<typename T>
-    inline auto exp2(T& a, T& b, T& c, T& d) noexcept
-    {
-        (isnan(a, b, c, d) ? T(0) : (__builtin_elementwise_exp2(a, b, c, d)));
+        T c;
+        (__builtin_elementwise_exp2(a, b, &c));
+        return c;
     }
     template<typename T, typename U>
-    constexpr auto pow(T& a, U& b, U& c)
+    constexpr auto pow(T& a, U& b)
     {
-        (isnan(a, b, c) ? T(0) : (__builtin_elementwise_pow(a, b, c)));
-    }
-    template<typename T, typename U>
-    constexpr auto pow(T& a, U& b, U& c, U& d) noexcept
-    {
-        (isnan(a, b, c, d) ? T(0) : (__builtin_elementwise_pow(a, b, c, d)));
+        T* c = nullptr;
+        (__builtin_elementwise_pow(a, b, c));
+        return *c;
     }
     using ID = u64;
 
@@ -698,33 +651,33 @@ namespace origin
     template<typename T>
     constexpr auto bitset(T a)
     {
-        T result = 0;
+        T b = 0;
         for (u32 i = 0; i < sizeof(T); i++)
         {
-            result = (result << 1) | ((a >> i) & 1);
+            b = (b << 1) | ((a >> i) & 1);
         }
-        return result;
+        return b;
     }
 
     template<typename T>
     constexpr auto hypot(T a, T b)
     {
-        return !isnan(a, b) ? T(__builtin_hypotl(cast<f128>(a), cast<f128>(b))) : T(0);
+        return T(__builtin_hypotl(cast<f128>(a), cast<f128>(b)));
     }
     template<typename T>
     constexpr auto square(T a)
     {
-        return !isnan(a) ? T(a * a) : T(0);
+        return T(a * a);
     }
     template<typename T>
     constexpr auto madd(T a, T b, T c)
     {
-        return !isnan(a, b, c) ? T(a * b + c) : T(0);
+        return T(a * b + c);
     }
     template<typename T>
     constexpr auto copysign(T a, T b)
     {
-        return !isnan(a, b) ? T(__builtin_copysignl(cast<f128>(a), cast<f128>(b))) : T(0);
+        return T(__builtin_copysignl(cast<f128>(a), cast<f128>(b)));
     }
     template<typename T>
     constexpr auto clamp(T a, T b, T c)
@@ -739,45 +692,33 @@ namespace origin
     template<typename T>
     constexpr auto fract(T a) noexcept
     {
-        if (isnan(a))
-            return T(0);
-        return a - cast<T>(__builtin_floorl(cast<f128>(a)));
+        return T(cast<f128>(a) - __builtin_floorl(cast<f128>(a)));
     }
     template<typename T>
     constexpr auto lerp(T a, T b, T c) noexcept
     {
-        if (isnan(a))
-            return T(0);
-        return (a + c * (b - a));
+        return T(a + c * (b - a));
     }
     template<typename T>
     constexpr auto smoothstep(T a, T b, T c)
     {
-        if (isnan(a, b, c))
-            return T(0);
         auto c2 = clamp(c - a / b - a, 0.0, 1.0);
-        return c2 * c2 * 3.0 - 2.0 * c2;
+        return T(c2 * c2 * 3.0 - 2.0 * c2);
     }
     template<typename T>
     constexpr auto rsqrt(T a)
     {
-        if (isnan(a))
-            return T(0);
-        return cast<T>(1.0 / sqrtl(cast<f128>(a)));
+        return T(1.0 / sqrtl(cast<f128>(a)));
     }
     template<typename T>
     constexpr auto dot(T a, T b) noexcept
     {
-        if (isnan(a, b))
-            return T(0);
-        return a * b;
+        return T(a * b);
     }
     template<typename T>
     constexpr auto length(T a, T b)
     {
-        if (isnan(a, b))
-            return T(0);
-        return sqrt(a * a + b * b);
+        return T(sqrt(cast<f128>(a * a + b * b)));
     }
     template<typename T, u64 N>
     constexpr auto normalize(T const (&arr)[N])
@@ -792,50 +733,35 @@ namespace origin
     template<typename T>
     auto neg(T a)
     {
-        if (isnan(a))
-            return T(0);
-        try
-        {
-            mul(a, -1);
-        }
-        catch (...)
-        {
-            return 0;
-        };
+        return T(mul(cast<f128>(a), (-1)));
     }
 
     template<typename T>
     constexpr auto random(T a, T b)
     {
-        if (isnan(a, b))
-            return T(0);
-        return abs<T>((rand64() % cast<u64>(b - a)) + a);
+        return abs(rand64() % cast<u64>((b - a) + a));
     }
     template<typename T>
     constexpr auto tan(T a)
     {
-        if (isnan(a))
-            return T(0);
-        return cast<T>(__builtin_tanl(cast<f128>(a)));
+        return T(__builtin_tanl(cast<f128>(a)));
     }
     template<typename T>
     constexpr auto atan2(T a, T b) noexcept
     {
-        if (isnan(a, b))
-            return T(0);
-        return cast<T>(__builtin_atan2l(cast<f128>(a), cast<f128>(b)));
+        return T(__builtin_atan2l(cast<f128>(a), cast<f128>(b)));
     }
 
     template<typename T>
     constexpr auto sinsq(T a) noexcept
     {
-        const T b = (isnan(a) ? T(0) : cast<T>(__builtin_sinl(cast<f128>(a))));
+        const T b = T(__builtin_sinl(cast<f128>(a)));
         return b * b;
     }
     template<typename T>
     constexpr auto cossq(T a) noexcept
     {
-        const T b = (isnan(a) ? T(0) : cast<T>(__builtin_cosl(cast<f128>(a))));
+        const T b = T(__builtin_cosl(cast<f128>(a)));
         return b * b;
     }
 
@@ -858,19 +784,41 @@ namespace origin
             C.Imag = imag;
         }
         static auto zero() -> Complex { return { 0, 0 }; }
+
+        auto add(const Complex<N> b) const noexcept -> Complex<N>
+        {
+            return { C.Real + b.Real, C.Imag + b.Imag };
+        }
+        auto sub(const Complex<N> b) const noexcept -> Complex<N>
+        {
+            return { C.Real - b.Real, C.Imag - b.Imag };
+        }
+        auto mul(const Complex b) const noexcept -> Complex
+        {
+            return { C.Real * b.Real - C.Imag * b.Imag, C.Real * b.Imag + C.Imag * b.Real };
+        }
+        auto div(const Complex a) const noexcept -> Complex
+        {
+            return { (a.Real * C.Real + a.Imag * C.Imag) / (C.Real * C.Real + C.Imag * C.Imag),
+                     (a.Imag * C.Real - a.Real * C.Imag) / (C.Real * C.Real + C.Imag * C.Imag) };
+        }
         static auto add(const Complex A, const Complex B) noexcept -> Complex
         {
-            auto C = op(A.Data, B.Data, N * 2);
             return { A.Real + B.Real, A.Imag + B.Imag };
         }
+
         static auto sub(const Complex A, const Complex B) noexcept -> Complex
         {
             return { A.Real - B.Real, A.Imag - B.Imag };
         }
-
-        auto mul(const Complex b) const noexcept -> Complex
+        static auto mul(const Complex<N> a, const Complex<N> b) noexcept -> Complex<N>
         {
-            return { C.Real * b.Real - C.Imag * b.Imag, C.Real * b.Imag + C.Imag * b.Real };
+            return { a.Real * b.Real - a.Imag * b.Imag, a.Real * b.Imag + a.Imag * b.Real };
+        }
+        static auto div(Complex a, Complex b) noexcept -> Complex
+        {
+            return { (a.Real * b.Real + a.Imag * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag),
+                     (a.Imag * b.Real - a.Real * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag) };
         }
         auto mul(f64* out, const f64* in) const noexcept
         {
@@ -883,11 +831,6 @@ namespace origin
             return ret;
         }
 
-        static auto div(Complex a, Complex b) noexcept -> Complex
-        {
-            return { (a.Real * b.Real + a.Imag * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag),
-                     (a.Imag * b.Real - a.Real * b.Imag) / (b.Real * b.Real + b.Imag * b.Imag) };
-        }
         static auto fft(const Complex* input, u64 n) -> Complex*
         {
             auto output = new Complex[n];
@@ -1031,13 +974,31 @@ namespace origin
             return c;
         }
 
-        static auto ifft(Complex C1[]) -> Complex*
+        static auto ifft(Complex* C1) -> Complex*
         {
             auto* c = C1;
             c = conjugate(c, N);
             fft2(c, N);
             c = conjugate(c, N);
             return c;
+        }
+        auto operator+(Complex<N> a) const noexcept -> Complex<N>
+        {
+            return this->add(a);
+        }
+
+        auto operator-(Complex<N> a) const noexcept -> Complex<N>
+        {
+            return this->sub(*this, a);
+        }
+        auto operator*(Complex<N> a) const noexcept -> Complex<N>
+        {
+            return this->mul(a);
+        }
+
+        auto operator/(Complex<N> a) const noexcept -> Complex<N>
+        {
+            return this->div(a);
         }
     } __attribute__((aligned(32)));
     struct Mem
@@ -1127,35 +1088,76 @@ namespace origin
             return *this;
         }
     } __attribute__((aligned(32))) __attribute__((packed));
-
+    template<typename T, typename... U>
+    class Function : public std::function<T (*)(U...)>
+    {
+    public:
+        Function() = default;
+        explicit Function(std::function<T (*)(U...)> f) :
+            std::function<T (*)(U...)>(f) {}
+        explicit Function(T (*f)(U...)) :
+            std::function<T (*)(U...)>((std::function<T (*)(U...)>(f))) {}
+        Function(const Function& f) :
+            std::function<T (*)(U...)>(f) {}
+        Function(Function&& f) noexcept :
+            std::function<T (*)(U...)>(std::move(f)) {}
+        ~Function() = default;
+        explicit operator Function() { return std::function<T (*)(U...)>(*this); }
+        explicit operator std::function<T (*)(U...)>() { return std::function<T (*)(U...)>(*this); }
+        Function& operator=(const Function& f)
+        {
+            *this = std::function<T (*)(U...)>(f);
+            return *this;
+        }
+        Function& operator=(Function&& f) noexcept
+        {
+            *this = std::function<T (*)(U...)>(std::move(f));
+            return *this;
+        }
+        Function& operator=(T (*f)(U...))
+        {
+            *this = std::function<T (*)(U...)>(f);
+            return *this;
+        }
+        Function& operator=(Function f)
+        {
+            *this = std::function<T (*)(U...)>(f);
+            return *this;
+        }
+        auto operator()(U... args)
+        {
+            return T(args...);
+        }
+        auto operator()(U... args) const -> T&
+        {
+            return T(args...);
+        }
+        explicit Function(U... args) { return &(*this)(args...); }
+    };
     template<typename T, typename... U>
     struct Op
     {
     private:
-        using function = T (*)(T (*)(U...));
-        template<typename... V>
-        static constexpr auto fmax_ = [](U... args) { return __builtin_fmax(args...); };
-        template<typename... V>
-        static constexpr auto fmin_ = [](U... args) { return __builtin_fmin(args...); };
-        static Vector<function> fvec = Vector<function>();
-        function func = nullptr;
+        using function = Function<T, U...>;
+        static constexpr auto FMAX = [](U... args) { return __builtin_fmax(args...); };
+        static constexpr auto FMIN = [](U... args) { return __builtin_fmin(args...); };
+        Vector<function> Fvec = Vector<function>();
 
     public:
-        static auto emplace_min(U... args) { return fvec.emplace_back(fmin_<U...>(args...)); }
-        static auto emplace_max(U... args) { return fvec.emplace_back(fmax_<U...>(args...)); }
+        auto emplaceMin(U... args) { return Fvec.emplace_back(Fvec.transform(Fvec, FMIN(args...))); }
+        auto emplaceMax(U... args) { return Fvec.emplace_back(Fvec.transform(Fvec, FMAX(args...))); }
 
-        template<typename... V>
-        static auto pushBack(function f)
+        auto pushBack(function f)
         {
-            if constexpr (sizeof...(V) > 0)
+            if constexpr (sizeof(V) > 0)
             {
-                fvec.push_back([=](V... args) { return f(args...); });
-                return *fvec.rbegin();
+                Fvec.push_back([=](V args...) { return f(args); });
+                return *Fvec.rbegin();
             }
             else
             {
-                fvec.push_back(f);
-                return *fvec.rbegin();
+                Fvec.push_back(f);
+                return *Fvec.rbegin();
             }
         }
 
@@ -1166,30 +1168,38 @@ namespace origin
             {
                 return *this;
             }
-            func = op.func;
+            Fvec = op.Fvec;
             return *this;
         }
+        auto clear() { Fvec.clear(); }
+        auto size() { return Fvec.size(); }
+        auto begin() { return Fvec.begin(); }
+        auto end() { return Fvec.end(); }
+        auto rbegin() { return Fvec.rbegin(); }
+        auto rend() { return Fvec.rend(); }
+        auto& get(u32 i) { return Fvec[i]; }
+        auto& operator[](u32 i) { return Fvec[i]; }
         auto push(Op op) noexcept
         {
-            fvec.pushBack(std::move(op.func));
+            Fvec.pushBack(std::move(op.Func));
         }
         Op(Op const& op)
         {
             *this = op;
             return *this;
         }
-        Op(function f)
+        explicit Op(function f)
         {
-            this->func = f;
+            this->Fvec.pushBack(f);
             return *this;
         }
         ~Op() = default;
         auto operator()(function f)
         {
-            this->func = f;
+            this->Fvec.pushBack(f);
             return *this;
         }
-        operator function() const { return fvec.begin(); }
+        explicit operator function() const { return Fvec.begin(); }
         Op& operator=(Op&& op) noexcept
         {
             return *this = std::move(op);
@@ -1198,60 +1208,48 @@ namespace origin
         {
             return *this = std::move(op);
         }
-        auto operator[](u32 i) { return fvec[i]; }
         auto operator<<(function&& f)
         {
-            fvec.pushBack(f);
-            return fvec;
+            Fvec.pushBack(f);
+            return Fvec;
         }
         auto& operator<<(function const& f)
         {
-            fvec.pushBack(f);
-            return fvec;
+            Fvec.pushBack(f);
+            return Fvec;
         }
         auto& operator<<(Op const& op)
         {
-            fvec.pushBack(op.f);
-            return fvec;
+            Fvec.pushBack(op.f);
+            return Fvec;
         }
-
-    private:
-        static auto pushBack(function f)
-        {
-            fvec.push_back(f);
-            return *fvec.rbegin();
-        }
-
-    public:
-        auto operator()() const noexcept { return func(); }
-        auto operator()() { return func(); }
+        auto operator()() const noexcept { return Fvec.cbegin(); }
+        auto operator()() { return Fvec.begin(); }
 
         auto operator()(Op const& op)
         {
-            this->f = op.f(op);
-            return *this;
+            *this() = op();
+            return *this();
         }
-        auto operator->() { return &func; }
+        auto operator->() { return &Fvec.begin(); }
 
-        auto operator->() const { return &func; }
+        auto operator->() const { return &Fvec.cbegin(); }
 
-        auto operator*() { return func; }
+        auto operator()(V args) -> Vector<function> { return *Fvec(args); }
 
-        auto operator*() const { return func; }
+        auto operator*(V args) -> Vector<function> { return *Fvec(args); }
 
-        auto reset(function f) { this->func = f; }
+        auto reset(function f) { f = nullptr; }
 
         auto reset(Op const& op) { *this = op; }
 
-        auto clear() { func = nullptr; }
+        auto empty() const { return Fvec == nullptr; }
 
-        auto empty() const { return func == nullptr; }
+        auto swap(Op& op) noexcept { std::swap(Fvec, op.Fvec); }
 
-        auto swap(Op& op) noexcept { std::swap(func, op.func); }
-
-        auto target() const
+        auto get() const
         {
-            return func;
+            return Fvec;
         }
     };
 } // namespace origin

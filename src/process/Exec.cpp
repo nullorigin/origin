@@ -2,13 +2,11 @@
 #include "Console.hpp"
 #include "Message.hpp"
 #include "Origin.hpp"
-#include <functional>
-#include <memory>
 #include "Timer.hpp"
-#include "Vector.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <unistd.h>
 namespace origin
 {
@@ -98,7 +96,7 @@ namespace origin
                 return code;
             }
         }
-        return Code::Error;
+        return Code::Failure;
     }
     auto Run::doStart() -> Code
     {
@@ -107,7 +105,7 @@ namespace origin
             Timers[0].start();
             return setRunState(STARTED);
         }
-        return Code::Error;
+        return Code::Failure;
     }
     auto Run::doPause() -> Code
     {
@@ -237,9 +235,16 @@ namespace origin
         if (cycles <= 0)
         {
             Max_cycles = INFINITY;
-            return Code::Warning;
         }
-        Max_cycles = cycles;
+        else if (Max_cycles < cycles)
+        {
+            debug("Max cycles cannot be less than current cycles.", Code::Error);
+            return Code::Failure;
+        }
+        else
+        {
+            Max_cycles = cycles;
+        }
         return Code::Success;
     }
 
@@ -604,7 +609,7 @@ namespace origin
     }
     auto Run::processIO() -> Code
     {
-        Code rstatus = getRunStatus();
+        const Code rstatus = getRunStatus();
         const bool success = ((processIn() == Code::Success) && (processOut() == Code::Success) && (rstatus <= Code::Error) && (rstatus != Code::Failure));
         return (!success) ? Code::Failure : Code::Success;
     }
