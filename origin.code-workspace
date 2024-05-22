@@ -6,29 +6,47 @@
 		}
 	],
 	"settings": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "Codeium.codeium",
+		"editor.defaultFoldingRangeProvider": "Codeium.codeium",
 		"codeium.enableSearch": true,
-		"cmake.additionalCompilerSearchDirs": [
-			"/home/matt/usr/bin"
-		],
+		"codeium.searchMaxWorkspaceFileCount": 50000,
+		"codium.rag.maxLocalSnippets": 10000,
 		"codeium.enableConfig": {
 			"*": true
 		},
-		"workbench.settings.editor": "json",
-		"clang-format.executable": "/home/matt/usr/bin/clang-format",
+		"cmake.installPrefix": "/home/matt/usr/local",
+		"cmake.sourceDirectory": ".",
+		"cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+		"cmake.configureOnOpen": true,
+		"cmake.mergedCompileCommands": "${workspaceFolder}/compile_commands.json",
+		"cmake.buildDirectory": "${workspaceFolder}/build",
+		"cmake.cmakeCommunicationMode": "automatic",
+		"clangd.arguments": [
+			"-background-index",
+			"-header-insertion=never",
+			"-completion-style=detailed",
+			"-log=info",
+		],
+		"clang-format.style": "LLVM",
+		"clang-format.language.cpp.enable": true,
+		"clang-format.language.c.enable": true,
+		"clang-format.executable": "/usr/lib/llvm/18/bin/clang-format",
 		"cmake.exportCompileCommandsFile": true,
-		"codium.codeCompletion.userInstructions": "Fix errors and warnings while preserving function, variable names, and values on save",
+		"codium.codeCompletion.userInstructions": "Fix errors and warnings while attempting to preserve the containing function names and variable names within that function. Optimize the code whenever possible.",
 		"codeium.enableCodeLens": true,
 		"codium.agent.onSave.improve": true,
 		"codium.agent.onSave.issues": true,
-		"codium.codeCompletion.enable": true,
+		"codium.codeCompletion.enable": false,
+		"workbench.settings.editor": "json",
 		"workbench.list.smoothScrolling": true,
 		"remote.autoForwardPortsFallback": 0,
-		"clangd.enableCodeCompletion": true,
 		"cmake.loadCompileCommands": true,
-		"codium.rag.maxLocalSnippets": 10000,
-		"cmake.sourceDirectory": "${workspaceFolder}",
-		"cmake.copyCompileCommands": "${workspaceFolder}/compile-commands.json",
-		"cmake.configureOnOpen": true,
-		"cmake.mergedCompileCommands": "${workspaceFolder}/compile-commands.json",
+		"clangd.enableCodeCompletion": true,
+		"clangd.path": "/usr/lib/llvm/18/bin/clangd",
+		"[cpp]": {
+			"editor.defaultFormatter": "xaver.clang-format"
+		},
+		"cmake.configureSettings": {},
 	}
 }

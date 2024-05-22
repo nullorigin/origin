@@ -22,154 +22,140 @@
 #include <algorithm>
 #include <cstddef>
 #include <memory>
-namespace origin
-{
-    enum : const u8
-    {
-        Lowpass = 0,
-        Highpass = 1,
-        Bandpass = 2,
-        Notch = 3,
-        Peak = 4,
-        Lowshelf = 5,
-        Highshelf = 6
-    };
+namespace origin {
+enum : const u8 {
+  Lowpass = 0,
+  Highpass = 1,
+  Bandpass = 2,
+  Notch = 3,
+  Peak = 4,
+  Lowshelf = 5,
+  Highshelf = 6
+};
 
-    class Biquad
-    {
-    public:
-        explicit Biquad(u8 type = Lowpass, f64 Fc = 0.50, f64 Q = 0.707, f64 peakGainDB = 0.0);
-        ~Biquad();
-        void setType(u8 type);
-        void setQ(f64 Q);
-        void setFc(f64 Fc);
-        void setPeakGain(f64 peakGainDB);
-        void setBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
-        auto process(f64 in) -> f64;
+class Biquad {
+public:
+  explicit Biquad(u8 type = Lowpass, f64 Fc = 0.50, f64 Q = 0.707,
+                  f64 peakGainDB = 0.0);
+  ~Biquad();
+  void setType(u8 type);
+  void setQ(f64 Q);
+  void setFc(f64 Fc);
+  void setPeakGain(f64 peakGainDB);
+  void setBiquad(u8 type, f64 Fc, f64 Q, f64 peakGainDB);
+  auto process(f64 in) -> f64;
 
-    protected:
-        void calcBiquad();
+protected:
+  void calcBiquad();
 
-        i32 Type;
-        f64 A0, A1, A2, B1, B2;
-        f64 Fc, Q, Peak_gain;
-        f64 Z1, Z2;
-    };
+  i32 Type;
+  f64 A0, A1, A2, B1, B2;
+  f64 Fc, Q, Peak_gain;
+  f64 Z1, Z2;
+};
 
-    inline auto Biquad::process(f64 in) -> f64
-    {
-        f64 out = in * A0 + Z1;
-        Z1 = in * A1 + Z2 - B1 * out;
-        Z2 = in * A2 - B2 * out;
-        return out;
-    }
+inline auto Biquad::process(f64 in) -> f64 {
+  f64 out = in * A0 + Z1;
+  Z1 = in * A1 + Z2 - B1 * out;
+  Z2 = in * A2 - B2 * out;
+  return out;
+}
 
-    //------------------------------------------------------------------------------
-    // IIR filter with compile-time length N
-    //------------------------------------------------------------------------------
-    template<unsigned N, class V>
-    struct IIR
-    {
-        static_assert(N >= 2, "invalid number of filter coefficients");
+//------------------------------------------------------------------------------
+// IIR filter with compile-time length N
+//------------------------------------------------------------------------------
+template <unsigned N, class V> struct IIR {
+  static_assert(N >= 2, "invalid number of filter coefficients");
 
-        IIR();
-        template<class Rc>
-        auto coefs(const Rc* bcf, const Rc* acf);
-        auto reset();
-        auto tick(i32 in);
+  IIR();
+  template <class Rc> auto coefs(const Rc *bcf, const Rc *acf);
+  auto reset();
+  auto tick(i32 in);
 
-        IIR(IIR&&) = default;
-        IIR& operator=(IIR&&) = default;
+  IIR(IIR &&) = default;
+  IIR &operator=(IIR &&) = default;
 
-    private:
-        unsigned I = {};
-        std::unique_ptr<i32[]> X, Y;
-        i32 B0 = 1, A0 = 1;
-        std::unique_ptr<i32[], i32> B, A;
+private:
+  unsigned I = {};
+  std::unique_ptr<i32[]> X, Y;
+  i32 B0 = 1, A0 = 1;
+  std::unique_ptr<i32[], i32> B, A;
 
-    public:
-        auto scalar(i32 in) -> i32;
-    };
+public:
+  auto scalar(i32 in) -> i32;
+};
 
-    //------------------------------------------------------------------------------
-    // FIR filter with run-time length
-    //------------------------------------------------------------------------------
-    template<class V>
-    struct IIRg
-    {
-        explicit IIRg(unsigned n);
-        template<class Rc>
-        auto coefs(const Rc* bcf, const Rc* acf);
-        auto reset();
-        i32 tick(i32 in);
+//------------------------------------------------------------------------------
+// FIR filter with run-time length
+//------------------------------------------------------------------------------
+template <class V> struct IIRg {
+  IIRg(const IIRg &) = default;
+  IIRg &operator=(const IIRg &) = default;
+  explicit IIRg(unsigned n);
+  template <class Rc> auto coefs(const Rc *bcf, const Rc *acf);
+  auto reset();
+  i32 tick(i32 in);
 
-        IIRg(IIRg&&) = default;
-        IIRg& operator=(IIRg&&) = default;
+  IIRg(IIRg &&) = default;
+  ~IIRg() = default;
+  IIRg &operator=(IIRg &&) = default;
 
-    private:
-        const unsigned N{};
-        unsigned I = {};
-        std::unique_ptr<i32[]> X, Y;
-        i32 B0 = 1, A0 = 1;
-        std::unique_ptr<i32[], i32> B, A;
+private:
+  const unsigned N{};
+  unsigned I = {};
+  std::unique_ptr<i32[]> X, Y;
+  i32 B0 = 1, A0 = 1;
+  std::unique_ptr<i32[], i32> B, A;
 
-    public:
-        auto scalar(i32 in);
-    };
-    template<unsigned N, class V>
-    IIR<N, V>::IIR()
-    {
-        constexpr unsigned v = sizeof(V) / sizeof(i32);
-        constexpr unsigned nn = (N + v - 2) & ~(v - 1);
-        const i32 rst[2 * nn]{};
-        X.reset(rst);
-        Y.reset(rst);
-    }
+public:
+  auto scalar(i32 in);
+};
+template <unsigned N, class V> IIR<N, V>::IIR() {
+  constexpr unsigned v = sizeof(V) / sizeof(i32);
+  constexpr unsigned nn = (N + v - 2) & ~(v - 1);
+  const i32 rst[2 * nn]{};
+  X.reset(rst);
+  Y.reset(rst);
+}
 
-    template<unsigned N, class V>
-    template<class Rc>
-    auto IIR<N, V>::coefs(const Rc* b, const Rc* a)
-    {
-        B0 = b[0];
-        A0 = a[0];
-        std::copy(b + 1, N - 1, B.get());
-        std::copy(a + 1, N - 1, A.get());
-    }
+template <unsigned N, class V>
+template <class Rc>
+auto IIR<N, V>::coefs(const Rc *b, const Rc *a) {
+  B0 = b[0];
+  A0 = a[0];
+  std::copy(b + 1, N - 1, B.get());
+  std::copy(a + 1, N - 1, A.get());
+}
 
-    template<unsigned N, class V>
-    auto IIR<N, V>::reset()
-    {
-        constexpr unsigned vlen = sizeof(V) / sizeof(i32);
-        constexpr unsigned n = (N + vlen - 2) & ~(vlen - 1);
+template <unsigned N, class V> auto IIR<N, V>::reset() {
+  constexpr unsigned vlen = sizeof(V) / sizeof(i32);
+  constexpr unsigned n = (N + vlen - 2) & ~(vlen - 1);
 
-        std::fill_n(X.get(), 2 * n, 0);
-        std::fill_n(Y.get(), 2 * n, 0);
-    }
+  std::fill_n(X.get(), 2 * n, 0);
+  std::fill_n(Y.get(), 2 * n, 0);
+}
 
-    template<unsigned N, class V>
-    auto IIR<N, V>::scalar(i32 in) -> i32
-    {
-        constexpr unsigned vn = N + (sizeof(V) / sizeof(i32)) - 2;
-        constexpr unsigned nn = vn & ~(sizeof(V) / sizeof(i32) - 1);
+template <unsigned N, class V> auto IIR<N, V>::scalar(i32 in) -> i32 {
+  constexpr unsigned vn = N + (sizeof(V) / sizeof(i32)) - 2;
+  constexpr unsigned nn = vn & ~(sizeof(V) / sizeof(i32) - 1);
 
-        i32* x = X.get();
-        i32* y = Y.get();
-        const i32* b = B.get();
-        const i32* a = A.get();
+  i32 *x = X.get();
+  i32 *y = Y.get();
+  const i32 *b = B.get();
+  const i32 *a = A.get();
 
-        i32 r = in * b[0];
-        unsigned i = (I + nn) % nn;
-        x[i] = x[i + nn] = in;
+  i32 r = in * b[0];
+  unsigned i = (I + nn) % nn;
+  x[i] = x[i + nn] = in;
 
-        for (unsigned j = 1; j < N; ++j)
-        {
-            r += x[i + j] * b[j] - y[i + j] * a[j];
-        }
+  for (unsigned j = 1; j < N; ++j) {
+    r += x[i + j] * b[j] - y[i + j] * a[j];
+  }
 
-        r /= a[0];
-        y[i] = y[i + nn] = r;
-        I = i;
-        return r;
-    }
+  r /= a[0];
+  y[i] = y[i + nn] = r;
+  I = i;
+  return r;
+}
 } // namespace origin
 #endif // Biquad_h

@@ -1,5 +1,5 @@
 #include "Console.hpp"
-#include "Basic.hpp"
+#include "../math/Basic.hpp"
 #include <cstdio>
 #include <iostream>
 #include <unistd.h>

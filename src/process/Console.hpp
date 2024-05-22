@@ -1,6 +1,6 @@
 #ifndef CON_HPP
 #define CON_HPP
-#include "Basic.hpp"
+#include "../math/Basic.hpp"
 #include <fcntl.h>
 #include <string>
 #include <termios.h>

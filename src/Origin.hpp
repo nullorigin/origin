@@ -1,7 +1,7 @@
 #ifndef ORIGIN_HPP
 #define ORIGIN_HPP
 
-#include "Message.hpp"
+#include "debug/Message.hpp"
 #include "process/Exec.hpp"
 #pragma once
 
